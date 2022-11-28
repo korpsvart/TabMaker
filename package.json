@@ -1,0 +1,10 @@
+{
+  "name": "TabMaker",
+  "version": "1.0.0",
+  "dependencies": {
+    "tone": "^14.7.77",
+    "vexflow": "^4.0.3",
+    "tonal": "^4.6.10",
+    "@moonwave99/fretboard.js": "^0.2.13"
+  }
+}
