@@ -8,6 +8,26 @@ let submitChordButton = document.getElementById("submitChord");
 
 const notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
 
+
+class Note {
+    constructor(pitch, octave) {
+        this.pitch = pitch;
+        this.octave = octave;
+    }
+
+    equals(other) {
+        return this.pitch === other.pitch &&
+            this.octave === other.octave;
+    }
+
+    equalsIgnoreOctave(other) {
+        return this.pitch === other.pitch;
+    }
+
+}
+
+
+
 const allChords = Tonal.ChordType.symbols();
 allChords.forEach(x => {
     let option = document.createElement("option");
@@ -32,7 +52,7 @@ mainDiv.appendChild(selectChordTonic);
 function submit() {
     let chord = Tonal.Chord.getChord(selectChordType.options[selectChordType.selectedIndex].value,
         selectChordTonic.options[selectChordTonic.selectedIndex].value);
-    let positions = findPositions(fretboard, chord.notes[0].toString());
+    let positions = findPositions(fretboard, new Note(chord.notes[0].toString(), 0), true);
     let dots = [];
     positions.forEach(x => {
         dots.push({'string': x['string']+1, 'fret': x['fret']});
@@ -40,9 +60,16 @@ function submit() {
     fretboardGraphics.setDots(dots).render();
 }
 
+const tuning = [new Note('E', 4),
+    new Note('B', 3),
+    new Note('G', 3),
+    new Note('D', 3),
+    new Note('A', 2),
+    new Note('E', 2)];
 
 
-fretboard = createFretboard(6, 24, ["E", "B", "G", "D", "A", "E"]);
+//We represent a fretboard as a matrix of Note objects
+fretboard = createFretboard(6, 24, tuning);
 submitChordButton.onclick = submit;
 
 const fretboardGraphics = new Fretboard.Fretboard({
@@ -52,12 +79,16 @@ const fretboardGraphics = new Fretboard.Fretboard({
 });
 
 
-function findPositions(fretboard, note) {
-    //find all positions
+function findPositions(fretboard, note, ignoreOctave = true) {
+    //Find all positions corresponding to a particular note
+    //If ignoreOctave = true it returns all positions corresponding
+    //to the pitch class
     let positions = []; //array of positions
     for (let i = 0; i < fretboard.length; i++) {
         for (let j = 0; j < fretboard[i].length; j++) {
-            if (fretboard[i][j]===note)
+            let condition = (fretboard[i][j].equalsIgnoreOctave(note) && ignoreOctave) ||
+                            fretboard[i][j].equals(note);
+            if (condition)
                 positions.push({'string': i, 'fret': j});
         }
     }
@@ -69,16 +100,19 @@ function createFretboard(numString, numFrets, tuning) {
     let fretboard = [];
     for (let i = 0; i < numString; i++) {
         let string = [];
-        let noteIndex = notes.indexOf(tuning[i]);
+        let noteIndex = notes.indexOf(tuning[i].pitch);
+        let octave = tuning[i].octave;
         for (let j = 0; j < numFrets; j++) {
-            string.push(notes[noteIndex]);
+            let pitch = notes[noteIndex];
+            let note = new Note(pitch, octave);
+            string.push(note);
             noteIndex = (noteIndex + 1) % 12;
+            if (noteIndex === 0) octave++; //we reached a new octave
         }
         fretboard.push(string);
     }
     return fretboard;
 }
-
 
 },{"@moonwave99/fretboard.js":2,"tonal":23}],2:[function(require,module,exports){
 (function (global, factory) {
