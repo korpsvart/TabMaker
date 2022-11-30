@@ -52,7 +52,7 @@ mainDiv.appendChild(selectChordTonic);
 function submit() {
     let chord = Tonal.Chord.getChord(selectChordType.options[selectChordType.selectedIndex].value,
         selectChordTonic.options[selectChordTonic.selectedIndex].value);
-    let positions = findPositions(fretboard, new Note(chord.notes[0].toString(), 0), true);
+    let positions = findRootPosVoicing(chord, fretboard);
     let dots = [];
     positions.forEach(x => {
         dots.push({'string': x['string']+1, 'fret': x['fret']});
@@ -95,6 +95,25 @@ function findPositions(fretboard, note, ignoreOctave = true) {
     return positions;
 }
 
+function findPositionsAboveOctave(fretboard, note) {
+    //Find all positions corresponding to a particular pitch class
+    //and octave equal or above the one provided
+    let positions = []; //array of positions
+    for (let i = 0; i < fretboard.length; i++) {
+        for (let j = 0; j < fretboard[i].length; j++) {
+            let condition = fretboard[i][j].equalsIgnoreOctave(note) && (fretboard[i][j].octave >= note.octave);
+            if (condition)
+                positions.push({'string': i, 'fret': j});
+        }
+    }
+    return positions;
+}
+
+function getNote(position, fretboard) {
+    //Return the note corresponding to a given position on the fretboard
+    return fretboard[position.string][position.fret];
+}
+
 function createFretboard(numString, numFrets, tuning) {
     //Return a matrix fretboard of notes
     let fretboard = [];
@@ -112,6 +131,38 @@ function createFretboard(numString, numFrets, tuning) {
         fretboard.push(string);
     }
     return fretboard;
+}
+
+function findRootPosVoicing(chord, fretboard) {
+    //Return the positions of a voicing for the given chord
+    //in root position (tonic is the lower note)
+    //And possibly using lower numbered frets
+
+    //Find tonic positions
+    let positions = findPositions(fretboard, new Note(chord.notes[0].toString(), 0), true);
+    //Select only frets before the 5th one
+    let posBefore5 = positions.filter(pos => pos.fret < 5);
+    //Pick the position on the lowest string (highest numbered)
+    let tonicPos = posBefore5.filter(pos => posBefore5.every(pos2 => pos2.string <= pos.string));
+
+    //Get the exact note corresponding to the position found
+    //(we need to know the octave)
+    let tonicNote = getNote(tonicPos[0], fretboard);
+
+
+    //Find positions for the third
+    //Since we are in root position, all other chord tones will need to have octave
+    //>= wrt to the root octave
+    let thirdPositions = findPositionsAboveOctave(fretboard, new Note(chord.notes[1].toString(), tonicNote.octave));
+
+    //Find positions for the fifth
+    let fifthPositions = findPositionsAboveOctave(fretboard, new Note(chord.notes[2].toString(), tonicNote.octave));
+
+
+
+
+    return tonicPos;
+
 }
 
 },{"@moonwave99/fretboard.js":2,"tonal":23}],2:[function(require,module,exports){
