@@ -1,7 +1,7 @@
 <template>
     <div>
         <div id="main">
-            <button id="submitChord">Submit</button>
+            <button id="submitChord" ref="submit">Submit</button>
         </div>
         <figure id="fretboard"></figure>
         <div id="output"></div>
@@ -12,10 +12,11 @@ import * as Tonal from  'tonal';
 import * as Fretboard from '@moonwave99/fretboard.js'
 export default {
     mounted() {
+        let me = this
         const mainDiv = document.getElementById("main");
         const selectChordType = document.createElement("select");
         const selectChordTonic = document.createElement("select");
-        let submitChordButton = document.getElementById("submitChord");
+        let submitChordButton = me.$refs.submit
 
         const notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
 
