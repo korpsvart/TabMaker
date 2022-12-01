@@ -1,9 +1,12 @@
 ### install
 ```bash
-npm install -g browserify
 npm install
 ```
-### build the bundle.js
+### developing
+```bash
+npm run dev
+```
+### build
 ```bash
 npm run build
 ```
