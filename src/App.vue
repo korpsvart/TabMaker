@@ -151,15 +151,25 @@ export default {
         //And possibly using lower numbered frets
 
         //Find tonic positions
-        let positions = findPositions(fretboard, new Note(chord.notes[0].toString(), 0), true);
+        let allTonicPositions = findPositions(fretboard, new Note(chord.notes[0].toString(), 0), true);
         //Select only frets before the 5th one
-        let posBefore5 = positions.filter(pos => pos.fret < 5);
+        let posBefore5 = allTonicPositions.filter(pos => pos.fret < 5);
         //Pick the position on the lowest string (highest numbered)
         let tonicPos = posBefore5.filter(pos => posBefore5.every(pos2 => pos2.string <= pos.string));
 
         //Get the exact note corresponding to the position found
         //(we need to know the octave)
         let tonicNote = getNote(tonicPos[0], fretboard);
+
+        let chordVoicings = []; //will be filled with all the voicings for the complete chord
+        //This will be a list of lists. The elements of this list in fact will be sequences of positions
+
+
+
+        //Descend on the strings one by one
+        for (let i = tonicPos.string-1; i >= 0; i--) {
+
+        }
 
         //Find positions for the third
         //Since we are in root position, all other chord tones will need to have octave
@@ -171,6 +181,84 @@ export default {
 
         return tonicPos;
 
+      }
+
+    function containsChordTones(previousPositions, chordNotes) {
+      //TODO
+      //If the chord has only three notes, then check if it contains all of them
+      //If the chord has more than 3 notes, some notes can be skipped (for example the 5th)
+      //But this should be refined
+
+      return false;
+    }
+
+    function canApplyBarre(previousPositions) {
+      //TODO
+      //Check if barre can be applied
+      //Simply check if there is a "column" of notes played on the same fret
+      //And no frets are played before that column position
+      return false;
+    }
+
+    function findNextPositions(lastPosition, lastNote, minFret) {
+      //TODO
+
+      //Return the next candidate positions, based on three principles
+      //1) fret distance is not > 2 frets compared to lastPosition fret
+      //2) note is different from lastNote (check both note and octave)
+      //3) distance from min fret is not > 4 frets
+
+
+      return undefined;
+    }
+
+    function recursivePositionSearch(previousPositions, lastPosition, lastNote, minFret, chordNotes, validPositions) {
+
+        //Recursively find valid positions for a chord
+
+
+        //Check if this voicing is acceptable
+        //1) Only check if we have at least 3 notes (otherwise we don't consider it a chord yet)
+        if (previousPositions.length > 2) {
+
+          //2) Check if it contains the necessary chord tones
+          //(If it doesn't do not skip yet, unless we've already reached the last string)
+          if (containsChordTones(previousPositions, chordNotes)) {
+            const frettedNotes = previousPositions.reduce((x, y) => {
+              if (y.fret !== 0) return x + 1;
+            }, 0);
+            if (frettedNotes > 4) {
+              //Check if we can use barre
+              if (canApplyBarre(previousPositions)) {
+                  validPositions.push(previousPositions);
+              } else {
+                //Chord is not valid, discard (return, so to avoid also following paths)
+                return;
+              }
+            } else {
+              //Simply add it to valid positions
+              validPositions.push(previousPositions);
+            }
+          }
+        }
+
+        //Check if this is not the last string
+        //If it is then stop the recursion
+        if (lastPosition.string !==0) {
+          //Find next positions and do recursive call
+
+          //Implement a function that returns that next possible positions based on the basic constraints
+          let nextPositions = findNextPositions(lastPosition, lastNote, minFret);
+
+          //Find all possible valid voicings with more notes
+          for (const nextPosition in nextPositions) {
+            //Update minFret if necessary
+            if (previousPositions.every(x => x.fret > nextPosition.fret)) minFret = nextPosition.fret;
+            recursivePositionSearch(previousPositions.push(nextPosition), nextPosition, getNote(nextPosition, fretboardMatrix),
+                                    minFret, chordNotes, validPositions);
+          }
+
+        }
       }
 
     }
