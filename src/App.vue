@@ -18,25 +18,8 @@
 <script>
 import * as Tonal from 'tonal';
 import { Fretboard } from '@moonwave99/fretboard.js';
+import {Note,notes} from "./components/note";
 
-class Note {
-    constructor(pitch, octave) {
-        this.pitch = pitch;
-        this.octave = octave;
-    }
-
-    equals(other) {
-        return this.pitch === other.pitch &&
-            this.octave === other.octave;
-    }
-
-    equalsIgnoreOctave(other) {
-        return this.pitch === other.pitch;
-    }
-
-}
-
-let notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
 let allChords = Tonal.ChordType.symbols()
 
 const tuning = [new Note('E', 4),
