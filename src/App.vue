@@ -9,7 +9,8 @@
             </select>
         </div>
         <div id="main">
-            <button id="submitChord" ref="submit" @click="submit">Submit</button>
+            <button @click="submit">Submit</button>
+            <button @click="midi">enable midi</button>
         </div>
         <figure id="fretboard"></figure>
         <div id="output"></div>
@@ -19,6 +20,8 @@
 import * as Tonal from 'tonal';
 import { Fretboard } from '@moonwave99/fretboard.js';
 import {Note,notes} from "./components/note";
+import {enableMidi} from "./components/midi";
+
 
 let allChords = Tonal.ChordType.symbols()
 
@@ -123,13 +126,19 @@ function findRootPosVoicing(chord, fretboard) {
     return tonicPos;
 
 }
-
-function containsChordTones(previousPositions, chordNotes) {
+// e.g notes: ['D', 'G', 'A#', 'C#']
+function containsChordTones(position, chordNotes) {
     //TODO
+    if(chordNotes<3){
+        return false
+    }
     //If the chord has only three notes, then check if it contains all of them
+    if(chordNotes.length===3){
 
+    }
     //If the chord has more than 3 notes, some notes can be skipped (for example the 5th)
     //But this should be refined
+    // else >3
 
     return false;
 }
@@ -220,11 +229,14 @@ export default {
         })
     },
     methods: {
+        midi(){
+            enableMidi();
+        },
         submit() {
             let me = this
             let data = me.data
             let chord = Tonal.Chord.getChord(data.chordSelect, data.notesSelect);
-            let positions = findRootPosVoicing(chord, fretboardMatrix);
+            let positions = findRootPosVoicing(chord, fretboardMatrix);// e.g: {string: 4, fret: 3}
             let dots = positions.map(x=>{
                 return {'string': x['string'] + 1, 'fret': x['fret']}
             })
