@@ -43,7 +43,7 @@ function findPositions(fretboard, note, ignoreOctave = true) {
             let condition = (fretboard[i][j].equalsIgnoreOctave(note) && ignoreOctave) ||
                 fretboard[i][j].equals(note);
             if (condition)
-                positions.push({'string': i, 'fret': j});
+                positions.push({string: i, fret: j});
         }
     }
     return positions;
@@ -127,18 +127,25 @@ function findRootPosVoicing(chord, fretboard) {
 function containsChordTones(previousPositions, chordNotes) {
     //TODO
     //If the chord has only three notes, then check if it contains all of them
+
     //If the chord has more than 3 notes, some notes can be skipped (for example the 5th)
     //But this should be refined
 
     return false;
 }
 
-function canApplyBarre(previousPositions) {
-    //TODO
+function canApplyBarre(position) {
     //Check if barre can be applied
     //Simply check if there is a "column" of notes played on the same fret
     //And no frets are played before that column position
-    return false;
+    if(!position || !Array.isArray(position) || !position.length){
+        return false
+    }
+    let frets = position.map(v=>{
+        v.fret
+    })
+    let uniqueSet = new Set(frets)
+    return uniqueSet.size!==frets.length;
 }
 
 function findNextPositions(lastPosition, lastNote, minFret) {
