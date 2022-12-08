@@ -17,7 +17,7 @@
 </template>
 <script>
 import * as Tonal from 'tonal';
-import * as Fretboard from '@moonwave99/fretboard.js'
+import { Fretboard } from '@moonwave99/fretboard.js';
 
 class Note {
     constructor(pitch, octave) {
@@ -223,7 +223,7 @@ export default {
         return {data}
     },
     mounted() {
-        fretboardGraphics = new Fretboard.Fretboard({
+        fretboardGraphics = new Fretboard({
             el: '#fretboard',
             fretColor: 'blue',
             dotFill: 'red'
@@ -235,9 +235,8 @@ export default {
             let data = me.data
             let chord = Tonal.Chord.getChord(data.chordSelect, data.notesSelect);
             let positions = findRootPosVoicing(chord, fretboardMatrix);
-            let dots = [];
-            positions.forEach(x => {
-                dots.push({'string': x['string'] + 1, 'fret': x['fret']});
+            let dots = positions.map(x=>{
+                return {'string': x['string'] + 1, 'fret': x['fret']}
             })
             fretboardGraphics.setDots(dots).render();
         }
