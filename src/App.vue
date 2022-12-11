@@ -126,21 +126,26 @@ function findRootPosVoicing(chord, fretboard) {
     return tonicPos;
 
 }
-// e.g notes: ['D', 'G', 'A#', 'C#']
-function containsChordTones(position, chordNotes) {
+// e.g chordNotes = [ {'C',3} , {'E',3} , {'G',3} ]
+// e.g positions = [ {5,3} , {4,2} , {3,0} ]
+function containsChordTones(positions, fretboard, chordNotes) {
     //TODO
-    if(chordNotes<3){
-        return false
+    if ( chordNotes.length < 3 ) {
+      return false;
     }
     //If the chord has only three notes, then check if it contains all of them
-    if(chordNotes.length===3){
-
+    else if (chordNotes.length === 3) {
+      let notesFound = [];
+      for ( let i = 0 ; i < positions.length ; i++ ) {
+        notesFound.push( getNote( positions[i] , fretboard ) );
+      }
+      let check = ( chordNotes , notesFound ) => notesFound.every( note => chordNotes.includes(note) );
+      if ( check ) return true;
+      else return false;
     }
     //If the chord has more than 3 notes, some notes can be skipped (for example the 5th)
     //But this should be refined
     // else >3
-
-    return false;
 }
 
 function canApplyBarre(position) {
@@ -176,7 +181,7 @@ function recursivePositionSearch(previousPositions, lastPosition, lastNote, minF
     if (previousPositions.length > 2) {
         //2) Check if it contains the necessary chord tones
         //(If it doesn't do not skip yet, unless we've already reached the last string)
-        if (containsChordTones(previousPositions, chordNotes)) {
+        if (containsChordTones(previousPositions, fretboard, chordNotes)) {
             const frettedNotes = previousPositions.reduce((x, y) => {
                 if (y.fret !== 0) return x + 1;
             }, 0);
