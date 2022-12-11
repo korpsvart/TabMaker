@@ -146,6 +146,7 @@ function containsChordTones(positions, fretboard, chordNotes) {
     //If the chord has more than 3 notes, some notes can be skipped (for example the 5th)
     //But this should be refined
     // else >3
+
 }
 
 function canApplyBarre(position) {
