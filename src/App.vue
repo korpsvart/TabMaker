@@ -129,24 +129,26 @@ function findRootPosVoicing(chord, fretboard) {
 // e.g chordNotes = [ {'C',3} , {'E',3} , {'G',3} ]
 // e.g positions = [ {5,3} , {4,2} , {3,0} ]
 function containsChordTones(positions, fretboard, chordNotes) {
-    //TODO
     if ( chordNotes.length < 3 ) {
       return false;
     }
-    //If the chord has only three notes, then check if it contains all of them
-    else if (chordNotes.length === 3) {
-      let notesFound = [];
-      for ( let i = 0 ; i < positions.length ; i++ ) {
-        notesFound.push( getNote( positions[i] , fretboard ) );
-      }
-      let check = ( chordNotes , notesFound ) => notesFound.every( note => chordNotes.includes(note) );
-      if ( check ) return true;
-      else return false;
+    //Array of the notes which have been found during positions research
+    let notesFound = [];
+    for (let i = 0; i < positions.length; i++) {
+      notesFound.push(getNote(positions[i], fretboard));
     }
-    //If the chord has more than 3 notes, some notes can be skipped (for example the 5th)
-    //But this should be refined
-    // else >3
-
+    //If the chord has only three notes, then check if it contains all of them
+    if (chordNotes.length === 3) {
+      var check = ( chordNotes , notesFound ) => notesFound.every( note => chordNotes.includes(note) );
+    }
+    //If the chord has 4 notes, a note can be eventually skipped (the 5th)
+    if (chordNotes.length === 4) {
+      let mandatoryNotes = chordNotes;
+      mandatoryNotes.splice(2,1);
+      var check = (mandatoryNotes, notesFound) => notesFound.every(note => mandatoryNotes.includes(note));
+    }
+    if (check) return true;
+    else return false;
 }
 
 function canApplyBarre(position) {
