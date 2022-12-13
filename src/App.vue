@@ -158,6 +158,9 @@ function canApplyBarre(position, minFret, frettedNotes) {
     if(!position || !Array.isArray(position) || !position.length){
         return false
     }
+
+    if (minFret === 0) return false; //Can never apply barre on open strings
+
     let minFretsAmount = position.filter(x => x.fret === minFret).length;
 
     return frettedNotes - minFretsAmount + 1 < 5; //check if we now can play the chord with less than 5 fingers
