@@ -129,40 +129,39 @@ function findRootPosVoicing(chord, fretboard) {
 // e.g chordNotes = [ {'C',3} , {'E',3} , {'G',3} ]
 // e.g positions = [ {5,3} , {4,2} , {3,0} ]
 function containsChordTones(positions, fretboard, chordNotes) {
-    if ( chordNotes.length < 3 ) {
-      return false;
-    }
-    //Array of the notes which have been found during positions research
-    let notesFound = [];
+
+    /* If this is a check to only accept 3 or more notes chord, I think this should be done somewhere else */
+    // if ( chordNotes.length < 3 ) {
+    //   return false;
+    // }
+
+    //Set of the notes which have been found during positions research
+    let notesFound = new Set();
     for (let i = 0; i < positions.length; i++) {
-      notesFound.push(getNote(positions[i], fretboard));
+      notesFound.add(getNote(positions[i], fretboard));
     }
     //If the chord has only three notes, then check if it contains all of them
     if (chordNotes.length === 3) {
-      var check = ( chordNotes , notesFound ) => notesFound.every( note => chordNotes.includes(note) );
+      return chordNotes.every((note) => notesFound.has(note));
     }
     //If the chord has 4 notes, a note can be eventually skipped (the 5th)
     if (chordNotes.length === 4) {
-      let mandatoryNotes = chordNotes;
-      mandatoryNotes.splice(2,1);
-      var check = (mandatoryNotes, notesFound) => notesFound.every(note => mandatoryNotes.includes(note));
+      let mandatoryNotes = chordNotes.slice(); //to clone the object, otherwise we are modifying chordNotes!
+      mandatoryNotes.splice(2,1); //to remove the fifth
+      return mandatoryNotes.every((note) => notesFound.has(note));
     }
-    if (check) return true;
-    else return false;
 }
 
-function canApplyBarre(position) {
+function canApplyBarre(position, minFret, frettedNotes) {
     //Check if barre can be applied
-    //Simply check if there is a "column" of notes played on the same fret
-    //And no frets are played before that column position
+    //For now we assume barre can only be done on the minimum fret position
     if(!position || !Array.isArray(position) || !position.length){
         return false
     }
-    let frets = position.map(v=>{
-        v.fret
-    })
-    let uniqueSet = new Set(frets)
-    return uniqueSet.size!==frets.length;
+    let minFretsAmount = position.filter(x => x.fret === minFret).length;
+
+    return frettedNotes - minFretsAmount + 1 < 5; //check if we now can play the chord with less than 5 fingers
+
 }
 
 function findNextPositions(lastPosition, lastNote, minFret) {
@@ -190,7 +189,7 @@ function recursivePositionSearch(previousPositions, lastPosition, lastNote, minF
             }, 0);
             if (frettedNotes > 4) {
                 //Check if we can use barre
-                if (canApplyBarre(previousPositions)) {
+                if (canApplyBarre(previousPositions, minFret, frettedNotes)) {
                     validPositions.push(previousPositions);
                 } else {
                     //Chord is not valid, discard (return, so to avoid also following paths)
