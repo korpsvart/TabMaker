@@ -23,6 +23,10 @@ import {Note,notes} from "./components/note";
 import {enableMidi} from "./components/midi";
 
 
+/* For debugging in webstorm: CTRL+SHIFT+CLICK on the localhost link after
+npm run dev
+ */
+
 let allChords = Tonal.ChordType.symbols()
 
 const tuning = [new Note('E', 4),
@@ -31,8 +35,10 @@ const tuning = [new Note('E', 4),
     new Note('D', 3),
     new Note('A', 2),
     new Note('E', 2)];
+const numStrings = 6;
+const numFrets = 24;
 //We represent a fretboard as a matrix of Note objects
-const fretboardMatrix = createFretboard(6, 24, tuning);
+const fretboardMatrix = createFretboard(numStrings, numFrets, tuning);
 
 let fretboardGraphics;
 
@@ -68,8 +74,16 @@ function findPositionsAboveOctave(fretboard, note) {
 
 function getNote(position, fretboard) {
     //Return the note corresponding to a given position on the fretboard
-    return fretboard[position.string][position.fret];
+    return fretboardMatrix[position.string][position.fret];
 }
+
+
+//
+// function getNote(i, j, fretboard) {
+//   //Return the note corresponding to a given position on the fretboard
+//   //Same as the other but take indexes directly
+//   return fretboard[i][j];
+// }
 
 function createFretboard(numString, numFrets, tuning) {
     //Return a matrix fretboard of notes
@@ -109,24 +123,14 @@ function findRootPosVoicing(chord, fretboard) {
     let chordVoicings = []; //will be filled with all the voicings for the complete chord
     //This will be a list of lists. The elements of this list in fact will be sequences of positions
 
+    let chordNotes = chord.notes.map(x => x.toString());
 
-    //Descend on the strings one by one
-    for (let i = tonicPos.string - 1; i >= 0; i--) {
+    recursivePositionSearch(tonicPos, tonicPos[0], tonicNote, tonicPos[0].fret, chordNotes, chordVoicings);
 
-    }
-
-    //Find positions for the third
-    //Since we are in root position, all other chord tones will need to have octave
-    //>= wrt to the root octave
-    let thirdPositions = findPositionsAboveOctave(fretboard, new Note(chord.notes[1].toString(), tonicNote.octave));
-
-    //Find positions for the fifth
-    let fifthPositions = findPositionsAboveOctave(fretboard, new Note(chord.notes[2].toString(), tonicNote.octave));
-
-    return tonicPos;
+    return chordVoicings;
 
 }
-// e.g chordNotes = [ {'C',3} , {'E',3} , {'G',3} ]
+// e.g chordNotes = [ 'C', 'E', 'G' ]
 // e.g positions = [ {5,3} , {4,2} , {3,0} ]
 function containsChordTones(positions, fretboard, chordNotes) {
 
@@ -138,7 +142,7 @@ function containsChordTones(positions, fretboard, chordNotes) {
     //Set of the notes which have been found during positions research
     let notesFound = new Set();
     for (let i = 0; i < positions.length; i++) {
-      notesFound.add(getNote(positions[i], fretboard));
+      notesFound.add(getNote(positions[i], fretboard).pitch); //Ignore the octave
     }
     //If the chord has only three notes, then check if it contains all of them
     if (chordNotes.length === 3) {
@@ -167,16 +171,38 @@ function canApplyBarre(position, minFret, frettedNotes) {
 
 }
 
-function findNextPositions(lastPosition, lastNote, minFret) {
+function findPositionsOnString(string, lastPosition, lastNote, minFret, chordNotes) {
+  let positions = [];
+  let lastFret = lastPosition.fret;
+    //Check only positions which are at most 2 frets away from lastFret or at most 4 frets from minFret
+    let startIndex = Math.max(lastFret-2, minFret-4, 1); //1 as safety bound (not 0 because we treat it separately)
+    let stopIndex = Math.min(lastFret+2, minFret+4, numFrets-1); //numFrets-1 as safety bound
+    //Zero fret must always be considered separately
+    let pos = {'string': string, 'fret': 0};
+    let posNote = getNote(pos);
+    //Check if it's part of chord notes and it's not equal to lastNote (both in pitch class and octave)
+    if (chordNotes.includes(posNote.pitch) && !posNote.equals(lastNote)) positions.push(pos);
+    for (let j = startIndex; j <= stopIndex; j++) {
+      pos = {'string': string, 'fret': j};
+      posNote = getNote(pos);
+      if (chordNotes.includes(posNote.pitch) && !posNote.equals(lastNote)) positions.push(pos);
+    }
+  return positions;
+}
+
+function findNextPositions(lastPosition, lastNote, minFret, chordNotes) {
     //TODO
 
-    //Return the next candidate positions, based on three principles
-    //1) fret distance is not > 2 frets compared to lastPosition fret
-    //2) note is different from lastNote (check both note and octave)
-    //3) distance from min fret is not > 4 frets
+  //Return the next candidate positions, based on three principles
+  //1) fret distance is not > 2 frets compared to lastPosition fret
+  //2) note is different from lastNote (check both note and octave)
+  //3) distance from min fret is not > 4 frets
+  //4)Notes belong to the chord (chordNotes)
+  //5)Special exceptional rules applies for the 0 fret
 
+  let string = lastPosition.string - 1;
+  return findPositionsOnString(string, lastPosition, lastNote, minFret, chordNotes);
 
-    return undefined;
 }
 
 function recursivePositionSearch(previousPositions, lastPosition, lastNote, minFret, chordNotes, validPositions) {
@@ -186,7 +212,7 @@ function recursivePositionSearch(previousPositions, lastPosition, lastNote, minF
     if (previousPositions.length > 2) {
         //2) Check if it contains the necessary chord tones
         //(If it doesn't do not skip yet, unless we've already reached the last string)
-        if (containsChordTones(previousPositions, fretboard, chordNotes)) {
+        if (containsChordTones(previousPositions, fretboardMatrix, chordNotes)) {
             const frettedNotes = previousPositions.reduce((x, y) => {
                 if (y.fret !== 0) return x + 1;
             }, 0);
@@ -200,7 +226,8 @@ function recursivePositionSearch(previousPositions, lastPosition, lastNote, minF
                 }
             } else {
                 //Simply add it to valid positions
-                validPositions.push(previousPositions);
+                //I use slice to create shallow copy, not to modify it later
+                validPositions.push(previousPositions.slice());
             }
         }
     }
@@ -209,12 +236,16 @@ function recursivePositionSearch(previousPositions, lastPosition, lastNote, minF
     if (lastPosition.string !== 0) {
         //Find next positions and do recursive call
         //Implement a function that returns that next possible positions based on the basic constraints
-        let nextPositions = findNextPositions(lastPosition, lastNote, minFret);
+        let nextPositions = findNextPositions(lastPosition, lastNote, minFret, chordNotes);
         //Find all possible valid voicings with more notes
-        for (const nextPosition in nextPositions) {
+        for (let i in nextPositions) {
+            let nextPosition = nextPositions[i];
             //Update minFret if necessary
             if (previousPositions.every(x => x.fret > nextPosition.fret)) minFret = nextPosition.fret;
-            recursivePositionSearch(previousPositions.push(nextPosition), nextPosition, getNote(nextPosition, fretboardMatrix),
+            let newPositions = previousPositions.slice();
+            newPositions.push(nextPosition); //add the new element
+            //Again I use splice to create shallow copy, otherwise we will add other voicings together
+            recursivePositionSearch(newPositions, nextPosition, getNote(nextPosition, fretboardMatrix),
                 minFret, chordNotes, validPositions);
         }
     }
@@ -246,7 +277,9 @@ export default {
             let me = this
             let data = me.data
             let chord = Tonal.Chord.getChord(data.chordSelect, data.notesSelect);
-            let positions = findRootPosVoicing(chord, fretboardMatrix);// e.g: {string: 4, fret: 3}
+            let rootVoicings = findRootPosVoicing(chord, fretboardMatrix);
+            //Only for test purposes, represent a voicing with at least 4 notes
+            let positions = rootVoicings.filter( x => x.length > 3)[0];
             let dots = positions.map(x=>{
                 return {'string': x['string'] + 1, 'fret': x['fret']}
             })
