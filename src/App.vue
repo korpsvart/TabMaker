@@ -11,6 +11,7 @@
         <div id="main">
             <button @click="submit">Submit</button>
             <button @click="midi">enable midi</button>
+            <button @click="play">Play Chord</button>
         </div>
         <figure id="fretboard"></figure>
         <div id="output"></div>
@@ -21,6 +22,9 @@ import * as Tonal from 'tonal';
 import { Fretboard } from '@moonwave99/fretboard.js';
 import {Note,notes} from "./components/note";
 import {enableMidi} from "./components/midi";
+import {playChord} from "./components/sound";
+import { Synth, AudioSynth, AudioSynthInstrument } from 'keithwhor-audiosynth-packaged/audiosynth.js';
+
 
 
 /* For debugging in webstorm: CTRL+SHIFT+CLICK on the localhost link after
@@ -290,10 +294,19 @@ export default {
                 return {'string': x['string'] + 1, 'fret': x['fret']}
             })
             fretboardGraphics.setDots(dots).render();
+        },
+        play(){
+            let me = this
+            let data = me.data
+            let chord = Tonal.Chord.getChord(data.chordSelect, data.notesSelect);
+            let rootVoicings = findRootPosVoicing(chord, fretboardMatrix);
+            let positions = rootVoicings.filter( x => x.length > 3)[0];
+            let foundNotes = [];
+            for (let i=0; i<positions.length; i++) {foundNotes.push(getNote(positions[i]))}
+            playChord(foundNotes, notes);
         }
     },
 }
-
 
 </script>
 <style scoped>

@@ -13,7 +13,8 @@
     "vexflow": "^4.0.3",
     "vue": "^3.2.38",
     "vue-router": "^4.1.5",
-    "webmidi": "^3.0.22"
+    "webmidi": "^3.0.22",
+    "keithwhor-audiosynth-packaged": "1.0.4"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^3.0.3",
