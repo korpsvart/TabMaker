@@ -140,19 +140,25 @@ function containsChordTones(positions, fretboard, chordNotes) {
     // }
 
     //Set of the notes which have been found during positions research
-    let notesFound = new Set();
+    let notesFound = [];
     for (let i = 0; i < positions.length; i++) {
-      notesFound.add(getNote(positions[i], fretboard).pitch); //Ignore the octave
+      notesFound.push(getNote(positions[i], fretboard));
     }
     //If the chord has only three notes, then check if it contains all of them
     if (chordNotes.length === 3) {
-      return chordNotes.every((note) => notesFound.has(note));
+      return chordNotes.every((note) => notesFound.some(foundNote => foundNote.equalsIgnoreOctave(
+          new Note(note, 0)
+      )));
     }
+
+
     //If the chord has 4 notes, a note can be eventually skipped (the 5th)
     if (chordNotes.length === 4) {
       let mandatoryNotes = chordNotes.slice(); //to clone the object, otherwise we are modifying chordNotes!
       mandatoryNotes.splice(2,1); //to remove the fifth
-      return mandatoryNotes.every((note) => notesFound.has(note));
+      return mandatoryNotes.every((note) => notesFound.some(foundNote => foundNote.equalsIgnoreOctave(
+          new Note(note, 0)
+      )));
     }
 }
 
@@ -181,11 +187,11 @@ function findPositionsOnString(string, lastPosition, lastNote, minFret, chordNot
     let pos = {'string': string, 'fret': 0};
     let posNote = getNote(pos);
     //Check if it's part of chord notes and it's not equal to lastNote (both in pitch class and octave)
-    if (chordNotes.includes(posNote.pitch) && !posNote.equals(lastNote)) positions.push(pos);
+    if (chordNotes.some(x => posNote.equalsIgnoreOctave(new Note(x, 0))) && !posNote.equals(lastNote)) positions.push(pos);
     for (let j = startIndex; j <= stopIndex; j++) {
       pos = {'string': string, 'fret': j};
       posNote = getNote(pos);
-      if (chordNotes.includes(posNote.pitch) && !posNote.equals(lastNote)) positions.push(pos);
+      if (chordNotes.some(x => posNote.equalsIgnoreOctave(new Note(x, 0))) && !posNote.equals(lastNote)) positions.push(pos);
     }
   return positions;
 }
