@@ -23,8 +23,6 @@ import { Fretboard } from '@moonwave99/fretboard.js';
 import {Note,notes} from "./components/note";
 import {enableMidi} from "./components/midi";
 import {playChord} from "./components/sound";
-import { Synth, AudioSynth, AudioSynthInstrument } from 'keithwhor-audiosynth-packaged/audiosynth.js';
-
 
 
 /* For debugging in webstorm: CTRL+SHIFT+CLICK on the localhost link after
@@ -303,7 +301,7 @@ export default {
             let positions = rootVoicings.filter( x => x.length > 3)[0];
             let foundNotes = [];
             for (let i=0; i<positions.length; i++) {foundNotes.push(getNote(positions[i]))}
-            playChord(foundNotes, notes);
+            playChord(foundNotes);
         }
     },
 }

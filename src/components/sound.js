@@ -1,36 +1,32 @@
-let c = new AudioContext();
+import {AudioSynth} from 'keithwhor-audiosynth-packaged/audiosynth.js';
 
-function playChord(chordNotes,notes) {
-    let chordPlayTime = 2;
+// Create a Synth object which will play the notes and setting up its volume
+let synth = new AudioSynth;
+synth.setVolume(0.18);
+
+// Fixed chord play time duration
+let chordPlayTime = 2;
+
+// Function which plays first an arpeggio and then a strum of the chord found
+function playChord(chordNotes) {
+    // Arpeggio part
     for (let i = 0; i < chordNotes.length; i++) {
+        // Notes are well spaced in time, to give the feeling of an arpeggio
         setTimeout(function() {
-            let g = c.createGain();
-            g.connect(c.destination);
-            g.gain.linearRampToValueAtTime(0, c.currentTime + chordPlayTime);
-            let o = c.createOscillator();
-            o.connect(g);
-            o.type = "sawtooth";
-            let noteIndex = notes.indexOf(chordNotes[i].pitch) - 9 - 12*(4-chordNotes[i].octave);
-            let f = 440 * Math.pow(2,noteIndex/12);
-            o.frequency.setValueAtTime(f, c.currentTime);
-            o.start(c.currentTime);
-            o.stop(c.currentTime + chordPlayTime);
+            // The Synth will play each note of the chord with 'acoustic' guitar timbre,
+            // each note lasts chordPlayTime seconds
+            synth.play('acoustic', chordNotes[i].pitch, chordNotes[i].octave, chordPlayTime);
         }, 650 * i);
     }
+    // Strum part
     for (let i = 0; i < chordNotes.length; i++) {
+        // Notes are played rapidly, to give the feeling of a strum (after the arpeggio)
         setTimeout(function() {
-            let g = c.createGain();
-            g.connect(c.destination);
-            g.gain.linearRampToValueAtTime(0, c.currentTime + chordPlayTime);
-            let o = c.createOscillator();
-            o.connect(g);
-            o.type = "sawtooth";
-            let noteIndex = notes.indexOf(chordNotes[i].pitch) - 9 - 12*(4-chordNotes[i].octave);
-            let f = 440 * Math.pow(2,noteIndex/12);
-            o.frequency.setValueAtTime(f, c.currentTime);
-            o.start(c.currentTime);
-            o.stop(c.currentTime + chordPlayTime);
-        }, 650 * chordNotes.length + chordPlayTime * 300 + 70 * i);
+            // The Synth will play each note of the chord with 'acoustic' guitar timbre,
+            // each note lasts more than chordPlayTime seconds (more tail)
+            synth.play('acoustic', chordNotes[i].pitch, chordNotes[i].octave, 1.5 * chordPlayTime);
+        }, 650 * chordNotes.length + chordPlayTime * 250 + 70 * i);
     }
 }
+
 export{playChord}
