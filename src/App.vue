@@ -106,28 +106,29 @@ function createFretboard(numString, numFrets, tuning) {
     return fretboard;
 }
 
-function findRootPosVoicing(chord, fretboard) {
+function findVoicings(chord, fretboard, inversion = 0) {
     //Return the positions of a voicing for the given chord
-    //in root position (tonic is the lower note)
+    //given the inversion
+    //(inversion = 0 => root position (default), inversion = 1 => third in the bass, ecc...)
     //And possibly using lower numbered frets
 
-    //Find tonic positions
-    let allTonicPositions = findPositions(fretboard, new Note(chord.notes[0].toString(), 0), true);
+    //Find bass position
+    let allBassPositions = findPositions(fretboard, new Note(chord.notes[inversion].toString(), 0), true);
     //Select only frets before the 5th one
-    let posBefore5 = allTonicPositions.filter(pos => pos.fret < 5);
+    let posBefore5 = allBassPositions.filter(pos => pos.fret < 5);
     //Pick the position on the lowest string (highest numbered)
-    let tonicPos = posBefore5.filter(pos => posBefore5.every(pos2 => pos2.string <= pos.string));
+    let bassPos = posBefore5.filter(pos => posBefore5.every(pos2 => pos2.string <= pos.string));
 
     //Get the exact note corresponding to the position found
     //(we need to know the octave)
-    let tonicNote = getNote(tonicPos[0], fretboard);
+    let bassNote = getNote(bassPos[0], fretboard);
 
     let chordVoicings = []; //will be filled with all the voicings for the complete chord
     //This will be a list of lists. The elements of this list in fact will be sequences of positions
 
     let chordNotes = chord.notes.map(x => x.toString());
 
-    recursivePositionSearch(tonicPos, tonicPos[0], tonicNote, tonicPos[0].fret, chordNotes, chordVoicings);
+    recursivePositionSearch(bassPos, bassPos[0], bassNote, bassPos[0].fret, chordNotes, chordVoicings);
 
     return chordVoicings;
 
@@ -180,11 +181,25 @@ function canApplyBarre(position, minFret, frettedNotes) {
 }
 
 function findPositionsOnString(string, lastPosition, lastNote, minFret, chordNotes) {
+
+  //Need to do some fixes on minFret (minFret should never be 0)
   let positions = [];
   let lastFret = lastPosition.fret;
-    //Check only positions which are at most 2 frets away from lastFret or at most 4 frets from minFret
-    let startIndex = Math.max(lastFret-2, minFret-4, 1); //1 as safety bound (not 0 because we treat it separately)
-    let stopIndex = Math.min(lastFret+2, minFret+4, numFrets-1); //numFrets-1 as safety bound
+  //Initialize indexes by default values
+  let startIndex = 1;
+  let stopIndex = numFrets-1;
+  if (minFret !== 0) { //If minFret is zero then we don't need to perform any check
+    if (lastFret !== 0) {
+      //Check only positions which are at most 2 frets away from lastFret or at most 4 frets from minFret
+      startIndex = Math.max(lastFret-2, minFret-4, 1); //1 as safety bound (not 0 because we treat it separately)
+      stopIndex = Math.min(lastFret+2, minFret+4, numFrets-1); //numFrets-1 as safety bound
+    } else {
+      //if lastFret is zero, then ignore the last fret constraint
+      startIndex = Math.max(minFret-4, 1); //1 as safety bound (not 0 because we treat it separately)
+      stopIndex = Math.min(minFret+4, numFrets-1); //numFrets-1 as safety bound
+    }
+  }
+
     //Zero fret must always be considered separately
     let pos = {'string': string, 'fret': 0};
     let posNote = getNote(pos);
@@ -248,8 +263,10 @@ function recursivePositionSearch(previousPositions, lastPosition, lastNote, minF
         //Find all possible valid voicings with more notes
         for (let i in nextPositions) {
             let nextPosition = nextPositions[i];
-            //Update minFret if necessary
-            if (previousPositions.every(x => x.fret > nextPosition.fret)) minFret = nextPosition.fret;
+            //Update minFret if necessary (never update minFret if new fret is zero)
+            //Also skip comparison for zero frets
+            if (nextPosition.fret !== 0 && previousPositions.every(x => x.fret > nextPosition.fret ||
+                (x.fret===0))) minFret = nextPosition.fret;
             let newPositions = previousPositions.slice();
             newPositions.push(nextPosition); //add the new element
             //Again I use splice to create shallow copy, otherwise we will add other voicings together
@@ -285,9 +302,10 @@ export default {
             let me = this
             let data = me.data
             let chord = Tonal.Chord.getChord(data.chordSelect, data.notesSelect);
-            let rootVoicings = findRootPosVoicing(chord, fretboardMatrix);
-            //Only for test purposes, represent a voicing with at least 4 notes
-            let positions = rootVoicings.filter( x => x.length > 3)[0];
+            let rootVoicings = findVoicings(chord, fretboardMatrix);
+            //Only for test purposes, represent the first voicing with the most positions available
+            let maxLength = Math.max(...rootVoicings.map(x => x.length));
+            let positions = rootVoicings.filter( x => x.length >= maxLength)[0];
             let dots = positions.map(x=>{
                 return {'string': x['string'] + 1, 'fret': x['fret']}
             })
@@ -297,8 +315,9 @@ export default {
             let me = this
             let data = me.data
             let chord = Tonal.Chord.getChord(data.chordSelect, data.notesSelect);
-            let rootVoicings = findRootPosVoicing(chord, fretboardMatrix);
-            let positions = rootVoicings.filter( x => x.length > 3)[0];
+            let rootVoicings = findVoicings(chord, fretboardMatrix);
+            let maxLength = Math.max(...rootVoicings.map(x => x.length));
+            let positions = rootVoicings.filter( x => x.length >= maxLength)[0];
             let foundNotes = [];
             for (let i=0; i<positions.length; i++) {foundNotes.push(getNote(positions[i]))}
             playChord(foundNotes);
