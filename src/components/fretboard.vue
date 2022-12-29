@@ -142,9 +142,9 @@ export default {
 .fretboard:after {
     content: "";
     width: 100%;
-    height: 500%;
+    height: 800%;
     position: absolute;
-    transform: rotate(90deg);
+    transform: rotate(90deg) translate(-50% , 0%);
     z-index: -1;
     background-image: url(@/assets/wood-pattern.png);
     background-color: #380000;
@@ -183,7 +183,7 @@ export default {
     flex-shrink: 0;
 }
 .note:before {
-    font-family: Comic Sans MS;
+    font-family: Comic Sans MS, serif;
     content: attr(note);
     width: var(--notes_diameter);
     height: var(--notes_diameter);
