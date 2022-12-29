@@ -49,7 +49,7 @@ for (let i = 0; i < notes.length; i++) {
 
 }
 
-alert("only for debug");
+console.log("only for debug");
 
 
 export {notes}

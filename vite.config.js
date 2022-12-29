@@ -10,5 +10,15 @@ export default defineConfig({
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
     }
-  }
+  },
+  rules: [
+    {
+      test: /\.less$/,
+      use: [
+        'vue-style-loader',
+        'css-loader',
+        'less-loader'
+      ]
+    }
+  ]
 })

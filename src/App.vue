@@ -13,6 +13,9 @@
             <button @click="midi">enable midi</button>
             <button @click="play">Play Chord</button>
         </div>
+        <div v-if="data.dots&&data.dots.length">
+            <FretboardEL :position="data.dots"></FretboardEL>
+        </div>
         <figure id="fretboard"></figure>
         <div id="output"></div>
     </div>
@@ -23,7 +26,7 @@ import { Fretboard } from '@moonwave99/fretboard.js';
 import {Note,notes} from "./components/note";
 import {enableMidi} from "./components/midi";
 import {playChord} from "./components/sound";
-
+import FretboardEL from "./components/fretboard.vue"
 
 /* For debugging in webstorm: CTRL+SHIFT+CLICK on the localhost link after
 npm run dev
@@ -283,9 +286,13 @@ export default {
             notes,
             notesSelect: notes[0],
             allChords,
-            chordSelect: allChords[0]
+            chordSelect: allChords[0],
+            dots:[]
         }
         return {data}
+    },
+    components:{
+        FretboardEL
     },
     mounted() {
         fretboardGraphics = new Fretboard({
@@ -309,7 +316,9 @@ export default {
             let dots = positions.map(x=>{
                 return {'string': x['string'] + 1, 'fret': x['fret']}
             })
-            fretboardGraphics.setDots(dots).render();
+            //
+            data.dots = dots
+            // fretboardGraphics.setDots(dots).render();
         },
         play(){
             let me = this
