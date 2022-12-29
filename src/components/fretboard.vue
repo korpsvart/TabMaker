@@ -22,9 +22,6 @@
 
 <script>
 
-let number_of_frets = 15;
-let number_of_strings = 6;
-
 let accidentals = 'flats';
 let sharp_notes = ['C', 'C♯', 'D', 'D♯', 'E', 'F', 'F♯', 'G', 'G♯', 'A', 'A♯', 'B'];
 let flat_notes = ['C', 'D♭', 'D', 'E♭', 'E', 'F', 'G♭', 'G', 'A♭', 'A', 'B♭', 'B'];
@@ -33,23 +30,33 @@ let standard_tuning = ['E', 'A', 'D', 'G', 'B', 'E'];
 
 export default {
     name: "fretboard",
-    props:['position'],
+    props:{
+        position:{
+            type: Array,
+        },
+        number_of_frets:{
+            type:Number,
+            default:15
+        },
+        number_of_strings:{
+            type:Number,
+            default: 6
+        }
+    },
     data(){
         return{
-            number_of_strings,
-            number_of_frets,
             fretboard:this.createFretboardData(),
         }
     },
     computed:{
         rootStyle(){
             return {
-                '--number_of_strings': number_of_strings
+                '--number_of_strings': this.number_of_strings
             }
         },
     },
     watch:{
-        position(v){
+        position(){
             let me = this
             me.fretboard = this.createFretboardData()
         }
@@ -63,7 +70,7 @@ export default {
             if(accidentals==='flats') {
                 note_type = flat_notes;
             }
-            let index = (j+note_type.indexOf(standard_tuning[number_of_strings-i-1]))%12;
+            let index = (j+note_type.indexOf(standard_tuning[this.number_of_strings-i-1]))%12;
             return note_type[index];
         },
         accidentalSelector(event) {
@@ -77,10 +84,10 @@ export default {
             let me = this
             let arr = []
             let position = me.position
-            for(let i=0; i<number_of_strings; i++) {
+            for(let i=0; i<me.number_of_strings; i++) {
                 let string = {className:[],children:[]}
                 string.className.push('string')
-                for(let j=0; j<=number_of_frets; j++) {
+                for(let j=0; j<=me.number_of_frets; j++) {
                     let note = {className:[],children:[]}
                     note.className.push('note')
                     note.noteName = this.noteName(i, j,  accidentals);
