@@ -22,7 +22,7 @@
 </template>
 <script>
 import * as Tonal from 'tonal';
-import { Fretboard } from '@moonwave99/fretboard.js';
+import {Fretboard} from '@moonwave99/fretboard.js';
 import {Note,notes} from "./components/note";
 import {enableMidi} from "./components/midi";
 import {playChord} from "./components/sound";
@@ -329,7 +329,7 @@ export default {
             let positions = rootVoicings.filter( x => x.length >= maxLength)[0];
             let foundNotes = [];
             for (let i=0; i<positions.length; i++) {foundNotes.push(getNote(positions[i]))}
-            playChord(foundNotes);
+            playChord(foundNotes, positions);
         }
     },
 }
