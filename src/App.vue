@@ -281,6 +281,117 @@ function recursivePositionSearch(previousPositions, lastPosition, lastNote, minF
 }
 
 
+function computeOverlap(previousVoicing, currentVoicing) {
+  //Compute number of common tones for two voicings
+  if (previousVoicing===null) return 0;
+  return previousVoicing.filter(x => currentVoicing.some(y => y.fret === x.fret && y.string === x.string)).length;
+}
+
+function pickBestVoicingSequence(chordsVoicings, previousVoicing, i) {
+
+  //Will return the best voicing
+  //(For now based only on highest number of common tones)
+  //Later I'll probably add typical 3th-7th voice leading guideline
+  // Works in a recursive fashion, by analyzing all possible
+  //combinations. Could get computationally really heavy for long sequences though
+
+  //Input is a sequence of objects of the form
+  //{ 'chord': { 'Type': type, 'Name': name}, 'voicings': [an array of voicings] }
+
+  let currentChordVoicings = chordsVoicings[i];
+  let currentChord = currentChordVoicings.chord; //unused for now
+  let currentVoicings = currentChordVoicings.voicings;
+  let maxOverlap = 0;
+  let bestSequence = [];
+  for (let j = 0; j < currentVoicings.length; j++) {
+    let overlap = computeOverlap(previousVoicing, currentVoicings[j]);
+    if (i < chordsVoicings.length-1) {
+      let recursiveResult = pickBestVoicingSequence(chordsVoicings, currentVoicings[j], i+1);
+      overlap = overlap + recursiveResult.overlap;
+      if (overlap > maxOverlap) {
+        maxOverlap = overlap;
+        //Make copy of recursiveResult to avoid mess
+        bestSequence = recursiveResult.sequence.slice();
+        bestSequence.unshift(currentVoicings[j]); //add picked voicing
+      }
+    } else { //no recursive call
+      if (overlap > maxOverlap) {
+        maxOverlap = overlap;
+        bestSequence = [currentVoicings[j]];
+      }
+    }
+  }
+  
+  return {'overlap': maxOverlap, 'sequence': bestSequence};
+
+
+
+}
+
+
+//Old version, delete this later
+// function selectBestPairsByCommonPositions(chord1Voicings, chord2Voicings) {
+//
+//   //Generate all possible pairs
+//   //Pick the one (or more) having most positions in common
+//
+//   let commonPos = [];
+//   for (let i = 0; i < chord1Voicings.length; i++) {
+//     let commonPosCurrent = [];
+//     for (let j = 0; j < chord2Voicings.length; j++) {
+//       commonPosCurrent.push(chord1Voicings[i].filter(x => chord2Voicings[j]
+//           .some(y => y.fret === x.fret && y.string === x.string)));
+//
+//     }
+//     commonPos.push(commonPosCurrent);
+//   }
+//   //Now commonPos is a matrix where the [i][j] element contains an array of the common positions
+//   //between the i-th voicing of the first chord and the j-th voicing of the second chord
+//
+//   //For now the logic will be simply to pick one of the combinations having the most common positions
+//   let maxCommonLength = 0;
+//   let maxCommonVoicing = {'i': 0, 'j': 0};
+//   for (let i = 0; i <commonPos.length; i++) {
+//     for (let j = 0; j < commonPos[i].length; j++) {
+//       if (commonPos[i][j].length > maxCommonLength)
+//         maxCommonLength = commonPos[i][j].length;
+//         maxCommonVoicing.i = i;
+//         maxCommonVoicing.j = j;
+//     }
+//
+//   }
+//
+//   //Return a sequence of two chord positions
+//   return [chord1Voicings[maxCommonVoicing.i], chord2Voicings[maxCommonVoicing.j]];
+//
+// }
+
+//
+function testVoicingSequence(chord1Voicings) {
+
+  let chord1 = Tonal.Chord.getChord("m7", "D");
+  let chord2 = Tonal.Chord.getChord("7", "G");
+  let chord3 = Tonal.Chord.getChord("M7", "C");
+
+  let chords = [chord1, chord2, chord3];
+  let chordsVoicings = [];
+
+
+  for (let i = 0; i < chords.length; i++) {
+    let chordVoicings = findVoicings(chords[i], fretboardMatrix);
+    //chordVoicings = chordVoicings.concat(findVoicings(chords[i], fretboardMatrix, 1));
+    //chordVoicings = chordVoicings.concat(findVoicings(chords[i], fretboardMatrix, 2));
+    chordsVoicings.push({'chord': chords[i], 'voicings': chordVoicings});
+  }
+
+
+  let bestSequence = pickBestVoicingSequence(chordsVoicings, null, 0);
+
+}
+
+
+
+
 export default {
     data() {
         let data = {
@@ -311,6 +422,7 @@ export default {
             let data = me.data
             let chord = Tonal.Chord.getChord(data.chordSelect, data.notesSelect);
             let rootVoicings = findVoicings(chord, fretboardMatrix);
+            testVoicingSequence(rootVoicings);
             //Only for test purposes, represent the first voicing with the most positions available
             let maxLength = Math.max(...rootVoicings.map(x => x. length));
             let positions = rootVoicings.filter( x => x.length >= maxLength)[0];
