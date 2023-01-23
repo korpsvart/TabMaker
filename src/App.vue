@@ -175,7 +175,8 @@ function canApplyBarre(position, minFret, frettedNotes) {
         return false
     }
 
-    if (minFret === 0) return false; //Can never apply barre on open strings
+    if (Math.min(...position.map(x => x.fret))===0) return false; //Can never apply barre on open strings
+    //(Do not use minFret for checking this, since it can't contain the zero fret)
 
     let minFretsAmount = position.filter(x => x.fret === minFret).length;
 
@@ -240,7 +241,7 @@ function recursivePositionSearch(previousPositions, lastPosition, lastNote, minF
         //(If it doesn't do not skip yet, unless we've already reached the last string)
         if (containsChordTones(previousPositions, fretboardMatrix, chordNotes)) {
             const frettedNotes = previousPositions.reduce((x, y) => {
-                if (y.fret !== 0) return x + 1;
+                return y.fret !==0 ? x+1 : x;
             }, 0);
             if (frettedNotes > 4) {
                 //Check if we can use barre
@@ -311,7 +312,7 @@ export default {
             let chord = Tonal.Chord.getChord(data.chordSelect, data.notesSelect);
             let rootVoicings = findVoicings(chord, fretboardMatrix);
             //Only for test purposes, represent the first voicing with the most positions available
-            let maxLength = Math.max(...rootVoicings.map(x => x.length));
+            let maxLength = Math.max(...rootVoicings.map(x => x. length));
             let positions = rootVoicings.filter( x => x.length >= maxLength)[0];
             let dots = positions.map(x=>{
                 return {'string': x['string'] + 1, 'fret': x['fret']}
