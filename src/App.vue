@@ -1,12 +1,28 @@
 <template>
     <div>
         <div>
-            <select name="chords" v-model="data.chordSelect">
+            <select name="chords" v-model="data.chord1Select">
                 <option :value="item" v-for="item in data.allChords">{{ item }}</option>
             </select>
-            <select name="notes" v-model="data.notesSelect">
+            <select name="notes" v-model="data.notes1Select">
                 <option :value="item" v-for="item in data.notes">{{ item }}</option>
             </select>
+
+          <select name="chords" v-model="data.chord2Select">
+            <option :value="item" v-for="item in data.allChords">{{ item }}</option>
+          </select>
+          <select name="notes" v-model="data.notes2Select">
+            <option :value="item" v-for="item in data.notes">{{ item }}</option>
+          </select>
+
+          <select name="chords" v-model="data.chord3Select">
+            <option :value="item" v-for="item in data.allChords">{{ item }}</option>
+          </select>
+          <select name="notes" v-model="data.notes3Select">
+            <option :value="item" v-for="item in data.notes">{{ item }}</option>
+          </select>
+
+
         </div>
         <div id="main">
             <button @click="submit">Submit</button>
@@ -23,7 +39,7 @@
 <script>
 import * as Tonal from 'tonal';
 import {Fretboard} from '@moonwave99/fretboard.js';
-import {Note,notes} from "./components/note";
+import {Note, notes} from "./components/note";
 import {enableMidi} from "./components/midi";
 import {playChord} from "./components/sound";
 import FretboardEL from "./components/fretboard.vue"
@@ -296,7 +312,7 @@ function pickBestVoicingSequence(chordsVoicings, previousVoicing, i) {
   //combinations. Could get computationally really heavy for long sequences though
 
   //Input is a sequence of objects of the form
-  //{ 'chord': { 'Type': type, 'Name': name}, 'voicings': [an array of voicings] }
+  //{ 'chord': { see Tonal chord object }, 'voicings': [an array of voicings] }
 
   let currentChordVoicings = chordsVoicings[i];
   let currentChord = currentChordVoicings.chord; //unused for now
@@ -367,13 +383,9 @@ function pickBestVoicingSequence(chordsVoicings, previousVoicing, i) {
 // }
 
 //
-function testVoicingSequence(chord1Voicings) {
+function getVoicingSequence(chords) {
 
-  let chord1 = Tonal.Chord.getChord("m7", "D");
-  let chord2 = Tonal.Chord.getChord("7", "G");
-  let chord3 = Tonal.Chord.getChord("M7", "C");
 
-  let chords = [chord1, chord2, chord3];
   let chordsVoicings = [];
 
 
@@ -387,6 +399,8 @@ function testVoicingSequence(chord1Voicings) {
 
   let bestSequence = pickBestVoicingSequence(chordsVoicings, null, 0);
 
+  return bestSequence;
+
 }
 
 
@@ -396,9 +410,13 @@ export default {
     data() {
         let data = {
             notes,
-            notesSelect: notes[0],
+            notes1Select: notes[0],
             allChords,
-            chordSelect: allChords[0],
+            chord1Select: allChords[0],
+            notes2Select: notes[0],
+            chord2Select: allChords[0],
+            notes3Select: notes[0],
+            chord3Select: allChords[0],
             dots:[]
         }
         return {data}
@@ -418,25 +436,37 @@ export default {
             enableMidi();
         },
         submit() {
-            let me = this
-            let data = me.data
-            let chord = Tonal.Chord.getChord(data.chordSelect, data.notesSelect);
-            let rootVoicings = findVoicings(chord, fretboardMatrix);
-            testVoicingSequence(rootVoicings);
-            //Only for test purposes, represent the first voicing with the most positions available
-            let maxLength = Math.max(...rootVoicings.map(x => x. length));
-            let positions = rootVoicings.filter( x => x.length >= maxLength)[0];
-            let dots = positions.map(x=>{
+          let me = this
+          let data = me.data
+          let chord1 = Tonal.Chord.getChord(data.chord1Select, data.notes1Select);
+          let chord2 = Tonal.Chord.getChord(data.chord2Select, data.notes2Select);
+          let chord3 = Tonal.Chord.getChord(data.chord3Select, data.notes3Select);
+          let voicingSequence = getVoicingSequence([chord1, chord2, chord3]).sequence;
+
+          let i = 0;
+          //I set up a simple 3 sec loop only to display the voicing sequence
+          function loopVoicings() {
+            setTimeout(function() {
+              data.dots = voicingSequence[i].map(x => {
                 return {'string': x['string'] + 1, 'fret': x['fret']}
-            })
-            //
-            data.dots = dots
-            // fretboardGraphics.setDots(dots).render();
+              });
+              i++;
+              if (i < voicingSequence.length) {
+                loopVoicings();
+              }
+            }, 3000)
+          }
+
+          loopVoicings();
+
+          //
+
+          // fretboardGraphics.setDots(dots).render();
         },
         play(){
             let me = this
             let data = me.data
-            let chord = Tonal.Chord.getChord(data.chordSelect, data.notesSelect);
+            let chord = Tonal.Chord.getChord(data.chord1Select, data.notes1Select);
             let rootVoicings = findVoicings(chord, fretboardMatrix);
             let maxLength = Math.max(...rootVoicings.map(x => x.length));
             let positions = rootVoicings.filter( x => x.length >= maxLength)[0];
