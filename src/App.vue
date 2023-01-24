@@ -410,13 +410,13 @@ export default {
     data() {
         let data = {
             notes,
-            notes1Select: notes[0],
+            notes1Select: 'D',
             allChords,
-            chord1Select: allChords[0],
-            notes2Select: notes[0],
-            chord2Select: allChords[0],
-            notes3Select: notes[0],
-            chord3Select: allChords[0],
+            chord1Select: 'm7',
+            notes2Select: 'G',
+            chord2Select: '7',
+            notes3Select: 'C',
+            chord3Select: 'maj7',
             dots:[]
         }
         return {data}
@@ -444,6 +444,10 @@ export default {
           let voicingSequence = getVoicingSequence([chord1, chord2, chord3]).sequence;
 
           let i = 0;
+          data.dots = voicingSequence[i].map(x => {
+            return {'string': x['string'] + 1, 'fret': x['fret']}
+          });
+          i++;
           //I set up a simple 3 sec loop only to display the voicing sequence
           function loopVoicings() {
             setTimeout(function() {
@@ -466,13 +470,29 @@ export default {
         play(){
             let me = this
             let data = me.data
-            let chord = Tonal.Chord.getChord(data.chord1Select, data.notes1Select);
-            let rootVoicings = findVoicings(chord, fretboardMatrix);
-            let maxLength = Math.max(...rootVoicings.map(x => x.length));
-            let positions = rootVoicings.filter( x => x.length >= maxLength)[0];
+            let chord1 = Tonal.Chord.getChord(data.chord1Select, data.notes1Select);
+            let chord2 = Tonal.Chord.getChord(data.chord2Select, data.notes2Select);
+            let chord3 = Tonal.Chord.getChord(data.chord3Select, data.notes3Select);
+            let voicingSequence = getVoicingSequence([chord1, chord2, chord3]).sequence;
+            let k = 0;
             let foundNotes = [];
-            for (let i=0; i<positions.length; i++) {foundNotes.push(getNote(positions[i]))}
-            playChord(foundNotes, positions);
+            for (let i=0; i<voicingSequence[k].length; i++) {foundNotes.push(getNote(voicingSequence[k][i]))}
+            playChord(foundNotes, voicingSequence[k]);
+            k++;
+
+          function loopVoicings() {
+            setTimeout(function() {
+              let foundNotes = [];
+              for (let i=0; i<voicingSequence[k].length; i++) {foundNotes.push(getNote(voicingSequence[k][i]))}
+              playChord(foundNotes, voicingSequence[k]);
+              k++;
+              if (k < voicingSequence.length) {
+                loopVoicings();
+              }
+            }, 6000)
+          }
+
+          loopVoicings();
         }
     },
 }
