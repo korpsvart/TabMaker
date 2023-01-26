@@ -1,5 +1,5 @@
 <template>
-    <div class="container" :style="rootStyle">
+    <div class="fretboard-container" :style="rootStyle">
 <!--        <label for="number_of_frets_selector">Number of frets: </label>-->
 <!--        <input type="number" id="number_of_frets_selector" min="5" max="36" value="15" @change="numberOfFretsSelector">-->
         <div class="accidental_selector" @click="accidentalSelector">
@@ -130,7 +130,7 @@ export default {
 
 <style scoped lang="less">
 
-.container {
+.fretboard-container {
     display: block;
     width: 100%;
     overflow: hidden;

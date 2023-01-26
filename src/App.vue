@@ -9,12 +9,12 @@
                     <option :value="item" v-for="item in data.notes">{{ item }}</option>
                 </select>
             </div>
-            <button @click="addChord">add chord</button>
+            <button class="btn" @click="addChord">add chord</button>
         </div>
         <div id="main">
-            <button @click="submit">Submit</button>
-            <button @click="midi">enable midi</button>
-            <button @click="play">Play Sequence</button>
+            <button class="btn btn-outline-success"  @click="submit">Submit</button>
+<!--            <button class="btn btn-info" @click="midi">enable midi</button>-->
+            <button class="btn btn-outline-info" @click="play">Play Sequence</button>
         </div>
         <div class="fretboard-figure-container" v-if="data.dots&&data.dots.length">
             <FretboardEL :position="data.dots"></FretboardEL>
@@ -461,7 +461,8 @@ export default {
     width: 100vw;
     height: 100vh;
     color: #333;
-    background: radial-gradient(ellipse at center, #f5f5f5 0%,#ddd 100%);
+    background: #f5f5f5
+    //background: radial-gradient(ellipse at center, #f5f5f5 0%,#ddd 100%);
 }
 .fretboard-figure-container{
     position: absolute;
@@ -533,6 +534,5 @@ export default {
 }
 .chords-container{
     position: relative;
-    border-style: dotted;
 }
 </style>
