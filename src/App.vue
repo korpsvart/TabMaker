@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class="container">
         <div class="chords-container">
             <div v-for="(chord,index) in data.chordsSelect" class="chord">
                 <select name="chords" v-model="data.chordsSelect[index].name">
@@ -489,4 +489,5 @@ export default {
 
 </script>
 <style scoped>
+
 </style>
