@@ -14,7 +14,7 @@
         <div id="main">
             <button @click="submit">Submit</button>
             <button @click="midi">enable midi</button>
-            <button @click="play">Play Chord</button>
+            <button @click="play">Play Sequence</button>
         </div>
         <div v-if="data.dots&&data.dots.length">
             <FretboardEL :position="data.dots"></FretboardEL>
@@ -418,30 +418,18 @@ export default {
             })
             let voicingSequence = getVoicingSequence(chordArray).sequence;
 
-            let i = 0;
-            data.dots = voicingSequence[i].map(x => {
-                return {'string': x['string'] + 1, 'fret': x['fret']}
-            });
-            i++;
-
             //I set up a simple 3 sec loop only to display the voicing sequence
             function loopVoicings() {
-                setTimeout(function() {
-                    data.dots = voicingSequence[i].map(x => {
-                        return {'string': x['string'] + 1, 'fret': x['fret']}
-                    });
-                    i++;
-                    if (i < voicingSequence.length) {
-                        loopVoicings();
-                    }
-                }, 3000)
+                for(let i = 0; i < voicingSequence.length; i++) {
+                    setTimeout(function () {
+                        data.dots = voicingSequence[i].map(x => {
+                            return {'string': x['string'] + 1, 'fret': x['fret']}
+                        });
+                    }, 3000 * i)
+                }
             }
 
             loopVoicings();
-
-            //
-
-            // fretboardGraphics.setDots(dots).render();
         },
         play() {
             let me = this
@@ -450,26 +438,24 @@ export default {
                 return Tonal.Chord.getChord(v.name, v.note)
             })
             let voicingSequence = getVoicingSequence(chordArray).sequence;
-            let k = 0;
-            let foundNotes = [];
-            for (let i = 0; i < voicingSequence[k].length; i++) {
-                foundNotes.push(getNote(voicingSequence[k][i]))
+            let T = [ 0 ];
+            for(let i = 1; i < voicingSequence.length; i++) {
+                T.push(720 * voicingSequence[i-1].length + 3000 + T[i-1]);
             }
-            playChord(foundNotes, voicingSequence[k]);
-            k++;
 
             function loopVoicings() {
-                setTimeout(function() {
-                    let foundNotes = [];
-                    for (let i = 0; i < voicingSequence[k].length; i++) {
-                        foundNotes.push(getNote(voicingSequence[k][i]))
-                    }
-                    playChord(foundNotes, voicingSequence[k]);
-                    k++;
-                    if (k < voicingSequence.length) {
-                        loopVoicings();
-                    }
-                }, 6000)
+                for(let k = 0; k < voicingSequence.length; k++) {
+                    setTimeout(function () {
+                        data.dots = voicingSequence[k].map(x => {
+                            return {'string': x['string'] + 1, 'fret': x['fret']}
+                        });
+                        let foundNotes = [];
+                        for (let i = 0; i < voicingSequence[k].length; i++) {
+                            foundNotes.push(getNote(voicingSequence[k][i]));
+                        }
+                        playChord(foundNotes, voicingSequence[k]);
+                    }, T[k]);
+                }
             }
 
             loopVoicings();
