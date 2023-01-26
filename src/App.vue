@@ -1,28 +1,15 @@
 <template>
     <div>
-        <div>
-            <select name="chords" v-model="data.chord1Select">
-                <option :value="item" v-for="item in data.allChords">{{ item }}</option>
-            </select>
-            <select name="notes" v-model="data.notes1Select">
-                <option :value="item" v-for="item in data.notes">{{ item }}</option>
-            </select>
-
-          <select name="chords" v-model="data.chord2Select">
-            <option :value="item" v-for="item in data.allChords">{{ item }}</option>
-          </select>
-          <select name="notes" v-model="data.notes2Select">
-            <option :value="item" v-for="item in data.notes">{{ item }}</option>
-          </select>
-
-          <select name="chords" v-model="data.chord3Select">
-            <option :value="item" v-for="item in data.allChords">{{ item }}</option>
-          </select>
-          <select name="notes" v-model="data.notes3Select">
-            <option :value="item" v-for="item in data.notes">{{ item }}</option>
-          </select>
-
-
+        <div class="chords-container">
+            <div v-for="(chord,index) in data.chordsSelect" class="chord">
+                <select name="chords" v-model="data.chordsSelect[index].name">
+                    <option :value="item" v-for="item in data.allChords">{{ item }}</option>
+                </select>
+                <select name="notes" v-model="data.chordsSelect[index].note">
+                    <option :value="item" v-for="item in data.notes">{{ item }}</option>
+                </select>
+            </div>
+            <button @click="addChord">add chord</button>
         </div>
         <div id="main">
             <button @click="submit">Submit</button>
@@ -175,6 +162,7 @@ function findVoicings(chord, fretboard, inversion = 0) {
     return chordVoicings;
 
 }
+
 // e.g chordNotes = [ 'C', 'E', 'G' ]
 // e.g positions = [ {5,3} , {4,2} , {3,0} ]
 function containsChordTones(positions, fretboard, chordNotes) {
@@ -191,19 +179,19 @@ function containsChordTones(positions, fretboard, chordNotes) {
     }
     //If the chord has only three notes, then check if it contains all of them
     if (chordNotes.length === 3) {
-      return chordNotes.every((note) => notesFound.some(foundNote => foundNote.equalsIgnoreOctave(
-          new Note(note, 0)
-      )));
+        return chordNotes.every((note) => notesFound.some(foundNote => foundNote.equalsIgnoreOctave(
+            new Note(note, 0)
+        )));
     }
 
 
     //If the chord has 4 notes, a note can be eventually skipped (the 5th)
     if (chordNotes.length === 4) {
-      let mandatoryNotes = chordNotes.slice(); //to clone the object, otherwise we are modifying chordNotes!
-      mandatoryNotes.splice(2,1); //to remove the fifth
-      return mandatoryNotes.every((note) => notesFound.some(foundNote => foundNote.equalsIgnoreOctave(
-          new Note(note, 0)
-      )));
+        let mandatoryNotes = chordNotes.slice(); //to clone the object, otherwise we are modifying chordNotes!
+        mandatoryNotes.splice(2, 1); //to remove the fifth
+        return mandatoryNotes.every((note) => notesFound.some(foundNote => foundNote.equalsIgnoreOctave(
+            new Note(note, 0)
+        )));
     }
 }
 
@@ -218,11 +206,11 @@ function canApplyBarre(position, frettedNotes) {
     //For now we assume barre can only be done on the minimum fret position
 
     let minFret = getMinFret(position);
-    if(!position || !Array.isArray(position) || !position.length){
+    if (!position || !Array.isArray(position) || !position.length) {
         return false
     }
 
-    if (Math.min(...position.map(x => x.fret))===0) return false; //Can never apply barre on open strings
+    if (Math.min(...position.map(x => x.fret)) === 0) return false; //Can never apply barre on open strings
     //(Do not use minFret for checking this, since it can't contain the zero fret)
 
     let minFretsAmount = position.filter(x => x.fret === minFret).length;
@@ -238,35 +226,35 @@ function findPositionsOnString(string, lastPosition, lastNote, minFret, chordNot
   let lastFret = lastPosition.fret;
   //Initialize indexes by default values
   let startIndex = 1;
-  let stopIndex = numFrets-1;
+  let stopIndex = numFrets - 1;
   if (minFret !== 0 && minFret !== Infinity) { //If minFret is zero then we don't need to perform any check
     //minFret === Infinity when there are only open strings, so we need to perform this check too
     if (lastFret !== 0) {
       //Check only positions which are at most 2 frets away from lastFret or at most 4 frets from minFret
-      startIndex = Math.max(lastFret-2, minFret-4, 1); //1 as safety bound (not 0 because we treat it separately)
-      stopIndex = Math.min(lastFret+2, minFret+4, numFrets-1); //numFrets-1 as safety bound
+      startIndex = Math.max(lastFret - 2, minFret - 4, 1); //1 as safety bound (not 0 because we treat it separately)
+      stopIndex = Math.min(lastFret + 2, minFret + 4, numFrets - 1); //numFrets-1 as safety bound
     } else {
       //if lastFret is zero, then ignore the last fret constraint
-      startIndex = Math.max(minFret-4, 1); //1 as safety bound (not 0 because we treat it separately)
-      stopIndex = Math.min(minFret+4, numFrets-1); //numFrets-1 as safety bound
+      startIndex = Math.max(minFret - 4, 1); //1 as safety bound (not 0 because we treat it separately)
+      stopIndex = Math.min(minFret + 4, numFrets - 1); //numFrets-1 as safety bound
     }
   }
 
-    //Zero fret must always be considered separately
-    let pos = {'string': string, 'fret': 0};
-    let posNote = getNote(pos);
-    //Check if it's part of chord notes and it's not equal to lastNote (both in pitch class and octave)
+  //Zero fret must always be considered separately
+  let pos = {'string': string, 'fret': 0};
+  let posNote = getNote(pos);
+  //Check if it's part of chord notes and it's not equal to lastNote (both in pitch class and octave)
+  if (chordNotes.some(x => posNote.equalsIgnoreOctave(new Note(x, 0))) && !posNote.equals(lastNote)) positions.push(pos);
+  for (let j = startIndex; j <= stopIndex; j++) {
+    pos = {'string': string, 'fret': j};
+    posNote = getNote(pos);
     if (chordNotes.some(x => posNote.equalsIgnoreOctave(new Note(x, 0))) && !posNote.equals(lastNote)) positions.push(pos);
-    for (let j = startIndex; j <= stopIndex; j++) {
-      pos = {'string': string, 'fret': j};
-      posNote = getNote(pos);
-      if (chordNotes.some(x => posNote.equalsIgnoreOctave(new Note(x, 0))) && !posNote.equals(lastNote)) positions.push(pos);
-    }
+  }
   return positions;
 }
 
 function findNextPositions(positions, lastNote, chordNotes) {
-    //TODO
+  //TODO
 
   //Return the next candidate positions, based on three principles
   //1) fret distance is not > 2 frets compared to lastPosition fret
@@ -274,7 +262,6 @@ function findNextPositions(positions, lastNote, chordNotes) {
   //3) distance from min fret is not > 4 frets
   //4)Notes belong to the chord (chordNotes)
   //5)Special exceptional rules applies for the 0 fret
-
   let lastPosition = positions[positions.length-1];
   let string = lastPosition.string - 1;
   let minFret = getMinFret(positions);
@@ -292,7 +279,7 @@ function recursivePositionSearch(previousPositions, lastNote, chordNotes, validP
         //(If it doesn't do not skip yet, unless we've already reached the last string)
         if (containsChordTones(previousPositions, fretboardMatrix, chordNotes)) {
             const frettedNotes = previousPositions.reduce((x, y) => {
-                return y.fret !==0 ? x+1 : x;
+                return y.fret !== 0 ? x + 1 : x;
             }, 0);
             if (frettedNotes > 4) {
                 //Check if we can use barre
@@ -320,8 +307,6 @@ function recursivePositionSearch(previousPositions, lastNote, chordNotes, validP
             let nextPosition = nextPositions[i];
             //Update minFret if necessary (never update minFret if new fret is zero)
             //Also skip comparison for zero frets
-            //if (nextPosition.fret !== 0 && previousPositions.every(x => x.fret > nextPosition.fret ||
-            //    (x.fret===0))) minFret = nextPosition.fret;
             let newPositions = previousPositions.slice();
             newPositions.push(nextPosition); //add the new element
             //Again I use splice to create shallow copy, otherwise we will add other voicings together
@@ -332,92 +317,81 @@ function recursivePositionSearch(previousPositions, lastNote, chordNotes, validP
 
 
 function computeOverlap(previousVoicing, currentVoicing) {
-  //Compute number of common tones for two voicings
-  if (previousVoicing===null) return 0;
-  return previousVoicing.filter(x => currentVoicing.some(y => y.fret === x.fret && y.string === x.string)).length;
+    //Compute number of common tones for two voicings
+    if (previousVoicing === null) return 0;
+    return previousVoicing.filter(x => currentVoicing.some(y => y.fret === x.fret && y.string === x.string)).length;
 }
 
 function pickBestVoicingSequence(chordsVoicings, previousVoicing, i) {
 
-  //Will return the best voicing
-  //(For now based only on highest number of common tones)
-  //Later I'll probably add typical 3th-7th voice leading guideline
-  // Works in a recursive fashion, by analyzing all possible
-  //combinations. Could get computationally really heavy for long sequences though
+    //Will return the best voicing
+    //(For now based only on highest number of common tones)
+    //Later I'll probably add typical 3th-7th voice leading guideline
+    // Works in a recursive fashion, by analyzing all possible
+    //combinations. Could get computationally really heavy for long sequences though
 
-  //Input is a sequence of objects of the form
-  //{ 'chord': { see Tonal chord object }, 'voicings': [an array of voicings] }
+    //Input is a sequence of objects of the form
+    //{ 'chord': { see Tonal chord object }, 'voicings': [an array of voicings] }
 
-  let currentChordVoicings = chordsVoicings[i];
-  let currentChord = currentChordVoicings.chord; //unused for now
-  let currentVoicings = currentChordVoicings.voicings;
-  let maxOverlap = 0;
-  let bestSequence = [];
-  for (let j = 0; j < currentVoicings.length; j++) {
-    let overlap = computeOverlap(previousVoicing, currentVoicings[j]);
-    if (i < chordsVoicings.length-1) {
-      let recursiveResult = pickBestVoicingSequence(chordsVoicings, currentVoicings[j], i+1);
-      overlap = overlap + recursiveResult.overlap;
-      if (overlap > maxOverlap) {
-        maxOverlap = overlap;
-        //Make copy of recursiveResult to avoid mess
-        bestSequence = recursiveResult.sequence.slice();
-        bestSequence.unshift(currentVoicings[j]); //add picked voicing
-      }
-    } else { //no recursive call
-      if (overlap > maxOverlap) {
-        maxOverlap = overlap;
-        bestSequence = [currentVoicings[j]];
-      }
+    let currentChordVoicings = chordsVoicings[i];
+    let currentChord = currentChordVoicings.chord; //unused for now
+    let currentVoicings = currentChordVoicings.voicings;
+    let maxOverlap = 0;
+    let bestSequence = [];
+    for (let j = 0; j < currentVoicings.length; j++) {
+        let overlap = computeOverlap(previousVoicing, currentVoicings[j]);
+        if (i < chordsVoicings.length - 1) {
+            let recursiveResult = pickBestVoicingSequence(chordsVoicings, currentVoicings[j], i + 1);
+            overlap = overlap + recursiveResult.overlap;
+            if (overlap > maxOverlap) {
+                maxOverlap = overlap;
+                //Make copy of recursiveResult to avoid mess
+                bestSequence = recursiveResult.sequence.slice();
+                bestSequence.unshift(currentVoicings[j]); //add picked voicing
+            }
+        } else { //no recursive call
+            if (overlap > maxOverlap) {
+                maxOverlap = overlap;
+                bestSequence = [currentVoicings[j]];
+            }
+        }
     }
-  }
-  
-  return {'overlap': maxOverlap, 'sequence': bestSequence};
 
+    return {'overlap': maxOverlap, 'sequence': bestSequence};
 
 
 }
 
 function getVoicingSequence(chords) {
 
+    let chordsVoicings = [];
 
-  let chordsVoicings = [];
+    for (let i = 0; i < chords.length; i++) {
+      let chordVoicings = findVoicings(chords[i], fretboardMatrix);
+      sortVoicings(chordVoicings); //Sort voicings from highest to lowest priority
+      //chordVoicings = chordVoicings.concat(findVoicings(chords[i], fretboardMatrix, 1));
+      //chordVoicings = chordVoicings.concat(findVoicings(chords[i], fretboardMatrix, 2));
+      chordsVoicings.push({'chord': chords[i], 'voicings': chordVoicings});
+    }
 
+    let bestSequence = pickBestVoicingSequence(chordsVoicings, null, 0);
 
-  for (let i = 0; i < chords.length; i++) {
-    let chordVoicings = findVoicings(chords[i], fretboardMatrix);
-    sortVoicings(chordVoicings); //Sort voicings from highest to lowest priority
-    //chordVoicings = chordVoicings.concat(findVoicings(chords[i], fretboardMatrix, 1));
-    //chordVoicings = chordVoicings.concat(findVoicings(chords[i], fretboardMatrix, 2));
-    chordsVoicings.push({'chord': chords[i], 'voicings': chordVoicings});
-  }
-
-
-  let bestSequence = pickBestVoicingSequence(chordsVoicings, null, 0);
-
-  return bestSequence;
+    return bestSequence;
 
 }
-
-
 
 
 export default {
     data() {
         let data = {
             notes,
-            notes1Select: 'D',
             allChords,
-            chord1Select: 'm7',
-            notes2Select: 'G',
-            chord2Select: '7',
-            notes3Select: 'C',
-            chord3Select: 'maj7',
-            dots:[]
+            chordsSelect: [{name: 'm7', note: 'D'}, {name: '7', note: 'G'}, {name: 'maj7', note: 'C'}],
+            dots: []
         }
         return {data}
     },
-    components:{
+    components: {
         FretboardEL
     },
     mounted() {
@@ -428,67 +402,77 @@ export default {
         })
     },
     methods: {
-        midi(){
+        addChord() {
+            let me = this
+            me.data.chordsSelect.push({name: 'm7', note: 'D'})
+        },
+        midi() {
             enableMidi();
         },
         submit() {
-          let me = this
-          let data = me.data
-          let chord1 = Tonal.Chord.getChord(data.chord1Select, data.notes1Select);
-          let chord2 = Tonal.Chord.getChord(data.chord2Select, data.notes2Select);
-          let chord3 = Tonal.Chord.getChord(data.chord3Select, data.notes3Select);
-          let voicingSequence = getVoicingSequence([chord1, chord2, chord3]).sequence;
-
-          let i = 0;
-          data.dots = voicingSequence[i].map(x => {
-            return {'string': x['string'] + 1, 'fret': x['fret']}
-          });
-          i++;
-          //I set up a simple 3 sec loop only to display the voicing sequence
-          function loopVoicings() {
-            setTimeout(function() {
-              data.dots = voicingSequence[i].map(x => {
-                return {'string': x['string'] + 1, 'fret': x['fret']}
-              });
-              i++;
-              if (i < voicingSequence.length) {
-                loopVoicings();
-              }
-            }, 3000)
-          }
-
-          loopVoicings();
-
-          //
-
-          // fretboardGraphics.setDots(dots).render();
-        },
-        play(){
             let me = this
             let data = me.data
-            let chord1 = Tonal.Chord.getChord(data.chord1Select, data.notes1Select);
-            let chord2 = Tonal.Chord.getChord(data.chord2Select, data.notes2Select);
-            let chord3 = Tonal.Chord.getChord(data.chord3Select, data.notes3Select);
-            let voicingSequence = getVoicingSequence([chord1, chord2, chord3]).sequence;
+            console.log(data.chordsSelect)
+            let chordArray = data.chordsSelect.map((v) => {
+                return Tonal.Chord.getChord(v.name, v.note)
+            })
+            let voicingSequence = getVoicingSequence(chordArray).sequence;
+
+            let i = 0;
+            data.dots = voicingSequence[i].map(x => {
+                return {'string': x['string'] + 1, 'fret': x['fret']}
+            });
+            i++;
+
+            //I set up a simple 3 sec loop only to display the voicing sequence
+            function loopVoicings() {
+                setTimeout(function() {
+                    data.dots = voicingSequence[i].map(x => {
+                        return {'string': x['string'] + 1, 'fret': x['fret']}
+                    });
+                    i++;
+                    if (i < voicingSequence.length) {
+                        loopVoicings();
+                    }
+                }, 3000)
+            }
+
+            loopVoicings();
+
+            //
+
+            // fretboardGraphics.setDots(dots).render();
+        },
+        play() {
+            let me = this
+            let data = me.data
+            let chordArray = data.chordsSelect.map((v) => {
+                return Tonal.Chord.getChord(v.name, v.note)
+            })
+            let voicingSequence = getVoicingSequence(chordArray).sequence;
             let k = 0;
             let foundNotes = [];
-            for (let i=0; i<voicingSequence[k].length; i++) {foundNotes.push(getNote(voicingSequence[k][i]))}
+            for (let i = 0; i < voicingSequence[k].length; i++) {
+                foundNotes.push(getNote(voicingSequence[k][i]))
+            }
             playChord(foundNotes, voicingSequence[k]);
             k++;
 
-          function loopVoicings() {
-            setTimeout(function() {
-              let foundNotes = [];
-              for (let i=0; i<voicingSequence[k].length; i++) {foundNotes.push(getNote(voicingSequence[k][i]))}
-              playChord(foundNotes, voicingSequence[k]);
-              k++;
-              if (k < voicingSequence.length) {
-                loopVoicings();
-              }
-            }, 6000)
-          }
+            function loopVoicings() {
+                setTimeout(function() {
+                    let foundNotes = [];
+                    for (let i = 0; i < voicingSequence[k].length; i++) {
+                        foundNotes.push(getNote(voicingSequence[k][i]))
+                    }
+                    playChord(foundNotes, voicingSequence[k]);
+                    k++;
+                    if (k < voicingSequence.length) {
+                        loopVoicings();
+                    }
+                }, 6000)
+            }
 
-          loopVoicings();
+            loopVoicings();
         }
     },
 }
