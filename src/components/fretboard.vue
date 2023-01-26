@@ -131,6 +131,10 @@ export default {
 <style scoped lang="less">
 
 .container {
+    display: block;
+    width: 100%;
+    overflow: hidden;
+    height: calc( 50px * var(--number_of_strings) );
     --number_of_strings: 6;
     --string_height: 9px;
     --mark_diameter: 20px;
@@ -149,7 +153,7 @@ export default {
     display: flex;
     flex-direction: column;
     width: 100%;
-    min-width: 1500px;
+    //width: 100vw;
     height: var(--fretboard_height);
     position: relative;
     margin-top: var(--top_margins);
@@ -161,7 +165,7 @@ export default {
     height: 800%;
     position: absolute;
     transform: rotate(90deg) translate(-50% , 0%);
-    z-index: -1;
+    z-index: 10;
     background-image: url(@/assets/wood-pattern.png);
     background-color: #380000;
 }
@@ -189,7 +193,7 @@ export default {
     height: var(--string_height);
     position: absolute;
     top: var(--first_string_top);
-    z-index: 2;
+    z-index: 20;
     background: repeating-linear-gradient(-60deg, #eee, #444 5px, #eee 5px);
     box-shadow: var(--min_width_zero_fret) 4px 3px #000000;
     animation-name: vibrate;
@@ -227,7 +231,7 @@ export default {
     line-height: var(--notes_diameter);
     text-align: center;
     background: #8FBC8F;
-    z-index: 2;
+    z-index: 20;
     color: #000000;
     opacity: var(--dot_opacity);
 }
@@ -240,7 +244,7 @@ export default {
     content: "\274c"; /* use the hex value here... */
     font-size: 30px;
     color: #FFF;
-    z-index: 2;
+    z-index: 20;
     line-height: 100px;
     text-align: center;
     transform: translate(0, -50%);

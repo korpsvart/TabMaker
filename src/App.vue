@@ -1,11 +1,11 @@
 <template>
-    <div class="container">
-        <div class="chords-container">
+    <div class="app-container">
+        <div class="chords-container clearfix">
             <div v-for="(chord,index) in data.chordsSelect" class="chord">
-                <select name="chords" v-model="data.chordsSelect[index].name">
+                <select v-model="data.chordsSelect[index].name" class="custom-select">
                     <option :value="item" v-for="item in data.allChords">{{ item }}</option>
                 </select>
-                <select name="notes" v-model="data.chordsSelect[index].note">
+                <select v-model="data.chordsSelect[index].note" class="custom-select">
                     <option :value="item" v-for="item in data.notes">{{ item }}</option>
                 </select>
             </div>
@@ -16,7 +16,7 @@
             <button @click="midi">enable midi</button>
             <button @click="play">Play Sequence</button>
         </div>
-        <div v-if="data.dots&&data.dots.length">
+        <div class="fretboard-figure-container" v-if="data.dots&&data.dots.length">
             <FretboardEL :position="data.dots"></FretboardEL>
         </div>
         <figure id="fretboard"></figure>
@@ -47,8 +47,6 @@ const numStrings = 6;
 const numFrets = 24;
 //We represent a fretboard as a matrix of Note objects
 const fretboardMatrix = createFretboard(numStrings, numFrets, tuning);
-
-let fretboardGraphics;
 
 function findPositions(fretboard, note, ignoreOctave = true) {
     //Find all positions corresponding to a particular note
@@ -394,13 +392,6 @@ export default {
     components: {
         FretboardEL
     },
-    mounted() {
-        fretboardGraphics = new Fretboard({
-            el: '#fretboard',
-            fretColor: 'blue',
-            dotFill: 'red'
-        })
-    },
     methods: {
         addChord() {
             let me = this
@@ -464,6 +455,84 @@ export default {
 }
 
 </script>
-<style scoped>
-
+<style lang="less" scoped>
+.app-container{
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    color: #333;
+    background: radial-gradient(ellipse at center, #f5f5f5 0%,#ddd 100%);
+}
+.fretboard-figure-container{
+    position: absolute;
+    width: 100%;
+    overflow: hidden;
+    bottom: 0;
+}
+.chord{
+    display: block;
+    padding: 10px 20px;
+    float:left;
+    position: relative;
+}
+.custom-select::after {
+    content: '\25BC';
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 1em;
+    background-color: #34495e;
+    transition: .25s all ease;
+    pointer-events: none;
+}
+.custom-select {
+    width: 120px;
+    appearance: none;
+    font-family: "Source Sans Pro", sans-serif;
+    font-size: 16px;
+    a {
+        color: #333;
+        font-weight: 700;
+        text-decoration: none;
+    }
+    a:hover {
+        text-decoration: underline;
+    }
+}
+.custom-select {
+    display: block;
+    padding: 4px 10px;
+    background: #fff url(@/assets/arrow.svg) no-repeat right 16px center;
+    background-size: 10px;
+    transition: border-color .1s ease-in-out,box-shadow .1s ease-in-out;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+}
+.custom-select:hover {
+    border: 1px solid #999;
+}
+.custom-select:focus {
+    border: 1px solid #999;
+    box-shadow: 0 3px 5px 0 rgba(0,0,0,.2);
+    outline: none;
+}
+.custom-select::after {
+    content: '\25BC';
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 1em;
+    background-color: black;
+    //transition: .25s all ease;
+    //pointer-events: none;
+}
+.clearfix::after {
+    content: "";
+    clear: both;
+    display: table;
+}
+.chords-container{
+    position: relative;
+    border-style: dotted;
+}
 </style>
