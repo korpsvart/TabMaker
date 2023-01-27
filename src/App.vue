@@ -37,7 +37,11 @@
         </div>
         <div class="fretboard-figure-container card" v-if="data.dots&&data.dots.length">
             <div class="control">
-                <button class="btn btn-outline-info" @click="play">Play Sequence</button>
+                <div class="play-container" @click="play">
+                    <a id="play-video" class="video-play-button" href="#">
+                        <span></span>
+                    </a>
+                </div>
             </div>
             <FretboardEL :position="data.dots"></FretboardEL>
         </div>
@@ -498,7 +502,6 @@ export default {
     padding:15px;
     position: relative;
     width: 100%;
-    overflow: hidden;
     bottom: 0;
 }
 .clearfix::after {
@@ -590,5 +593,82 @@ export default {
     margin-left: -100px;
     margin-top: 15px;
 }
+.video-play-button {
+    //position: absolute;
+    z-index: 30;
+    top: 50%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-50%);
+    box-sizing: content-box;
+    display: block;
+    width: 32px;
+    height: 44px;
+    /* background: #fa183d; */
+    border-radius: 50%;
+    padding: 18px 20px 18px 28px;
+}
 
+.video-play-button:before {
+    content: "";
+    position: absolute;
+    z-index: 0;
+    left: 50%;
+    top: 50%;
+    transform: translateX(-50%) translateY(-50%);
+    display: block;
+    width: 80px;
+    height: 80px;
+    background: #ba1f24;
+    border-radius: 50%;
+    animation: pulse-border 1500ms ease-out infinite;
+}
+
+.video-play-button:after {
+    content: "";
+    position: absolute;
+    z-index: 1;
+    left: 50%;
+    top: 50%;
+    transform: translateX(-50%) translateY(-50%);
+    display: block;
+    width: 80px;
+    height: 80px;
+    background: #fa183d;
+    border-radius: 50%;
+    transition: all 200ms;
+}
+
+.video-play-button:hover:after {
+    background-color: darken(#fa183d, 10%);
+}
+
+.video-play-button img {
+    position: relative;
+    z-index: 3;
+    max-width: 100%;
+    width: auto;
+    height: auto;
+}
+
+.video-play-button span {
+    display: block;
+    position: relative;
+    z-index: 3;
+    width: 0;
+    height: 0;
+    border-left: 32px solid #fff;
+    border-top: 22px solid transparent;
+    border-bottom: 22px solid transparent;
+}
+
+@keyframes pulse-border {
+    0% {
+        transform: translateX(-50%) translateY(-50%) translateZ(0) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translateX(-50%) translateY(-50%) translateZ(0) scale(1.5);
+        opacity: 0;
+    }
+}
 </style>
