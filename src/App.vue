@@ -1,37 +1,39 @@
 <template>
-    <div class="app-container">
+    <div class="app-container" :style="rootStyle">
         <div class="chords-container clearfix overflow-x-scroll">
-            <div v-for="(chord,index) in data.chordsSelect" class="chord-select-container">
-                <div class="input-group mb-3" >
-                    <div class="input-group-prepend">
-                        <label class="input-group-text" for="chord-select">Chord</label>
+            <div class="chords-container-sub">
+                <div v-for="(chord,index) in data.chordsSelect" class="chord-select-container">
+                    <div class="input-group mb-3" >
+                        <div class="input-group-prepend">
+                            <label class="input-group-text" for="chord-select">Chord</label>
+                        </div>
+                        <select name="chord-select" v-model="data.chordsSelect[index].name" class="custom-select">
+                            <option :value="item" v-for="item in data.allChords">{{ item }}</option>
+                        </select>
                     </div>
-                    <select name="chord-select" v-model="data.chordsSelect[index].name" class="custom-select">
-                        <option :value="item" v-for="item in data.allChords">{{ item }}</option>
-                    </select>
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <label class="input-group-text" for="note-select">Note</label>
+                        </div>
+                        <select name="note-select" v-model="data.chordsSelect[index].note" class="custom-select">
+                            <option :value="item" v-for="item in data.notes">{{ item }}</option>
+                        </select>
+                    </div>
                 </div>
-                <div class="input-group mb-3">
-                    <div class="input-group-prepend">
-                        <label class="input-group-text" for="note-select">Note</label>
+                <div class="add-container" @click="addChord">
+                    <div class="plus" id="plus">
+                        <div class="plus__line plus__line--v">
+                            <a href="#" class="plus__link ion-person"></a>
+                            <a href="#" class="plus__link ion-images"></a>
+                            <a href="#" class="plus__link ion-music-note"></a>
+                            <a href="#" class="plus__link ion-location"></a>
+                        </div>
+                        <div class="plus__line plus__line--h"></div>
                     </div>
-                    <select name="note-select" v-model="data.chordsSelect[index].note" class="custom-select">
-                        <option :value="item" v-for="item in data.notes">{{ item }}</option>
-                    </select>
-                </div>
-            </div>
-            <div class="add-container" @click="addChord">
-                <div class="plus" id="plus">
-                    <div class="plus__line plus__line--v">
-                        <a href="#" class="plus__link ion-person"></a>
-                        <a href="#" class="plus__link ion-images"></a>
-                        <a href="#" class="plus__link ion-music-note"></a>
-                        <a href="#" class="plus__link ion-location"></a>
-                    </div>
-                    <div class="plus__line plus__line--h"></div>
                 </div>
             </div>
         </div>
-        <div class="btn-group">
+        <div class="btn-group action-group">
             <button class="btn btn-outline-success"  @click="submit">Submit</button>
 <!--            <button class="btn btn-info" @click="midi">enable midi</button>-->
             <button class="btn btn-outline-info" @click="play">Play Sequence</button>
@@ -412,6 +414,13 @@ export default {
     components: {
         FretboardEL
     },
+    computed:{
+        rootStyle(){
+            return {
+                '--number_of_chords': this.data.chordsSelect.length
+            }
+        },
+    },
     methods: {
         addChord() {
             let me = this
@@ -485,16 +494,11 @@ export default {
     //background: radial-gradient(ellipse at center, #f5f5f5 0%,#ddd 100%);
 }
 .fretboard-figure-container{
-    position: absolute;
+    margin-top: 20px;
+    position: relative;
     width: 100%;
     overflow: hidden;
     bottom: 0;
-}
-.chord{
-    display: block;
-    padding: 10px 20px;
-    float:left;
-    position: relative;
 }
 .clearfix::after {
     content: "";
@@ -503,6 +507,12 @@ export default {
 }
 .chords-container{
     position: relative;
+    width: 100%;
+    overflow-x: auto;
+    .chords-container-sub{
+        width: calc( 220px * var(--number_of_chords) + 110px );
+        height: 100px;
+    }
     .chord-select-container{
         margin: 10px;
         float: left;
@@ -568,6 +578,9 @@ export default {
             transition-delay: .05s;
         }
     }
+}
+.action-group{
+    margin: 10px;
 }
 
 </style>
