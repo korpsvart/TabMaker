@@ -392,7 +392,7 @@ function computeStepRes(previousVoicing, currentVoicing) {
   let count = 0;
   for (let i = 0; i < previousVoicing.length; i++) {
     let pos = previousVoicing[i];
-    if (currentVoicing.filter(x => x.string === pos.string && Math.abs(x.fret - pos.fret) < 2).length > 0)
+    if (currentVoicing.filter(x => x.string === pos.string && Math.abs(x.fret - pos.fret) === 1).length > 0)
       count++;
   }
   return count;
@@ -482,6 +482,8 @@ function getVoicingSequence(chords) {
       // }
       let chordVoicings = findVoicings(chords[i], fretboardMatrix, 0, constraints);
       sortVoicings(chordVoicings); //Sort voicings from highest to lowest priority
+      //When we have more than 4 chords it's already really slow, so let's try to keep only the first 5 possible voicings
+      chordVoicings = chordVoicings.slice(0, 5);
       //chordVoicings = chordVoicings.concat(findVoicings(chords[i], fretboardMatrix, 1));
       //chordVoicings = chordVoicings.concat(findVoicings(chords[i], fretboardMatrix, 2));
       chordsVoicings.push({'chord': chords[i], 'voicings': chordVoicings});
