@@ -2,13 +2,17 @@
     <div class="fretboard-container" :style="rootStyle">
 <!--        <label for="number_of_frets_selector">Number of frets: </label>-->
 <!--        <input type="number" id="number_of_frets_selector" min="5" max="36" value="15" @change="numberOfFretsSelector">-->
-        <div class="accidental_selector" @click="accidentalSelector">
-            <input type="radio" class="acc_select" id="flats" name="accidentals" value="flats" checked>
-            <label for="flats">♭</label>
+<!--        <div class="accidental_selector form-check row justify-content-start" @click="accidentalSelector">-->
+<!--            <div class="form-check col-2">-->
+<!--                <input type="radio" class="acc_select form-check-input" id="flats" name="accidentals" value="flats" checked>-->
+<!--                <label class="form-check-label"  for="flats">♭</label>-->
+<!--            </div>-->
+<!--            <div class="form-check col-2">-->
+<!--                <input type="radio" class="acc_select form-check-input" id="sharps" name="accidentals" value="sharps">-->
+<!--                <label class="form-check-label"  for="sharps">♯</label>-->
+<!--            </div>-->
 
-            <input type="radio" class="acc_select" id="sharps" name="accidentals" value="sharps">
-            <label for="sharps">♯</label>
-        </div>
+<!--        </div>-->
         <div class="fretboard">
             <div v-for="item in fretboard" class="string" :class="item.className">
                 <div v-if="!!item.children" class="note" :note="note.noteName" v-for="note in item.children" :class="note.className">
@@ -272,6 +276,9 @@ export default {
 .mark_octave_lower:after {
   bottom: var(--mark_octave);
   transform: translate(0, 50%);
+}
+.form-check{
+    font-size: 16px;
 }
 
 </style>

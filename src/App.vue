@@ -6,7 +6,7 @@
                     <h5>Chord {{index+1}}</h5>
                     <div class="input-group mb-3" >
                         <div class="input-group-prepend">
-                            <label class="input-group-text" for="chord-select">Chord</label>
+                            <label class="input-group-text" for="chord-select">Name</label>
                         </div>
                         <select name="chord-select" v-model="data.chordsSelect[index].name" class="custom-select">
                             <option :value="item" v-for="item in data.allChords">{{ item }}</option>
@@ -492,7 +492,7 @@ export default {
     //background: radial-gradient(ellipse at center, #f5f5f5 0%,#ddd 100%);
 }
 .fretboard-figure-container{
-    margin-top: 20px;
+    margin-top: 60px;
     position: relative;
     width: 100%;
     overflow: hidden;
