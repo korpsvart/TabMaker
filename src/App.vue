@@ -50,7 +50,7 @@
                         <option :value="item" v-for="item in data.displayViewOptions">{{ item }}</option>
                     </select>
                 </div>
-                <button class="btn btn-primary turning" data-toggle="popover" data-content="to do">Turning</button>
+                <button class="btn btn-primary tuning" data-toggle="popover" data-content="to do">Tuning</button>
             </div>
             <FretboardEL :position="data.dots"></FretboardEL>
         </div>
@@ -440,7 +440,7 @@ export default {
         },
     },
     methods: {
-        openTurningDialog(){
+        openTuningDialog(){
 
         },
         addChord() {
