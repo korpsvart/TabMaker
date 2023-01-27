@@ -1,43 +1,63 @@
 <template>
     <div class="app-container" :style="rootStyle">
-        <div class="chords-container overflow-x-scroll card">
-            <div class="chords-container-sub clearfix">
-                <div v-for="(chord,index) in data.chordsSelect" class="chord-select-container">
-                    <h5>Chord {{index+1}}</h5>
-                    <div class="input-group mb-3" >
-                        <div class="input-group-prepend">
-                            <label class="input-group-text" for="chord-select">Type</label>
+        <div class="card submit-container" >
+            <div class="chords-container overflow-x-scroll">
+                <div class="chords-container-sub clearfix">
+                    <div v-for="(chord,index) in data.chordsSelect" class="chord-select-container">
+                        <h5>Chord {{index+1}}</h5>
+                        <div class="input-group mb-3" >
+                            <div class="input-group-prepend">
+                                <label class="input-group-text" for="chord-select">Type</label>
+                            </div>
+                            <select name="chord-select" v-model="data.chordsSelect[index].name" class="custom-select">
+                                <option :value="item" v-for="item in data.allChords">{{ item }}</option>
+                            </select>
                         </div>
-                        <select name="chord-select" v-model="data.chordsSelect[index].name" class="custom-select">
-                            <option :value="item" v-for="item in data.allChords">{{ item }}</option>
-                        </select>
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                <label class="input-group-text" for="note-select">Tonic</label>
+                            </div>
+                            <select name="note-select" v-model="data.chordsSelect[index].note" class="custom-select">
+                                <option :value="item" v-for="item in data.notes">{{ item }}</option>
+                            </select>
+                        </div>
                     </div>
-                    <div class="input-group mb-3">
-                        <div class="input-group-prepend">
-                            <label class="input-group-text" for="note-select">Tonic</label>
+                    <div class="add-container" @click="addChord">
+                        <div class="plus" id="plus">
+                            <div class="plus__line plus__line--v">
+                                <a href="#" class="plus__link ion-person"></a>
+                            </div>
+                            <div class="plus__line plus__line--h"></div>
                         </div>
-                        <select name="note-select" v-model="data.chordsSelect[index].note" class="custom-select">
-                            <option :value="item" v-for="item in data.notes">{{ item }}</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="add-container" @click="addChord">
-                    <div class="plus" id="plus">
-                        <div class="plus__line plus__line--v">
-                            <a href="#" class="plus__link ion-person"></a>
-                        </div>
-                        <div class="plus__line plus__line--h"></div>
                     </div>
                 </div>
             </div>
+            <div class="btn-group action-group">
+                <button class="btn btn-primary"  @click="submit">Submit</button>
+                <!--            <button class="btn btn-info" @click="midi">enable midi</button>-->
+            </div>
         </div>
-        <div class="btn-group action-group">
-            <button class="btn btn-primary"  @click="submit">Submit</button>
-<!--            <button class="btn btn-info" @click="midi">enable midi</button>-->
-        </div>
-        <div class="fretboard-figure-container card" v-if="data.dots&&data.dots.length">
+        <div class="fretboard-figure-container card" v-show="data.dots&&data.dots.length">
             <div class="control">
-                <button class="btn btn-outline-info" @click="play">Play Sequence</button>
+                <div class="music-control-container clearfix">
+                    <div class="play-container" @click="play" v-if="!data.playing">
+                        <a class="music-play-button" href="#">
+                            <span></span>
+                        </a>
+                    </div>
+                    <div class="stop-container">
+                        <div class="music-play-stop"></div>
+                    </div>
+                </div>
+                <div class="input-group mb-3 display-view-select">
+                    <div class="input-group-prepend">
+                        <label class="input-group-text" for="note-select">View</label>
+                    </div>
+                    <select name="note-select" v-model="data.displayView" class="custom-select">
+                        <option :value="item" v-for="item in data.displayViewOptions">{{ item }}</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary tuning" data-toggle="popover" data-content="to do">Tuning</button>
             </div>
             <FretboardEL :position="data.dots"></FretboardEL>
         </div>
@@ -476,15 +496,21 @@ function getVoicingSequence(chords) {
 export default {
     data() {
         let data = {
+            playing:false,
             notes,
             allChords,
             chordsSelect: [{name: 'm7', note: 'D'}, {name: '7', note: 'G'}, {name: 'maj7', note: 'C'}],
-            dots: []
+            dots: [],
+            displayView:'Fretboard',
+            displayViewOptions:['Fretboard','Tab'],
         }
         return {data}
     },
     components: {
         FretboardEL
+    },
+    mounted() {
+        $('[data-toggle="popover"]').popover()
     },
     computed:{
         rootStyle(){
@@ -494,6 +520,9 @@ export default {
         },
     },
     methods: {
+        openTuningDialog(){
+
+        },
         addChord() {
             let me = this
             me.data.chordsSelect.push({name: 'm7', note: 'D'})
@@ -504,24 +533,21 @@ export default {
         submit() {
             let me = this
             let data = me.data
-            console.log(data.chordsSelect)
             let chordArray = data.chordsSelect.map((v) => {
                 return Tonal.Chord.getChord(v.name, v.note)
             })
             let voicingSequence = getVoicingSequence(chordArray).sequence;
 
-            //I set up a simple 3 sec loop only to display the voicing sequence
-            function loopVoicings() {
-                for(let i = 0; i < voicingSequence.length; i++) {
-                    setTimeout(function () {
-                        data.dots = voicingSequence[i].map(x => {
-                            return {'string': x['string'] + 1, 'fret': x['fret']}
-                        });
-                    }, 3000 * i)
-                }
+            function firstVoicing() {
+                data.dots = voicingSequence[0].map(x => {
+                    return {'string': x['string'] + 1, 'fret': x['fret']}
+              })
             }
 
-            loopVoicings();
+            firstVoicing();
+        },
+        stop(){
+
         },
         play() {
             let me = this
@@ -532,9 +558,8 @@ export default {
             let voicingSequence = getVoicingSequence(chordArray).sequence;
             let T = [ 0 ];
             for(let i = 1; i < voicingSequence.length; i++) {
-                T.push(720 * voicingSequence[i-1].length + 3000 + T[i-1]);
+                T.push(720 * voicingSequence[i-1].length + 3200 + T[i-1]);
             }
-
             function loopVoicings() {
                 for(let k = 0; k < voicingSequence.length; k++) {
                     setTimeout(function () {
@@ -546,11 +571,18 @@ export default {
                             foundNotes.push(getNote(voicingSequence[k][i]));
                         }
                         playChord(foundNotes, voicingSequence[k]);
+                        if(k+1===voicingSequence.length){
+                            setTimeout(()=>{
+                                data.playing = false;
+                            },650*4)
+                        }
                     }, T[k]);
                 }
             }
 
             loopVoicings();
+            // hide play button
+            data.playing = true;
         }
     },
 }
@@ -570,8 +602,8 @@ export default {
     padding:15px;
     position: relative;
     width: 100%;
-    overflow: hidden;
     bottom: 0;
+    z-index: 10;
 }
 .clearfix::after {
     content: "";
@@ -658,9 +690,130 @@ export default {
 .action-group{
     width: 200px;
     position: relative;
+    //left: 50%;
+    //margin-left: -100px;
+    margin:10px;
+}
+.music-control-container{
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    left:50%;
+    margin-left: -40px;
+}
+.play-container{
+    position: relative;
+    top:-50px;
+    //left: 50%;
+    //margin-left: -16px;
+
+}
+.music-play-button {
+    position: relative;
+    z-index: 30;
+    box-sizing: content-box;
+    display: block;
+    width: 32px;
+    height: 44px;
+    /* background: #fa183d; */
+    border-radius: 50%;
+    padding: 18px 20px 18px 28px;
+}
+
+.music-play-button:before {
+    content: "";
+    position: absolute;
+    z-index: 0;
     left: 50%;
-    margin-left: -100px;
-    margin-top: 15px;
+    top: 50%;
+    transform: translateX(-50%) translateY(-50%);
+    display: block;
+    width: 80px;
+    height: 80px;
+    background: #ba1f24;
+    border-radius: 50%;
+    animation: pulse-border 1500ms ease-out infinite;
+}
+
+.music-play-button:after {
+    content: "";
+    position: absolute;
+    z-index: 1;
+    left: 50%;
+    top: 50%;
+    transform: translateX(-50%) translateY(-50%);
+    display: block;
+    width: 80px;
+    height: 80px;
+    background: #fa183d;
+    border-radius: 50%;
+    transition: all 200ms;
+}
+
+.music-play-button:hover:after {
+    background-color: darken(#fa183d, 10%);
+}
+
+.music-play-button img {
+    position: relative;
+    z-index: 3;
+    max-width: 100%;
+    width: auto;
+    height: auto;
+}
+
+.music-play-button span {
+    display: block;
+    position: relative;
+    z-index: 3;
+    width: 0;
+    height: 0;
+    border-left: 32px solid #fff;
+    border-top: 22px solid transparent;
+    border-bottom: 22px solid transparent;
+}
+
+@keyframes pulse-border {
+    0% {
+        transform: translateX(-50%) translateY(-50%) translateZ(0) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translateX(-50%) translateY(-50%) translateZ(0) scale(1.5);
+        opacity: 0;
+    }
+}
+.display-view-select{
+    width: 200px;
+    float: left;
+    margin-right: 15px;
+}
+@stop-container-width:80px;
+@stop-width:30px;
+@stop-margin:-15px;
+.stop-container{
+    position: absolute;
+    left:0;
+    cursor: pointer;
+    top:-50px;
+    float: left;
+    width: @stop-container-width;
+    height: @stop-container-width;
+    border-radius: 50%;
+    background: #000;
+    &:hover{
+        opacity: .8;
+    }
+}
+.music-play-stop{
+    position: relative;
+    top:50%;
+    margin-top:@stop-margin;
+    left: 50%;
+    margin-left: @stop-margin;
+    background: #fff;
+    width: @stop-width;
+    height: @stop-width;
 }
 
 </style>

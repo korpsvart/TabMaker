@@ -15,7 +15,7 @@
 <!--        </div>-->
         <div class="fretboard">
             <div v-for="item in fretboard" class="string" :class="item.className">
-                <div v-if="!!item.children" class="note" :note="note.noteName" v-for="note in item.children" :class="note.className">
+                <div v-if="!!item.children" :note="note.noteName" v-for="note in item.children" :class="note.className">
                     <div v-if="!!note.children" v-for="mark_octave in note.children" :class="mark_octave.className"></div>
                 </div>
             </div>
@@ -106,7 +106,7 @@ export default {
                     }
                     // creates marks on frets 3, 5, 7 and their corresponding in the next octaves
                     if(i === 0 && j % 2 !== 0 && j % 12 !== 1 && j % 11 !== Math.floor(j / 12)) {
-                        note.className.push('mark');
+                        note.className.push('fretboard-mark');
                     }
                     // creates the upper mark for the next octave
                     if(i === 0 && j % 12 === 0 && j !== 0) {
@@ -160,16 +160,17 @@ export default {
     //width: 100vw;
     height: var(--fretboard_height);
     position: relative;
-    margin-top: var(--top_margins);
+    //margin-top: var(--top_margins);
     overflow: hidden;
 }
 .fretboard:after {
     content: "";
     width: 100%;
+    min-width: 1500px;
     height: 800%;
     position: absolute;
     transform: rotate(90deg) translate(-50% , 0%);
-    z-index: 10;
+    z-index: -1;
     background-image: url(@/assets/wood-pattern.png);
     background-color: #380000;
 }
@@ -197,7 +198,7 @@ export default {
     height: var(--string_height);
     position: absolute;
     top: var(--first_string_top);
-    z-index: 20;
+    z-index: 2;
     background: repeating-linear-gradient(-60deg, #eee, #444 5px, #eee 5px);
     box-shadow: var(--min_width_zero_fret) 4px 3px #000000;
     animation-name: vibrate;
@@ -235,7 +236,7 @@ export default {
     line-height: var(--notes_diameter);
     text-align: center;
     background: #8FBC8F;
-    z-index: 20;
+    z-index: 2;
     color: #000000;
     opacity: var(--dot_opacity);
 }
@@ -248,7 +249,7 @@ export default {
     content: "\274c"; /* use the hex value here... */
     font-size: 30px;
     color: #FFF;
-    z-index: 20;
+    z-index: 2;
     line-height: 100px;
     text-align: center;
     transform: translate(0, -50%);
@@ -257,7 +258,7 @@ export default {
     opacity: 1;
 }
 
-.mark:after, .mark_octave_upper:after, .mark_octave_lower:after {
+.fretboard-mark:after, .mark_octave_upper:after, .mark_octave_lower:after {
     content: "";
     width: var(--mark_diameter);
     height: var(--mark_diameter);
@@ -265,7 +266,7 @@ export default {
     border-radius: 50%;
     background: linear-gradient(to left, #C0C0C0, #f7f7f7, #C0C0C0);
 }
-.mark:after {
+.fretboard-mark:after {
     top: var(--mark_top);
     transform: translate(0, -50%);
 }
