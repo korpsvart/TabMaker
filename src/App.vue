@@ -42,6 +42,14 @@
                         <span></span>
                     </a>
                 </div>
+                <div class="input-group mb-3 display-view-select">
+                    <div class="input-group-prepend">
+                        <label class="input-group-text" for="note-select">View</label>
+                    </div>
+                    <select name="note-select" v-model="data.displayView" class="custom-select">
+                        <option :value="item" v-for="item in data.displayViewOptions">{{ item }}</option>
+                    </select>
+                </div>
             </div>
             <FretboardEL :position="data.dots"></FretboardEL>
         </div>
@@ -411,7 +419,9 @@ export default {
             notes,
             allChords,
             chordsSelect: [{name: 'm7', note: 'D'}, {name: '7', note: 'G'}, {name: 'maj7', note: 'C'}],
-            dots: []
+            dots: [],
+            displayView:'Fretboard',
+            displayViewOptions:['Fretboard','Tab'],
         }
         return {data}
     },
@@ -672,5 +682,8 @@ export default {
         transform: translateX(-50%) translateY(-50%) translateZ(0) scale(1.5);
         opacity: 0;
     }
+}
+.display-view-select{
+    width: 200px;
 }
 </style>
