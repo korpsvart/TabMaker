@@ -498,6 +498,7 @@ export default {
     position: relative;
     width: 100%;
     bottom: 0;
+    z-index: 10;
 }
 .clearfix::after {
     content: "";
