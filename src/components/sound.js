@@ -18,7 +18,7 @@ function playChord(chordNotes, positions) {
             vibrateString(str, playTime, arpCoeff);
         }, 650 * i);
     }
-    // Strum part
+    // Strumming part
     for (let i = 0; i < chordNotes.length; i++) {
         setTimeout(function() {
             synth.play('acoustic', chordNotes[i].pitch, chordNotes[i].octave, 1.5 * playTime);
