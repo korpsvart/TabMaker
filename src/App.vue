@@ -442,18 +442,13 @@ export default {
             })
             let voicingSequence = getVoicingSequence(chordArray).sequence;
 
-            //I set up a simple 3 sec loop only to display the voicing sequence
-            function loopVoicings() {
-                for(let i = 0; i < voicingSequence.length; i++) {
-                    setTimeout(function () {
-                        data.dots = voicingSequence[i].map(x => {
-                            return {'string': x['string'] + 1, 'fret': x['fret']}
-                        });
-                    }, 3000 * i)
-                }
+            function firstVoicing() {
+                data.dots = voicingSequence[0].map(x => {
+                    return {'string': x['string'] + 1, 'fret': x['fret']}
+              })
             }
 
-            loopVoicings();
+            firstVoicing();
         },
         play() {
             let me = this
