@@ -1,7 +1,7 @@
 <template>
     <div class="app-container" :style="rootStyle">
-        <div class="chords-container clearfix overflow-x-scroll">
-            <div class="chords-container-sub">
+        <div class="chords-container overflow-x-scroll">
+            <div class="chords-container-sub clearfix">
                 <div v-for="(chord,index) in data.chordsSelect" class="chord-select-container">
                     <h5>Chord {{index+1}}</h5>
                     <div class="input-group mb-3" >
@@ -25,9 +25,6 @@
                     <div class="plus" id="plus">
                         <div class="plus__line plus__line--v">
                             <a href="#" class="plus__link ion-person"></a>
-                            <a href="#" class="plus__link ion-images"></a>
-                            <a href="#" class="plus__link ion-music-note"></a>
-                            <a href="#" class="plus__link ion-location"></a>
                         </div>
                         <div class="plus__line plus__line--h"></div>
                     </div>
@@ -511,8 +508,8 @@ export default {
     width: 100%;
     overflow-x: auto;
     .chords-container-sub{
+        position: relative;
         width: calc( 220px * var(--number_of_chords) + 110px );
-        height: 100px;
     }
     .chord-select-container{
         margin: 10px;
@@ -521,8 +518,11 @@ export default {
     }
 }
 .add-container{
+    position: relative;
+    top: 50%;
+    margin-top:40px;
     float: left;
-    margin: 15px;
+    margin-left: 15px;
 }
 .plus {
     width: 80px;
