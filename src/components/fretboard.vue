@@ -160,7 +160,7 @@ export default {
     //width: 100vw;
     height: var(--fretboard_height);
     position: relative;
-    margin-top: var(--top_margins);
+    //margin-top: var(--top_margins);
     overflow: hidden;
 }
 .fretboard:after {
