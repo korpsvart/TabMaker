@@ -476,7 +476,7 @@ export default {
             let voicingSequence = getVoicingSequence(chordArray).sequence;
             let T = [ 0 ];
             for(let i = 1; i < voicingSequence.length; i++) {
-                T.push(720 * voicingSequence[i-1].length + 3000 + T[i-1]);
+                T.push(720 * voicingSequence[i-1].length + 3200 + T[i-1]);
             }
 
             function loopVoicings() {
