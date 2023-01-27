@@ -1,17 +1,37 @@
 <template>
     <div class="app-container">
-        <div class="chords-container clearfix">
-            <div v-for="(chord,index) in data.chordsSelect" class="chord">
-                <select v-model="data.chordsSelect[index].name" class="custom-select">
-                    <option :value="item" v-for="item in data.allChords">{{ item }}</option>
-                </select>
-                <select v-model="data.chordsSelect[index].note" class="custom-select">
-                    <option :value="item" v-for="item in data.notes">{{ item }}</option>
-                </select>
+        <div class="chords-container clearfix overflow-x-scroll">
+            <div v-for="(chord,index) in data.chordsSelect" class="chord-select-container">
+                <div class="input-group mb-3" >
+                    <div class="input-group-prepend">
+                        <label class="input-group-text" for="chord-select">Chord</label>
+                    </div>
+                    <select name="chord-select" v-model="data.chordsSelect[index].name" class="custom-select">
+                        <option :value="item" v-for="item in data.allChords">{{ item }}</option>
+                    </select>
+                </div>
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <label class="input-group-text" for="note-select">Note</label>
+                    </div>
+                    <select name="note-select" v-model="data.chordsSelect[index].note" class="custom-select">
+                        <option :value="item" v-for="item in data.notes">{{ item }}</option>
+                    </select>
+                </div>
             </div>
-            <button class="btn" @click="addChord">add chord</button>
+            <div class="add-container" @click="addChord">
+                <div class="plus" id="plus">
+                    <div class="plus__line plus__line--v">
+                        <a href="#" class="plus__link ion-person"></a>
+                        <a href="#" class="plus__link ion-images"></a>
+                        <a href="#" class="plus__link ion-music-note"></a>
+                        <a href="#" class="plus__link ion-location"></a>
+                    </div>
+                    <div class="plus__line plus__line--h"></div>
+                </div>
+            </div>
         </div>
-        <div id="main">
+        <div class="btn-group">
             <button class="btn btn-outline-success"  @click="submit">Submit</button>
 <!--            <button class="btn btn-info" @click="midi">enable midi</button>-->
             <button class="btn btn-outline-info" @click="play">Play Sequence</button>
@@ -476,57 +496,6 @@ export default {
     float:left;
     position: relative;
 }
-.custom-select::after {
-    content: '\25BC';
-    position: absolute;
-    top: 0;
-    right: 0;
-    padding: 1em;
-    background-color: #34495e;
-    transition: .25s all ease;
-    pointer-events: none;
-}
-.custom-select {
-    width: 120px;
-    appearance: none;
-    font-family: "Source Sans Pro", sans-serif;
-    font-size: 16px;
-    a {
-        color: #333;
-        font-weight: 700;
-        text-decoration: none;
-    }
-    a:hover {
-        text-decoration: underline;
-    }
-}
-.custom-select {
-    display: block;
-    padding: 4px 10px;
-    background: #fff url(@/assets/arrow.svg) no-repeat right 16px center;
-    background-size: 10px;
-    transition: border-color .1s ease-in-out,box-shadow .1s ease-in-out;
-    border: 1px solid #ddd;
-    border-radius: 3px;
-}
-.custom-select:hover {
-    border: 1px solid #999;
-}
-.custom-select:focus {
-    border: 1px solid #999;
-    box-shadow: 0 3px 5px 0 rgba(0,0,0,.2);
-    outline: none;
-}
-.custom-select::after {
-    content: '\25BC';
-    position: absolute;
-    top: 0;
-    right: 0;
-    padding: 1em;
-    background-color: black;
-    //transition: .25s all ease;
-    //pointer-events: none;
-}
 .clearfix::after {
     content: "";
     clear: both;
@@ -534,5 +503,71 @@ export default {
 }
 .chords-container{
     position: relative;
+    .chord-select-container{
+        margin: 10px;
+        float: left;
+        width: 200px;
+    }
 }
+.add-container{
+    float: left;
+    margin: 15px;
+}
+.plus {
+    width: 80px;
+    cursor:pointer;
+    transition: all .3s ease 0s;
+    height: 80px;
+    background: #ffe581;
+    border-radius: 50%;
+    display: flex;
+    position: relative;
+    &__line {
+        width: 6px;
+        height: 50px;
+        background: #000;
+        border-radius:10px;
+        position: absolute;
+        left: calc(50% - 3px);
+        top: calc(50% - 25px);
+        &--h {
+            transform: rotate(90deg);
+        }
+        &--v {
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            overflow: hidden;
+            transition: all .4s ease 0s;
+        }
+    }
+    &__link {
+        color: #fff;
+        font-size: 30px;
+        opacity: 0;
+        visibility: hidden;
+        transition : .3s ease 0s;
+        transform:scale(.5);
+    }
+    &--active {
+        height:32px;
+        border-radius:30px;
+        .plus__line--v {
+            height: 68px;
+            top: calc(-100% - 60px);
+            padding:0 5px;
+            box-sizing:border-box;
+            width: 220px;
+            border-radius: 60px;
+            left: calc(50% - 110px);
+        }
+        .plus__link{
+            opacity:1;
+            visibility:visible;
+            transform:scale(1);
+            transition-delay: .05s;
+        }
+    }
+}
+
 </style>
