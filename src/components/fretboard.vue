@@ -166,6 +166,7 @@ export default {
 .fretboard:after {
     content: "";
     width: 100%;
+    min-width: 1500px;
     height: 800%;
     position: absolute;
     transform: rotate(90deg) translate(-50% , 0%);
