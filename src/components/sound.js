@@ -27,4 +27,16 @@ function playChord(chordNotes, positions) {
     }
 }
 
-export{playChord}
+function stopChordAnimation(){
+    document.querySelectorAll('.string').setProperty('--animation-iteration-count','0')
+}
+
+function stopSound(){
+    synth.pause()
+}
+function stopChord(){
+    stopChordAnimation()
+    stopSound()
+}
+
+export{playChord,stopChord}
