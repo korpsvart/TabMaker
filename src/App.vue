@@ -111,6 +111,21 @@ function createFretboard(numString, numFrets, tuning) {
     return fretboard;
 }
 
+
+function filterVoicings(voicings, chord, nextChord) {
+
+  //If the chord has dominant function, then we should not double the leading tone
+  if (chord.type === 'dominant seventh' && Tonal.Interval.distance(chord.notes[0], nextChord.notes[0])==='P5')
+  {
+    for (let i = 0; i < voicings.length; i++) {
+
+    }
+  }
+
+
+
+}
+
 function sortVoicings(voicings) {
   //Sort voicings from the "best" to the worst based on some principles
   //This is useful because when building a voicing sequence the voicings are analyzed
@@ -121,15 +136,18 @@ function sortVoicings(voicings) {
 
 }
 
+function getDistinctPitchesFromVoicing(voicing) {
+  let voicingPitches = voicing.map(x => getNote(x).pitch);
+  return new Set(voicingPitches);
+}
+
 function compareVoicings(voicingA, voicingB) {
 
   //Compare function for voicings sorting
 
   //More distinct pitch classes wins
-  let voicingAPitches = voicingA.map(x => getNote(x).pitch);
-  let voicingBPitches = voicingB.map(x => getNote(x).pitch);
-  let distinctPitchesA = new Set(voicingAPitches);
-  let distinctPitchesB = new Set(voicingBPitches);
+  let distinctPitchesA = getDistinctPitchesFromVoicing(voicingA)
+  let distinctPitchesB = getDistinctPitchesFromVoicing(voicingB);
   if (distinctPitchesA.size > distinctPitchesB.size) {
     return 1;
   } else if (distinctPitchesA.size < distinctPitchesB.size) {
@@ -154,7 +172,7 @@ function compareVoicings(voicingA, voicingB) {
 
 }
 
-function findVoicings(chord, fretboard, inversion = 0) {
+function findVoicings(chord, fretboard, inversion = 0, constraints) {
     //Return the positions of a voicing for the given chord
     //given the inversion
     //(inversion = 0 => root position (default), inversion = 1 => third in the bass, ecc...)
@@ -177,7 +195,7 @@ function findVoicings(chord, fretboard, inversion = 0) {
 
     let chordNotes = chord.notes.map(x => x.toString());
 
-    recursivePositionSearch(bassPos, bassNote, chordNotes, chordVoicings);
+    recursivePositionSearch(bassPos, bassNote, chordNotes, chordVoicings, constraints);
 
     return chordVoicings;
 
@@ -239,9 +257,11 @@ function canApplyBarre(position, frettedNotes) {
 
 }
 
-function findPositionsOnString(string, lastPosition, lastNote, minFret, chordNotes) {
+function findPositionsOnString(previousPositions, lastNote, minFret, chordNotes, constraints) {
 
   //Need to do some fixes on minFret (minFret should never be 0)
+  let lastPosition = previousPositions[previousPositions.length-1];
+  let string = lastPosition.string - 1;
   let positions = [];
   let lastFret = lastPosition.fret;
   //Initialize indexes by default values
@@ -261,6 +281,12 @@ function findPositionsOnString(string, lastPosition, lastNote, minFret, chordNot
   }
 
   //Zero fret must always be considered separately
+  chordNotes = chordNotes.slice(); //shallow copy just to be sure
+  //Check constraints, if present
+  if (constraints != null)
+  {
+    //Possibly some checks
+  }
   let pos = {'string': string, 'fret': 0};
   let posNote = getNote(pos);
   //Check if it's part of chord notes and it's not equal to lastNote (both in pitch class and octave)
@@ -273,7 +299,7 @@ function findPositionsOnString(string, lastPosition, lastNote, minFret, chordNot
   return positions;
 }
 
-function findNextPositions(positions, lastNote, chordNotes) {
+function findNextPositions(positions, lastNote, chordNotes, constraints) {
   //TODO
 
   //Return the next candidate positions, based on three principles
@@ -282,14 +308,12 @@ function findNextPositions(positions, lastNote, chordNotes) {
   //3) distance from min fret is not > 4 frets
   //4)Notes belong to the chord (chordNotes)
   //5)Special exceptional rules applies for the 0 fret
-  let lastPosition = positions[positions.length-1];
-  let string = lastPosition.string - 1;
   let minFret = getMinFret(positions);
-  return findPositionsOnString(string, lastPosition, lastNote, minFret, chordNotes);
+  return findPositionsOnString(positions, lastNote, minFret, chordNotes, constraints);
 
 }
 
-function recursivePositionSearch(previousPositions, lastNote, chordNotes, validPositions) {
+function recursivePositionSearch(previousPositions, lastNote, chordNotes, validPositions, constraints) {
     //Recursively find valid positions for a chord
     //Check if this voicing is acceptable
     //1) Only check if we have at least 3 notes (otherwise we don't consider it a chord yet)
@@ -321,7 +345,7 @@ function recursivePositionSearch(previousPositions, lastNote, chordNotes, validP
     if (lastPosition.string !== 0) {
         //Find next positions and do recursive call
         //Implement a function that returns that next possible positions based on the basic constraints
-        let nextPositions = findNextPositions(previousPositions, lastNote, chordNotes);
+        let nextPositions = findNextPositions(previousPositions, lastNote, chordNotes, constraints);
         //Find all possible valid voicings with more notes
         for (let i in nextPositions) {
             let nextPosition = nextPositions[i];
@@ -330,7 +354,7 @@ function recursivePositionSearch(previousPositions, lastNote, chordNotes, validP
             let newPositions = previousPositions.slice();
             newPositions.push(nextPosition); //add the new element
             //Again I use splice to create shallow copy, otherwise we will add other voicings together
-            recursivePositionSearch(newPositions, getNote(nextPosition), chordNotes, validPositions);
+            recursivePositionSearch(newPositions, getNote(nextPosition), chordNotes, validPositions, constraints);
         }
     }
 }
@@ -340,6 +364,18 @@ function computeOverlap(previousVoicing, currentVoicing) {
     //Compute number of common tones for two voicings
     if (previousVoicing === null) return 0;
     return previousVoicing.filter(x => currentVoicing.some(y => y.fret === x.fret && y.string === x.string)).length;
+}
+
+function computeStepRes(previousVoicing, currentVoicing) {
+  //Only on same string
+  if (previousVoicing == null) return 0;
+  let count = 0;
+  for (let i = 0; i < previousVoicing.length; i++) {
+    let pos = previousVoicing[i];
+    if (currentVoicing.filter(x => x.string === pos.string && Math.abs(x.fret - pos.fret) < 2).length > 0)
+      count++;
+  }
+  return count;
 }
 
 function pickBestVoicingSequence(chordsVoicings, previousVoicing, i) {
@@ -356,29 +392,61 @@ function pickBestVoicingSequence(chordsVoicings, previousVoicing, i) {
     let currentChordVoicings = chordsVoicings[i];
     let currentChord = currentChordVoicings.chord; //unused for now
     let currentVoicings = currentChordVoicings.voicings;
-    let maxOverlap = 0;
+    let maxOverlap = -1;
+    let maxStepRes = -1;
     let bestSequence = [];
     for (let j = 0; j < currentVoicings.length; j++) {
         let overlap = computeOverlap(previousVoicing, currentVoicings[j]);
+        let stepRes = computeStepRes(previousVoicing, currentVoicings[j]);
         if (i < chordsVoicings.length - 1) {
             let recursiveResult = pickBestVoicingSequence(chordsVoicings, currentVoicings[j], i + 1);
             overlap = overlap + recursiveResult.overlap;
+            stepRes = stepRes + recursiveResult.stepRes;
             if (overlap > maxOverlap) {
                 maxOverlap = overlap;
                 //Make copy of recursiveResult to avoid mess
                 bestSequence = recursiveResult.sequence.slice();
                 bestSequence.unshift(currentVoicings[j]); //add picked voicing
+            } else if (overlap === maxOverlap) {
+              //Choose the one having max stepRes
+              if (stepRes>maxStepRes) {
+                maxStepRes = stepRes;
+                bestSequence = recursiveResult.sequence.slice();
+                bestSequence.unshift(currentVoicings[j]);
+              }
             }
         } else { //no recursive call
             if (overlap > maxOverlap) {
                 maxOverlap = overlap;
                 bestSequence = [currentVoicings[j]];
+            } else if (overlap === maxOverlap) {
+              if (stepRes>maxStepRes) {
+                maxStepRes = stepRes;
+                bestSequence = [currentVoicings[j]];
+              }
             }
         }
     }
 
-    return {'overlap': maxOverlap, 'sequence': bestSequence};
+    //Put 0 in case one of these remained equal to -1
+    maxOverlap = Math.max(0, maxOverlap);
+    maxStepRes = Math.max(0, maxStepRes);
 
+    return {'overlap': maxOverlap, 'stepRes': maxStepRes, 'sequence': bestSequence};
+
+
+}
+
+function buildConstraints(chord, nextChord) {
+
+  let constraint = {'dominant': false};
+
+  if (chord.type === 'dominant seventh' && Tonal.Interval.distance(chord.notes[0], nextChord.notes[0])==='4P')
+  {
+    constraint.dominant = true; //chord has dominant function
+  }
+
+  return constraint;
 
 }
 
@@ -387,13 +455,17 @@ function getVoicingSequence(chords) {
     let chordsVoicings = [];
 
     for (let i = 0; i < chords.length; i++) {
-      let chordVoicings = findVoicings(chords[i], fretboardMatrix);
+      let constraints = null;
+      // if (i < chords.length-1)
+      // {
+      //   constraints = buildConstraints(chords[i], chords[i+1]);
+      // }
+      let chordVoicings = findVoicings(chords[i], fretboardMatrix, 0, constraints);
       sortVoicings(chordVoicings); //Sort voicings from highest to lowest priority
       //chordVoicings = chordVoicings.concat(findVoicings(chords[i], fretboardMatrix, 1));
       //chordVoicings = chordVoicings.concat(findVoicings(chords[i], fretboardMatrix, 2));
       chordsVoicings.push({'chord': chords[i], 'voicings': chordVoicings});
     }
-
     let bestSequence = pickBestVoicingSequence(chordsVoicings, null, 0);
 
     return bestSequence;
