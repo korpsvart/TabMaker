@@ -15,7 +15,7 @@
 <!--        </div>-->
         <div class="fretboard">
             <div v-for="item in fretboard" class="string" :class="item.className">
-                <div v-if="!!item.children" class="note" :note="note.noteName" v-for="note in item.children" :class="note.className">
+                <div v-if="!!item.children" :note="note.noteName" v-for="note in item.children" :class="note.className">
                     <div v-if="!!note.children" v-for="mark_octave in note.children" :class="mark_octave.className"></div>
                 </div>
             </div>
@@ -106,7 +106,7 @@ export default {
                     }
                     // creates marks on frets 3, 5, 7 and their corresponding in the next octaves
                     if(i === 0 && j % 2 !== 0 && j % 12 !== 1 && j % 11 !== Math.floor(j / 12)) {
-                        note.className.push('mark');
+                        note.className.push('fretboard-mark');
                     }
                     // creates the upper mark for the next octave
                     if(i === 0 && j % 12 === 0 && j !== 0) {
@@ -257,7 +257,7 @@ export default {
     opacity: 1;
 }
 
-.mark:after, .mark_octave_upper:after, .mark_octave_lower:after {
+.fretboard-mark:after, .mark_octave_upper:after, .mark_octave_lower:after {
     content: "";
     width: var(--mark_diameter);
     height: var(--mark_diameter);
@@ -265,7 +265,7 @@ export default {
     border-radius: 50%;
     background: linear-gradient(to left, #C0C0C0, #f7f7f7, #C0C0C0);
 }
-.mark:after {
+.fretboard-mark:after {
     top: var(--mark_top);
     transform: translate(0, -50%);
 }
