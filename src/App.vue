@@ -35,7 +35,7 @@
             <button class="btn btn-primary"  @click="submit">Submit</button>
 <!--            <button class="btn btn-info" @click="midi">enable midi</button>-->
         </div>
-        <div class="fretboard-figure-container card" v-if="data.dots&&data.dots.length">
+        <div class="fretboard-figure-container card" v-show="data.dots&&data.dots.length">
             <div class="control">
                 <div class="play-container" @click="play">
                     <a id="play-video" class="music-play-button" href="#">
@@ -50,6 +50,7 @@
                         <option :value="item" v-for="item in data.displayViewOptions">{{ item }}</option>
                     </select>
                 </div>
+                <button class="btn btn-primary turning" data-toggle="popover" data-content="to do">Turning</button>
             </div>
             <FretboardEL :position="data.dots"></FretboardEL>
         </div>
@@ -428,6 +429,9 @@ export default {
     components: {
         FretboardEL
     },
+    mounted() {
+        $('[data-toggle="popover"]').popover()
+    },
     computed:{
         rootStyle(){
             return {
@@ -436,6 +440,9 @@ export default {
         },
     },
     methods: {
+        openTurningDialog(){
+
+        },
         addChord() {
             let me = this
             me.data.chordsSelect.push({name: 'm7', note: 'D'})
@@ -685,5 +692,7 @@ export default {
 }
 .display-view-select{
     width: 200px;
+    float: left;
+    margin-right: 15px;
 }
 </style>
