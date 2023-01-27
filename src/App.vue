@@ -38,7 +38,7 @@
         <div class="fretboard-figure-container card" v-if="data.dots&&data.dots.length">
             <div class="control">
                 <div class="play-container" @click="play">
-                    <a id="play-video" class="video-play-button" href="#">
+                    <a id="play-video" class="music-play-button" href="#">
                         <span></span>
                     </a>
                 </div>
@@ -498,7 +498,7 @@ export default {
     //background: radial-gradient(ellipse at center, #f5f5f5 0%,#ddd 100%);
 }
 .fretboard-figure-container{
-    margin-top: 60px;
+    margin-top: 100px;
     padding:15px;
     position: relative;
     width: 100%;
@@ -589,16 +589,22 @@ export default {
 .action-group{
     width: 200px;
     position: relative;
-    left: 50%;
-    margin-left: -100px;
+    //left: 50%;
+    //margin-left: -100px;
     margin-top: 15px;
 }
-.video-play-button {
-    //position: absolute;
+.play-container{
+    position: relative;
+    top:-50px;
+    //left: 50%;
+    //margin-left: -16px;
+    width: 32px;
+    height: 44px;
+    margin:0 auto;
+}
+.music-play-button {
+    position: relative;
     z-index: 30;
-    top: 50%;
-    left: 50%;
-    transform: translateX(-50%) translateY(-50%);
     box-sizing: content-box;
     display: block;
     width: 32px;
@@ -608,7 +614,7 @@ export default {
     padding: 18px 20px 18px 28px;
 }
 
-.video-play-button:before {
+.music-play-button:before {
     content: "";
     position: absolute;
     z-index: 0;
@@ -623,7 +629,7 @@ export default {
     animation: pulse-border 1500ms ease-out infinite;
 }
 
-.video-play-button:after {
+.music-play-button:after {
     content: "";
     position: absolute;
     z-index: 1;
@@ -638,11 +644,11 @@ export default {
     transition: all 200ms;
 }
 
-.video-play-button:hover:after {
+.music-play-button:hover:after {
     background-color: darken(#fa183d, 10%);
 }
 
-.video-play-button img {
+.music-play-button img {
     position: relative;
     z-index: 3;
     max-width: 100%;
@@ -650,7 +656,7 @@ export default {
     height: auto;
 }
 
-.video-play-button span {
+.music-play-button span {
     display: block;
     position: relative;
     z-index: 3;
