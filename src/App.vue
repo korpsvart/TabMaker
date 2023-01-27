@@ -3,6 +3,7 @@
         <div class="chords-container clearfix overflow-x-scroll">
             <div class="chords-container-sub">
                 <div v-for="(chord,index) in data.chordsSelect" class="chord-select-container">
+                    <h5>Chord {{index+1}}</h5>
                     <div class="input-group mb-3" >
                         <div class="input-group-prepend">
                             <label class="input-group-text" for="chord-select">Chord</label>
