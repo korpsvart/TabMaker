@@ -1,12 +1,12 @@
 <template>
     <div class="app-container" :style="rootStyle">
-        <div class="chords-container overflow-x-scroll">
+        <div class="chords-container overflow-x-scroll card">
             <div class="chords-container-sub clearfix">
                 <div v-for="(chord,index) in data.chordsSelect" class="chord-select-container">
                     <h5>Chord {{index+1}}</h5>
                     <div class="input-group mb-3" >
                         <div class="input-group-prepend">
-                            <label class="input-group-text" for="chord-select">Name</label>
+                            <label class="input-group-text" for="chord-select">Type</label>
                         </div>
                         <select name="chord-select" v-model="data.chordsSelect[index].name" class="custom-select">
                             <option :value="item" v-for="item in data.allChords">{{ item }}</option>
@@ -14,7 +14,7 @@
                     </div>
                     <div class="input-group mb-3">
                         <div class="input-group-prepend">
-                            <label class="input-group-text" for="note-select">Note</label>
+                            <label class="input-group-text" for="note-select">Tonic</label>
                         </div>
                         <select name="note-select" v-model="data.chordsSelect[index].note" class="custom-select">
                             <option :value="item" v-for="item in data.notes">{{ item }}</option>
@@ -32,11 +32,13 @@
             </div>
         </div>
         <div class="btn-group action-group">
-            <button class="btn btn-outline-success"  @click="submit">Submit</button>
+            <button class="btn btn-primary"  @click="submit">Submit</button>
 <!--            <button class="btn btn-info" @click="midi">enable midi</button>-->
-            <button class="btn btn-outline-info" @click="play">Play Sequence</button>
         </div>
-        <div class="fretboard-figure-container" v-if="data.dots&&data.dots.length">
+        <div class="fretboard-figure-container card" v-if="data.dots&&data.dots.length">
+            <div class="control">
+                <button class="btn btn-outline-info" @click="play">Play Sequence</button>
+            </div>
             <FretboardEL :position="data.dots"></FretboardEL>
         </div>
         <figure id="fretboard"></figure>
@@ -493,6 +495,7 @@ export default {
 }
 .fretboard-figure-container{
     margin-top: 60px;
+    padding:15px;
     position: relative;
     width: 100%;
     overflow: hidden;
@@ -581,7 +584,11 @@ export default {
     }
 }
 .action-group{
-    margin: 10px;
+    width: 200px;
+    position: relative;
+    left: 50%;
+    margin-left: -100px;
+    margin-top: 15px;
 }
 
 </style>
