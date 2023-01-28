@@ -1,29 +1,30 @@
 import {AudioSynth} from 'keithwhor-audiosynth-packaged/audiosynth.js';
+import {vibrateString} from "@/components/fretboard.vue";
 
 let synth = new AudioSynth;
 synth.setVolume(0.18);
 
-let chordPlayTime = 2;
+let playTime = 2;
+let arpCoeff = 500;
+let strumCoeff = 1200;
 
 // Function which plays first an arpeggio and then a strum of the chord found
 function playChord(chordNotes, positions) {
     // Arpeggio part
     for (let i = 0; i < chordNotes.length; i++) {
         setTimeout(function() {
-            synth.play('acoustic', chordNotes[i].pitch, chordNotes[i].octave, chordPlayTime);
-            let f = positions[i].string;
-            document.querySelectorAll('.string').item(f).style.setProperty('--animation-iteration-count','infinite');
-            setTimeout(() => { document.querySelectorAll('.string').item(f).style.setProperty('--animation-iteration-count','0'); }, chordPlayTime * 500);
+            synth.play('acoustic', chordNotes[i].pitch, chordNotes[i].octave, playTime);
+            let str = positions[i].string;
+            vibrateString(str, playTime, arpCoeff);
         }, 650 * i);
     }
-    // Strum part
+    // Strumming part
     for (let i = 0; i < chordNotes.length; i++) {
         setTimeout(function() {
-            synth.play('acoustic', chordNotes[i].pitch, chordNotes[i].octave, 1.5 * chordPlayTime);
-            let f = positions[i].string;
-            document.querySelectorAll('.string').item(f).style.setProperty('--animation-iteration-count','infinite');
-            setTimeout(() => { document.querySelectorAll('.string').item(f).style.setProperty('--animation-iteration-count','0'); }, chordPlayTime * 1200);
-        }, 650 * chordNotes.length + chordPlayTime * 250 + 70 * i);
+            synth.play('acoustic', chordNotes[i].pitch, chordNotes[i].octave, 1.5 * playTime);
+            let str = positions[i].string;
+            vibrateString(str, playTime, strumCoeff);
+        }, 650 * chordNotes.length + playTime * 250 + 70 * i);
     }
 }
 

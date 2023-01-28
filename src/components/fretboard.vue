@@ -130,6 +130,13 @@ export default {
     },
 }
 
+function vibrateString(str, playTime, coeff) {
+  document.querySelectorAll('.string').item(str).style.setProperty('--animation-iteration-count','infinite');
+  setTimeout(() => { document.querySelectorAll('.string').item(str).style.setProperty('--animation-iteration-count','0'); }, playTime * coeff);
+}
+
+export{vibrateString}
+
 </script>
 
 <style scoped lang="less">
