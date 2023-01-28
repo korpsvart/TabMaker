@@ -211,7 +211,8 @@ function findVoicings(chord, fretboard, inversion = 0, constraints) {
     let bassNote = getNote(bassPos[0]);
 
     let chordVoicings = []; //will be filled with all the voicings for the complete chord
-    //This will be a list of lists. The elements of this list in fact will be sequences of positions
+    //This will be a list of objects of the form
+    //{'positions': [list of positions], 'isBarre': bool}
 
     let chordNotes = chord.notes.map(x => x.toString());
 
@@ -287,19 +288,11 @@ function checkFeasibleIntermediate(voicing, availableFingers, usedFingers)
   //Create a local shallow copy of voicing
   let voicingTmp = voicing.slice();
 
-
   let currentPos = voicingTmp.shift(); //also remove it from the voicing array
   let currentFret = currentPos.fret;
-  while(currentFret === 0 && voicingTmp.length > 0 ) {
-    currentPos = voicingTmp.shift();
-    currentFret = currentPos.fret;
-  }
-  //If by skipping all the zero frets we ended the positions
-  //(and did not find any fretted note), then it's feasible
-  if (voicingTmp.length === 0 && currentFret === 0) return true;
+
+
   //Check available fingers for this position
-  /*
-   */
   for (let j = 0; j < availableFingers.length; j++) {
     let finger = availableFingers[j];
     let usable = true;
@@ -365,27 +358,38 @@ function checkFeasible(voicing) {
   let availableFingers = [1, 2, 3];
   let usedFingers = [];
 
+  let frettedNotesCount = countFrettedNotes(voicing);
+  let isBarre = canApplyBarre(voicing, frettedNotesCount);
+
+  //Remove all open strings, as they don't need to be checked
+  voicingLocal = voicingLocal.filter(x => x.fret !== 0);
+
+  //If all strings are open (unlikely but check it), return true already
+  if (voicingLocal.length === 0) return true;
+
+  //Use index finger to play minimum non-zero fret
   let minFret = getMinFret(voicingLocal);
-  //Take the first string with min fret
+  //Take one string (doesn't matter which) having min fret
   let indexPos = voicingLocal.find(pos => pos.fret === minFret);
 
+  //Add index finger to usedFingers structure
   usedFingers.push({'finger': 0, 'pos': indexPos});
 
+
   //Remove the position assigned to index
-  voicingLocal = voicingLocal.filter(pos => !posEqual(pos, indexPos));
+  if (isBarre) {
+    //If it's a barre chord, then remove all the positions having fret = minFret
+    voicingLocal = voicingLocal.filter(pos => pos.fret !== minFret);
+  } else {
+    //Not a barre chord, remove only one exact position
+    voicingLocal = voicingLocal.filter(pos => !posEqual(pos, indexPos));
+  }
+  //Again, before proceeding check if we run out of positions to cover. In that case return true
+  if (voicingLocal.length === 0) return true;
   //Take the next position (doesn't matter which one it is)
     let currentPos = voicingLocal.shift(); //also remove it from the voicing array
     let currentFret = currentPos.fret;
-    while(currentFret === 0 && voicingLocal.length > 0) {
-      currentPos = voicingLocal.shift();
-      currentFret = currentPos.fret;
-    }
-    //If by skipping all the zero frets we ended the positions
-    //(and did not find any fretted note), then it's feasible
-    if (voicingLocal.length === 0 && currentFret === 0) return true;
     //Check available fingers for this position
-    /*
-     */
     for (let j = 0; j < availableFingers.length; j++) {
       let finger = availableFingers[j];
       let usable = true;
@@ -480,6 +484,12 @@ function findNextPositions(positions, lastNote, chordNotes, constraints) {
 
 }
 
+function countFrettedNotes(positions) {
+  return positions.reduce((x, y) => {
+    return y.fret !== 0 ? x + 1 : x;
+  }, 0);
+}
+
 function recursivePositionSearch(previousPositions, lastNote, chordNotes, validPositions, constraints) {
     //Recursively find valid positions for a chord
     //Check if this voicing is acceptable
@@ -489,9 +499,7 @@ function recursivePositionSearch(previousPositions, lastNote, chordNotes, validP
         //2) Check if it contains the necessary chord tones
         //(If it doesn't do not skip yet, unless we've already reached the last string)
         if (containsChordTones(previousPositions, fretboardMatrix, chordNotes)) {
-            const frettedNotes = previousPositions.reduce((x, y) => {
-                return y.fret !== 0 ? x + 1 : x;
-            }, 0);
+            const frettedNotes = countFrettedNotes(previousPositions);
             if (frettedNotes > 4) {
                 //Check if we can use barre
                 if (canApplyBarre(previousPositions, frettedNotes)) {
