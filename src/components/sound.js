@@ -16,7 +16,7 @@ async function playChord(chordNotes, positions) {
         synth.play('acoustic', chordNotes[i].pitch, chordNotes[i].octave, playTime);
         let str = positions[i].string;
         vibrateString(str, playTime, arpCoeff);
-        await sleep(650)
+        await sleep(600)
     }
     // Strumming part
     await sleep(playTime*250)
