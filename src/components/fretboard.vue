@@ -93,7 +93,7 @@ export default {
             let position = me.position
             // creates the strings
             for(let i = 0; i < me.number_of_strings; i++) {
-                let string = {className: [],children: []}
+                let string = {className: [], children: []}
                 string.className.push('string')
                 // creates frets all over the fretboard
                 for(let j = 0; j <= me.number_of_frets; j++) {
