@@ -21,10 +21,10 @@ async function playChord(chordNotes, positions) {
     // Strumming part
     await sleep(playTime*250)
     for (let i = 0; i < chordNotes.length; i++) {
-        await sleep(60)
         synth.play('acoustic', chordNotes[i].pitch, chordNotes[i].octave, 1.5 * playTime);
         let str = positions[i].string;
         vibrateString(str, playTime, strumCoeff);
+        await sleep(62);
     }
     await sleep(3200)
 }
