@@ -67,11 +67,11 @@
 </template>
 <script>
 import * as Tonal from 'tonal';
-import {Fretboard} from '@moonwave99/fretboard.js';
 import {Note, notes} from "./components/note";
 import {enableMidi} from "./components/midi";
 import {playChord} from "./components/sound";
 import FretboardEL from "./components/fretboard.vue"
+import {sleep} from "@/components/utils";
 
 /* For debugging in webstorm: CTRL+SHIFT+CLICK on the localhost link after
 npm run dev
@@ -709,35 +709,32 @@ export default {
         stop(){
 
         },
-        play() {
+        async play() {
             let me = this
             let data = me.data
             let chordArray = data.chordsSelect.map((v) => {
                 return Tonal.Chord.getChord(v.name, v.note)
             })
             let voicingSequence = getVoicingSequence(chordArray).sequence;
-            let T = [ 0 ];
-            for(let i = 1; i < voicingSequence.length; i++) {
-                T.push(720 * voicingSequence[i-1].length + 3200 + T[i-1]);
+            for(let k = 0; k < voicingSequence.length; k++) {
+                data.dots = voicingSequence[k].map(x => {
+                    return {'string': x['string'] + 1, 'fret': x['fret']}
+                });
+                let foundNotes = [];
+                for (let i = 0; i < voicingSequence[k].length; i++) {
+                    foundNotes.push(getNote(voicingSequence[k][i]));
+                }
+                await playChord(foundNotes, voicingSequence[k]);
+                // await sleep(3200)
+                // reset playing status for sound control
+                // if(k+1===voicingSequence.length){
+                //     setTimeout(()=>{
+                //         data.playing = false;
+                //     },650*4)
+                // }
             }
             function loopVoicings() {
-                for(let k = 0; k < voicingSequence.length; k++) {
-                    setTimeout(function () {
-                        data.dots = voicingSequence[k].map(x => {
-                            return {'string': x['string'] + 1, 'fret': x['fret']}
-                        });
-                        let foundNotes = [];
-                        for (let i = 0; i < voicingSequence[k].length; i++) {
-                            foundNotes.push(getNote(voicingSequence[k][i]));
-                        }
-                        playChord(foundNotes, voicingSequence[k]);
-                        if(k+1===voicingSequence.length){
-                            setTimeout(()=>{
-                                data.playing = false;
-                            },650*4)
-                        }
-                    }, T[k]);
-                }
+
             }
 
             loopVoicings();
