@@ -59,7 +59,8 @@
                 </div>
                 <button class="btn btn-primary tuning" data-toggle="popover" data-content="to do">Tuning</button>
             </div>
-            <FretboardEL :position="data.dots"></FretboardEL>
+            <FretboardEL v-show="isFretboardView()" :position="data.dots"></FretboardEL>
+            <Tab v-show="!isFretboardView()" :position="data.tab" v-if="data.dots.length"></Tab>
         </div>
         <figure id="fretboard"></figure>
         <div id="output"></div>
@@ -71,7 +72,7 @@ import {Note, notes} from "./components/note";
 import {enableMidi} from "./components/midi";
 import {playChord, stopChord} from "./components/sound";
 import FretboardEL from "./components/fretboard.vue"
-import {sleep} from "@/components/utils";
+import Tab from "./components/tablature.vue"
 
 /* For debugging in webstorm: CTRL+SHIFT+CLICK on the localhost link after
 npm run dev
@@ -743,6 +744,7 @@ export default {
             allChords,
             chordsSelect: [{name: 'm7', note: 'D'}, {name: '7', note: 'G'}, {name: 'maj7', note: 'C'}],
             dots: [],
+            tab:[],
             backupDots:[],
             displayView:'Fretboard',
             displayViewOptions:['Fretboard','Tab'],
@@ -750,7 +752,8 @@ export default {
         return {data}
     },
     components: {
-        FretboardEL
+        FretboardEL,
+        Tab
     },
     mounted() {
         $('[data-toggle="popover"]').popover()
@@ -763,6 +766,9 @@ export default {
         },
     },
     methods: {
+        isFretboardView(){
+            return this.data.displayView ==='Fretboard'
+        },
         openTuningDialog(){
 
         },
@@ -789,6 +795,12 @@ export default {
             }
             firstVoicing();
             data.backupDots = [...me.data.dots]
+            // gen array for tab view
+            data.tab = voicingSequence.map((chord)=>{
+                return chord.map(note=>{
+                    return {'string': note['string'] + 1, 'fret': note['fret']}
+                })
+            })
         },
         stop(){
             let me = this

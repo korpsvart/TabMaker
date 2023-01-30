@@ -1,13 +1,14 @@
 <template>
   <div class="tab-container" :style="rootStyle">
     <div class="tab">
-      <div v-for="item in tab" class="bar" :class="item.className">
-
-
+      <div v-for="t in tab" :class="t.className">
+          <div v-for="line in t.children" :class="line.className">
+              {{line.txt}}
+              <div v-for="space in line.children" :class="space.className">{{space.txt}}</div>
+          </div>
         </div>
       </div>
     </div>
-  </div>
 </template>
 
 <script>
@@ -42,41 +43,41 @@ export default {
     }
   },
   watch:{
-    chords() {
+    position() {
       this.tab = this.createTabData()
     }
   },
   methods:{
     noteSet(chord, j) {
-      let note = {className: [], children: []}
+      let note = {className: [], children: [],txt:''}
       note.className.push('note')
       if(chord.some(x => x.string === j + 1)) {
         let s = chord.findIndex(x => x.string === j + 1)
-        note.innerHTML += chord[s].fret
+        note.txt += chord[s].fret
       }
       else {
-        note.innerHTML += 'X'
+        note.txt += 'X'
       }
       return note;
     },
     createTabData(){
       let me = this
       let arr = []
-      let chords = me.chords
+      let chords = me.position
       // creates the bars
       for(let i = 0; i < me.number_of_bars; i++) {
         let bar = {className: [], children: []}
         bar.className.push('bar')
         // creates a line for each string
         for(let j = 0; j <= me.number_of_lines; j++) {
-          let line = {className: [], children: []}
+          let line = {className: [], children: [],txt:''}
           line.className.push('line')
           // creates the 'TAB' characters in the first bar
           if(i === 0) {
             for(let k = 0; k < TAB.length; k++) {
-              let letter = {className: [], children: []}
+              let letter = {className: [], children: [],txt:''}
               letter.className.push(TAB[k])
-              letter.innerHTML += TAB[k]
+              letter.txt += TAB[k]
               bar.children.push(letter)
             }
           }
@@ -91,10 +92,10 @@ export default {
           }
           // push lines in a bar
           bar.children.push(line)
-
         }
         arr.push(bar)
       }
+      console.log(arr)
       return arr
     }
   }
@@ -106,8 +107,6 @@ export default {
 .tab-container {
   display: block;
   width: 100%;
-  overflow: hidden;
-  height: var(--tab_height);
   --number_of_lines: 6;
   --tab_height: calc( var(--number_of_lines) * 21px );
   --bar_width: 150px;
