@@ -38,7 +38,8 @@ export default {
   computed:{
     rootStyle(){
       return {
-        '--number_of_lines': this.number_of_lines
+        '--number_of_lines': this.number_of_lines,
+        '--number_of_bars': this.number_of_bars
       }
     }
   },
@@ -49,7 +50,7 @@ export default {
   },
   methods:{
     noteSet(chord, j) {
-      let note = {className: [], children: [],txt:''}
+      let note = {className: [], children: [], txt: ''}
       note.className.push('note')
       if(chord.some(x => x.string === j + 1)) {
         let s = chord.findIndex(x => x.string === j + 1)
@@ -70,12 +71,12 @@ export default {
         bar.className.push('bar')
         // creates a line for each string
         for(let j = 0; j <= me.number_of_lines; j++) {
-          let line = {className: [], children: [],txt:''}
+          let line = {className: [], children: [], txt: ''}
           line.className.push('line')
           // creates the 'TAB' characters in the first bar
           if(i === 0) {
             for(let k = 0; k < TAB.length; k++) {
-              let letter = {className: [], children: [],txt:''}
+              let letter = {className: [], children: [], txt: ''}
               letter.className.push(TAB[k])
               letter.txt += TAB[k]
               bar.children.push(letter)
@@ -108,6 +109,7 @@ export default {
   display: block;
   width: 100%;
   --number_of_lines: 6;
+  --number_of_bars: 4;
   --tab_height: calc( var(--number_of_lines) * 21px );
   --bar_width: 150px;
   --bar_line_thickness: 1px;
@@ -118,7 +120,6 @@ export default {
   --selector_color: #fff;
   --first_bar_width: calc( var(--bar_width) / 3 );
   --text_size: calc( var(--tab_height) / 3 );
-  --top_margin_text: calc( -2.5px - 2.5 * ( var(--tab_height) / 125 - 1px ) );
 }
 
 * {
@@ -129,9 +130,9 @@ export default {
 }
 
 .tab {
-  margin: 30px;
+  margin: 30px auto;
   display: flex;
-  width: 100%;
+  width: calc( ( var(--number_of_bars) - 1 ) * var(--bar_width) + var(--first_bar_width) );
   height: 100%;
 }
 
@@ -151,10 +152,11 @@ export default {
 
 .T, .A, .B {
   position: absolute;
-  margin-left: 4px;
-  width: 100%;
-  height: 100%;
-  transform: translateY( var(--top_margin_text) );
+  width: var(--text_size);
+  height: var(--text_size);
+  text-align: center;
+  vertical-align: middle;
+  line-height: var(--text_size);
   font-size: var(--text_size);
 }
 .A {
@@ -177,7 +179,7 @@ export default {
   line-height: var(--spacer_dimensions);
   background: #fff;
   text-align: center;
-  transform: translateY(-8px);
+  transform: translateY(-100%);
   margin-left: var(--margin_note_space);
 }
 .space {
