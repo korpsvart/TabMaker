@@ -715,6 +715,7 @@ export default {
             let chordArray = data.chordsSelect.map((v) => {
                 return Tonal.Chord.getChord(v.name, v.note)
             })
+            data.playing = true;
             let voicingSequence = getVoicingSequence(chordArray).sequence;
             for(let k = 0; k < voicingSequence.length; k++) {
                 data.dots = voicingSequence[k].map(x => {
@@ -725,21 +726,10 @@ export default {
                     foundNotes.push(getNote(voicingSequence[k][i]));
                 }
                 await playChord(foundNotes, voicingSequence[k]);
-                // await sleep(3200)
-                // reset playing status for sound control
-                // if(k+1===voicingSequence.length){
-                //     setTimeout(()=>{
-                //         data.playing = false;
-                //     },650*4)
-                // }
+                if(k+1===voicingSequence.length){
+                    data.playing = false;
+                }
             }
-            function loopVoicings() {
-
-            }
-
-            loopVoicings();
-            // hide play button
-            data.playing = true;
         }
     },
 }
