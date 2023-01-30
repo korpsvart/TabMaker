@@ -45,7 +45,7 @@
                             <span></span>
                         </a>
                     </div>
-                    <div class="stop-container">
+                    <div class="stop-container" @click="stop">
                         <div class="music-play-stop"></div>
                     </div>
                 </div>
@@ -69,7 +69,7 @@
 import * as Tonal from 'tonal';
 import {Note, notes} from "./components/note";
 import {enableMidi} from "./components/midi";
-import {playChord} from "./components/sound";
+import {playChord, stopChord} from "./components/sound";
 import FretboardEL from "./components/fretboard.vue"
 import {sleep} from "@/components/utils";
 
@@ -661,6 +661,7 @@ export default {
             allChords,
             chordsSelect: [{name: 'm7', note: 'D'}, {name: '7', note: 'G'}, {name: 'maj7', note: 'C'}],
             dots: [],
+            backupDots:[],
             displayView:'Fretboard',
             displayViewOptions:['Fretboard','Tab'],
         }
@@ -692,6 +693,7 @@ export default {
         },
         submit() {
             let me = this
+            me.stop()
             let data = me.data
             let chordArray = data.chordsSelect.map((v) => {
                 return Tonal.Chord.getChord(v.name, v.note)
@@ -703,11 +705,19 @@ export default {
                     return {'string': x['string'] + 1, 'fret': x['fret']}
               })
             }
-
             firstVoicing();
+            data.backupDots = [...me.data.dots]
         },
         stop(){
-
+            let me = this
+            if(!me.data.playing){
+                return
+            }
+            me.data.playing = false
+            // stop the playing sound
+            stopChord()
+            // reset fretboard view
+            me.data.dots = me.data.backupDots
         },
         async play() {
             let me = this
@@ -718,6 +728,9 @@ export default {
             data.playing = true;
             let voicingSequence = getVoicingSequence(chordArray).sequence;
             for(let k = 0; k < voicingSequence.length; k++) {
+                if(!data.playing){
+                    return
+                }
                 data.dots = voicingSequence[k].map(x => {
                     return {'string': x['string'] + 1, 'fret': x['fret']}
                 });
