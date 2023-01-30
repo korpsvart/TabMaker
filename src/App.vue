@@ -553,6 +553,88 @@ function computeStepRes(previousVoicing, currentVoicing) {
   return count;
 }
 
+function computeDistance(previousVoicing, currentVoicing) {
+  if (previousVoicing == null) return 0;
+  let distance = 0;
+  let totalStringsUsed = 0;
+
+  for (let i = 0; i < 6; i++) {
+    let pos1= currentVoicing.find(x => x.string === i);
+    let pos2 = previousVoicing.find(x => x.string === i);
+    if ((pos1!==undefined && pos2 === undefined) ||
+        (pos1===undefined && pos2 !== undefined))
+    {
+      //When one string appears in only one of the chord, I count it as distance 4
+      //This is to avoid prioritizing chords with less notes
+      distance+=4;
+      totalStringsUsed++;
+    }
+    else if (pos1!== undefined && pos2!== undefined) {
+      distance = distance + Math.abs(pos1.fret - pos2.fret);
+      totalStringsUsed++;
+    }
+  }
+
+  // for (let i = 0; i < previousVoicing.length; i++) {
+  //   let sameStringPos = currentVoicing.filter(x => x.string === previousVoicing[i].string);
+  //   if (sameStringPos && sameStringPos.length > 0) {
+  //     sameStringPos = sameStringPos[0];
+  //     distance = distance + Math.abs(sameStringPos.fret - previousVoicing[i].fret);
+  //   } else {
+  //     //When one string appears in only one of the chord, I count it as distance 1
+  //     //This is to avoid prioritizing chords with less notes
+  //     distance = distance + 1;
+  //   }
+  // }
+
+  //Weigh the distance over the total number of strings used
+  //This is used, again, to prevent the algorithm from choosing chords with less notes
+  return distance/totalStringsUsed;
+}
+
+
+function findInterval(pos1, pos2) {
+  return Tonal.Interval.distance(getNote(pos1).pitch+getNote(pos1).octave,
+      getNote(pos2).pitch + getNote(pos2).octave);
+}
+
+
+function findIntervals(voicing) {
+  let intervals = [];
+  for (let i = 0; i < voicing.length-1; i++) {
+    let string1 = voicing[i].string;
+    let string2 = voicing[i+1].string;
+    let interval = findInterval(voicing[i], voicing[i+1]);
+    intervals.push({'string1': string1, 'string2': string2, 'interval': interval});
+  }
+  return intervals;
+}
+
+function countTritonesResolutions(voicing1, voicing2) {
+  if (voicing1===null) return 0;
+  let intervals1 = findIntervals(voicing1);
+  let intervals2 = findIntervals(voicing2);
+
+  let tritoneRes = 0;
+
+  for (let i = 0; i < intervals1.length; i++) {
+    let interval1 = intervals1[i];
+    let interval2 = intervals2.find(interv => interv.string1 === interval1.string1 && interv.string2 === interval1.string2);
+    if (interval2!==undefined)
+    {
+      let condition = interval1.interval==='5d' && (interval2.interval ==='3M' || interval2.interval==='4P') ||
+          interval1.interval==='4A' && (interval2.interval ==='5P' || interval2.interval==='6m');
+
+      if (condition) tritoneRes++;
+    }
+  }
+
+
+  //return 0; //to deactivate the function use this
+  return tritoneRes;
+
+}
+
 function pickBestVoicingSequence(chordsVoicings, previousVoicing, i) {
 
     //Will return the best voicing
@@ -567,47 +649,46 @@ function pickBestVoicingSequence(chordsVoicings, previousVoicing, i) {
     let currentChordVoicings = chordsVoicings[i];
     let currentChord = currentChordVoicings.chord; //unused for now
     let currentVoicings = currentChordVoicings.voicings;
-    let maxOverlap = -1;
-    let maxStepRes = -1;
+    let minDistance = Infinity;
+    let maxTritoneRes = -1;
     let bestSequence = [];
     for (let j = 0; j < currentVoicings.length; j++) {
-        let overlap = computeOverlap(previousVoicing, currentVoicings[j]);
-        let stepRes = computeStepRes(previousVoicing, currentVoicings[j]);
+        let tritoneRes = countTritonesResolutions(previousVoicing, currentVoicings[j]);
+        let distance = computeDistance(previousVoicing, currentVoicings[j]);
         if (i < chordsVoicings.length - 1) {
             let recursiveResult = pickBestVoicingSequence(chordsVoicings, currentVoicings[j], i + 1);
-            overlap = overlap + recursiveResult.overlap;
-            stepRes = stepRes + recursiveResult.stepRes;
-            if (overlap > maxOverlap) {
-                maxOverlap = overlap;
+            distance = distance + recursiveResult.distance;
+            tritoneRes = tritoneRes + recursiveResult.tritoneRes;
+            if (tritoneRes > maxTritoneRes) {
+              maxTritoneRes = tritoneRes;
+              //Make copy of recursiveResult to avoid mess
+              bestSequence = recursiveResult.sequence.slice();
+              bestSequence.unshift(currentVoicings[j]); //add picked voicing
+            } else if (tritoneRes === maxTritoneRes) {
+              if (distance < minDistance) {
+                minDistance = distance;
                 //Make copy of recursiveResult to avoid mess
                 bestSequence = recursiveResult.sequence.slice();
                 bestSequence.unshift(currentVoicings[j]); //add picked voicing
-            } else if (overlap === maxOverlap) {
-              //Choose the one having max stepRes
-              if (stepRes>maxStepRes) {
-                maxStepRes = stepRes;
-                bestSequence = recursiveResult.sequence.slice();
-                bestSequence.unshift(currentVoicings[j]);
               }
             }
         } else { //no recursive call
-            if (overlap > maxOverlap) {
-                maxOverlap = overlap;
-                bestSequence = [currentVoicings[j]];
-            } else if (overlap === maxOverlap) {
-              if (stepRes>maxStepRes) {
-                maxStepRes = stepRes;
-                bestSequence = [currentVoicings[j]];
-              }
+          if (tritoneRes > maxTritoneRes) {
+            maxTritoneRes = tritoneRes;
+            //Make copy of recursiveResult to avoid mess
+            bestSequence = [currentVoicings[j]];
+          } else if (tritoneRes === maxTritoneRes) {
+            if (distance < minDistance) {
+              minDistance = distance;
+              bestSequence = [currentVoicings[j]];
             }
+          }
         }
     }
 
-    //Put 0 in case one of these remained equal to -1
-    maxOverlap = Math.max(0, maxOverlap);
-    maxStepRes = Math.max(0, maxStepRes);
+    maxTritoneRes = Math.max(0, maxTritoneRes);
 
-    return {'overlap': maxOverlap, 'stepRes': maxStepRes, 'sequence': bestSequence};
+    return {'distance': minDistance, 'sequence': bestSequence, tritoneRes: maxTritoneRes};
 
 
 }
@@ -638,12 +719,13 @@ function getVoicingSequence(chords) {
       // }
       let chordVoicings = findVoicings(chords[i], fretboardMatrix, 0, constraints);
       sortVoicings(chordVoicings); //Sort voicings from highest to lowest priority
-      //In-depth feasibility check (considering fingering)
-      chordVoicings = chordVoicings.filter(voicing => checkFeasible(voicing));
-      //Uncomment next line to keep only the first 5 voicings in case the algorithm is really slow
+      //Uncomment next line to keep only the first n voicings in case the algorithm is really slow
       //(which might happen for 6 or more chords sequences. But it's not so common after implementation of
       //the in-depth feasibility check)
-      //chordVoicings = chordVoicings.slice(0, 5);
+      chordVoicings = chordVoicings.slice(0, 10);
+      //In-depth feasibility check (considering fingering)
+      chordVoicings = chordVoicings.filter(voicing => checkFeasible(voicing));
+
       chordsVoicings.push({'chord': chords[i], 'voicings': chordVoicings});
     }
     let bestSequence = pickBestVoicingSequence(chordsVoicings, null, 0);
