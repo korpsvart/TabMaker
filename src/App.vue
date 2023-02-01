@@ -4,7 +4,7 @@
             <div class="chords-container overflow-x-scroll">
                 <div class="chords-container-sub clearfix">
                     <div v-for="(chord,index) in data.chordsSelect" class="chord-select-container">
-                        <h5>Chord {{index+1}}</h5>
+                        <h5 :class="chordHighlightClass(index)">Chord {{index+1}}</h5>
                         <div class="input-group mb-3" >
                             <div class="input-group-prepend">
                                 <label class="input-group-text" for="chord-select">Type</label>
@@ -740,6 +740,7 @@ function getVoicingSequence(chords) {
 export default {
     data() {
         let data = {
+            playingPosition:-1,
             playing:false,
             notes,
             allChords,
@@ -759,6 +760,13 @@ export default {
     mounted() {
         $('[data-toggle="popover"]').popover()
     },
+    watch:{
+        'data.playing'(val){
+            let me = this
+            if(val===false)me.data.playingPosition = -1
+
+        }
+    },
     computed:{
         rootStyle(){
             return {
@@ -767,6 +775,11 @@ export default {
         },
     },
     methods: {
+        chordHighlightClass(chordIndex){
+            let me = this
+            if(me.data.playingPosition===-1) return
+            if(me.data.playingPosition===chordIndex)return {'highlight':true}
+        },
         isFretboardView(){
             return this.data.displayView ==='Fretboard'
         },
@@ -826,6 +839,7 @@ export default {
                 if(!data.playing){
                     return
                 }
+                data.playingPosition = k
                 data.dots = voicingSequence[k].map(x => {
                     return {'string': x['string'] + 1, 'fret': x['fret']}
                 });
@@ -1070,6 +1084,10 @@ export default {
     background: #fff;
     width: @stop-width;
     height: @stop-width;
+}
+.chord-select-container .highlight{
+    color:#ffe581;
+
 }
 
 </style>
