@@ -1,6 +1,7 @@
 <template>
   <div class="tab-container" :style="rootStyle">
     <div class="tab">
+<!--        bar -->
       <div v-for="t in tab" :class="t.className">
           <div v-for="line in t.children" :class="line.className">
               {{line.txt}}
@@ -18,17 +19,20 @@ let TAB = ['T', 'A', 'B'];
 export default {
   name: "tab",
   props:{
-    position:{
-      type: Array,
-    },
-    number_of_bars:{
-      type: Number,
-      default: 4
-    },
-    number_of_lines:{
-      type: Number,
-      default: 6
-    }
+      position: {
+          type: Array,
+      },
+      playing: {
+          type: Boolean,
+      },
+      number_of_bars: {
+          type: Number,
+          default: 4
+      },
+      number_of_lines: {
+          type: Number,
+          default: 6
+      }
   },
   data(){
     return{
@@ -46,6 +50,11 @@ export default {
   watch:{
     position() {
       this.tab = this.createTabData()
+    },
+    playing(val){
+        if(val===false){
+            stopTabHighlight()
+        }
     }
   },
   methods:{
@@ -109,29 +118,19 @@ export default {
 }
 
 function highlightTab(sel, playTime) {
-  document.querySelectorAll('.selector').item(sel).style.setProperty('--selector_color', '#FFE4B5');
-  let L = 6;
-  for(let i = 0; i < L; i++) {
-    let idx = i + L * sel;
-    document.querySelectorAll('.spacer').item(idx).style.setProperty('--note_color', '#FFE4B5');
-    setTimeout(() => { document.querySelectorAll('.spacer').item(idx).style.setProperty('--note_color','#fff') }, playTime);
-  }
-  setTimeout(() => { document.querySelectorAll('.selector').item(sel).style.setProperty('--selector_color','#fff') }, playTime);
+    $('.bar').removeClass('highlight')
+    $('.bar').eq(sel+1).addClass('highlight')
 }
 
-let playingStatus = false;
-
 function stopTabHighlight(){
-  $('.selector').css('--selector_color', '#fff');
-  $('.note').css('--note_color', '#fff');
+    $('.bar').removeClass('highlight')
 }
 
 function stopTab(){
-  playingStatus = false;
   stopTabHighlight();
 }
 
-export{highlightTab, stopTab}
+export{highlightTab}
 
 </script>
 
@@ -228,7 +227,7 @@ export{highlightTab, stopTab}
   opacity: 0;
 }
 .note {
-  background: var(--note_color);
+  background: #fff;
 }
 
 .selector {
@@ -241,4 +240,10 @@ export{highlightTab, stopTab}
   z-index: -1;
 }
 
+.bar.highlight{
+    //background: #FFE4B5;
+    .note,.space,.selector{
+        background: #FFE4B5;
+    }
+}
 </style>
