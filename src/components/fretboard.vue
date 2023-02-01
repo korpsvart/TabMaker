@@ -164,10 +164,8 @@ export{vibrateString}
     display: flex;
     flex-direction: column;
     width: 100%;
-    //width: 100vw;
     height: var(--fretboard_height);
     position: relative;
-    //margin-top: var(--top_margins);
     overflow: hidden;
 }
 .fretboard:after {

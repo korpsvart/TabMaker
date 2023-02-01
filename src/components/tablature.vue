@@ -69,6 +69,12 @@ export default {
       for(let i = 0; i < me.number_of_bars; i++) {
         let bar = {className: [], children: []}
         bar.className.push('bar')
+        // creates the highlighter for play function
+        if(i !== 0) {
+          let selector = {className: [], children: []}
+          selector.className.push('selector')
+          bar.children.push(selector)
+        }
         // creates a line for each string
         for(let j = 0; j <= me.number_of_lines; j++) {
           let line = {className: [], children: [], txt: ''}
@@ -101,6 +107,32 @@ export default {
     }
   }
 }
+
+function highlightTab(sel, playTime) {
+  document.querySelectorAll('.selector').item(sel).style.setProperty('--selector_color', '#FFE4B5');
+  let L = 6;
+  for(let i = 0; i < L; i++) {
+    let idx = i + L * sel;
+    document.querySelectorAll('.note').item(idx).style.setProperty('--note_color', '#FFE4B5');
+    setTimeout(() => { document.querySelectorAll('.note').item(idx).style.setProperty('--note_color','#fff') }, playTime);
+  }
+  setTimeout(() => { document.querySelectorAll('.selector').item(sel).style.setProperty('--selector_color','#fff') }, playTime);
+}
+
+let playingStatus = false;
+
+function stopTabHighlight(){
+  $('.selector').css('--selector_color', '#fff');
+  $('.note').css('--note_color', '#fff');
+}
+
+function stopTab(){
+  playingStatus = false;
+  stopTabHighlight();
+}
+
+export{highlightTab, stopTab}
+
 </script>
 
 <style scoped lang="less">
@@ -112,7 +144,7 @@ export default {
   --number_of_bars: 4;
   --tab_height: calc( var(--number_of_lines) * 21px );
   --bar_width: 150px;
-  --bar_line_thickness: 1px;
+  --bar_line_thickness: 2px;
   --line_thickness: 1px;
   --spacer_dimensions: 12px;
   --margin_note_space: 15px;
@@ -120,6 +152,7 @@ export default {
   --selector_color: #fff;
   --first_bar_width: calc( var(--bar_width) / 3 );
   --text_size: calc( var(--tab_height) / 3 );
+  --note_color: #fff;
 }
 
 * {
@@ -149,6 +182,15 @@ export default {
   border-left: var(--bar_line_thickness) solid;
   border-right: none;
 }
+.bar:last-child:before {
+  content: '';
+  height: var(--tab_height);
+  width: calc( var(--bar_width) - var(--bar_line_thickness) );
+  position: absolute;
+  border-right: 6px solid;
+  border-image: linear-gradient(to right, #000 33%, #fff 33% 67%, #000 67% 100%) 1 100%;
+  z-index: 1;
+}
 
 .T, .A, .B {
   position: absolute;
@@ -158,6 +200,7 @@ export default {
   vertical-align: middle;
   line-height: var(--text_size);
   font-size: var(--text_size);
+  transform: translateY( var(--line_thickness) );
 }
 .A {
   margin-top: var(--text_size);
@@ -179,21 +222,21 @@ export default {
   line-height: var(--spacer_dimensions);
   background: #fff;
   text-align: center;
-  transform: translateY(-100%);
+  transform: translateY( calc( -1 * var(--spacer_dimensions) + var(--line_thickness) ) );
   margin-left: var(--margin_note_space);
 }
 .space {
   opacity: 0;
 }
 .note {
-  background: var(--selector_color);
+  background: var(--note_color);
 }
 
 .selector {
   position: absolute;
-  margin-left: calc( var(--margin_note_space) + 2 * var(--spacer_dimensions) );
+  margin-left: calc( 2 * var(--margin_note_space) );
   margin-top: calc( -1 * var(--top_selector) );
-  width: calc( var(--margin_note_space) + var(--spacer_dimensions) );
+  width: calc( 3 * var(--spacer_dimensions) );
   height: calc( var(--tab_height) + 2 * var(--top_selector) );
   background: var(--selector_color);
   z-index: -1;

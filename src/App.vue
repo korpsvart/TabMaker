@@ -67,12 +67,13 @@
     </div>
 </template>
 <script>
-import * as Tonal from 'tonal';
-import {Note, notes} from "./components/note";
-import {enableMidi} from "./components/midi";
-import {playChord, stopChord} from "./components/sound";
+import * as Tonal from 'tonal'
+import {Note, notes} from "./components/note"
+import {enableMidi} from "./components/midi"
+import {playChord, stopChord} from "./components/sound"
 import FretboardEL from "./components/fretboard.vue"
 import Tab from "./components/tablature.vue"
+import {highlightTab, stopTab} from "./components/tablature.vue";
 
 /* For debugging in webstorm: CTRL+SHIFT+CLICK on the localhost link after
 npm run dev
@@ -812,6 +813,8 @@ export default {
             stopChord()
             // reset fretboard view
             me.data.dots = me.data.backupDots
+            // stop highlighting chord on tab
+            stopTab()
         },
         async play() {
             let me = this
@@ -828,6 +831,8 @@ export default {
                 data.dots = voicingSequence[k].map(x => {
                     return {'string': x['string'] + 1, 'fret': x['fret']}
                 });
+                let highlightTime = voicingSequence[k].length * 662 + 3700;
+                highlightTab(k, highlightTime);
                 let foundNotes = [];
                 for (let i = 0; i < voicingSequence[k].length; i++) {
                     foundNotes.push(getNote(voicingSequence[k][i]));
