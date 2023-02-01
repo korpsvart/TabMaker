@@ -113,8 +113,8 @@ function highlightTab(sel, playTime) {
   let L = 6;
   for(let i = 0; i < L; i++) {
     let idx = i + L * sel;
-    document.querySelectorAll('.note').item(idx).style.setProperty('--note_color', '#FFE4B5');
-    setTimeout(() => { document.querySelectorAll('.note').item(idx).style.setProperty('--note_color','#fff') }, playTime);
+    document.querySelectorAll('.spacer').item(idx).style.setProperty('--note_color', '#FFE4B5');
+    setTimeout(() => { document.querySelectorAll('.spacer').item(idx).style.setProperty('--note_color','#fff') }, playTime);
   }
   setTimeout(() => { document.querySelectorAll('.selector').item(sel).style.setProperty('--selector_color','#fff') }, playTime);
 }
@@ -220,7 +220,6 @@ export{highlightTab, stopTab}
   width: var(--spacer_dimensions);
   height: var(--spacer_dimensions);
   line-height: var(--spacer_dimensions);
-  background: #fff;
   text-align: center;
   transform: translateY( calc( -1 * var(--spacer_dimensions) + var(--line_thickness) ) );
   margin-left: var(--margin_note_space);
