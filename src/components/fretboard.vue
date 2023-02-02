@@ -5,11 +5,11 @@
 <!--        <div class="accidental_selector form-check row justify-content-start" @click="accidentalSelector">-->
 <!--            <div class="form-check col-2">-->
 <!--                <input type="radio" class="acc_select form-check-input" id="flats" name="accidentals" value="flats" checked>-->
-<!--                <label class="form-check-label"  for="flats">♭</label>-->
+<!--                <label class="form-check-label"  for="flats">b</label>-->
 <!--            </div>-->
 <!--            <div class="form-check col-2">-->
 <!--                <input type="radio" class="acc_select form-check-input" id="sharps" name="accidentals" value="sharps">-->
-<!--                <label class="form-check-label"  for="sharps">♯</label>-->
+<!--                <label class="form-check-label"  for="sharps">#</label>-->
 <!--            </div>-->
 
 <!--        </div>-->
@@ -27,10 +27,10 @@
 <script>
 
 let accidentals = 'sharps';
-let sharp_notes = ['C', 'C♯', 'D', 'D♯', 'E', 'F', 'F♯', 'G', 'G♯', 'A', 'A♯', 'B'];
-let flat_notes = ['C', 'D♭', 'D', 'E♭', 'E', 'F', 'G♭', 'G', 'A♭', 'A', 'B♭', 'B'];
+let sharp_notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+let flat_notes = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
 
-let standard_tuning = ['E', 'A', 'D', 'G', 'B', 'E'];
+//let standard_tuning = ['E', 'A', 'D', 'G', 'B', 'E'];
 
 export default {
     name: "fretboard",
@@ -45,7 +45,10 @@ export default {
         number_of_strings:{
             type: Number,
             default: 6
-        }
+        },
+      standard_tuning: {
+          type: Array,
+}
     },
     data(){
         return{
@@ -75,7 +78,7 @@ export default {
             if(accidentals === 'flats') {
                 note_type = flat_notes;
             }
-            let index = (j + note_type.indexOf(standard_tuning[this.number_of_strings - i - 1])) % 12;
+            let index = (j + note_type.indexOf(this.standard_tuning[this.number_of_strings - i - 1])) % 12;
             return note_type[index];
         },
         // changes the type of accidentals according to the selected radio button

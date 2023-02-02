@@ -20,6 +20,25 @@ class Note {
             enharmonic[this.pitch] === enharmonic[other.pitch];
     }
 
+    plus() {
+        //works in place (need to check if it doesn't mess everything up)
+        let noteIndex = notes.indexOf(this.pitch);
+        noteIndex = (noteIndex + 1) % 12;
+        this.pitch = notes[noteIndex];
+        if (noteIndex === 0) this.octave = this.octave+1; //we reached a new octave (above)
+
+    }
+
+    minus() {
+        //works in place (need to check if it doesn't mess everything up)
+        let noteIndex = notes.indexOf(this.pitch);
+        noteIndex = (noteIndex - 1);
+        if (noteIndex < 0) noteIndex = 11;
+        this.pitch = notes[noteIndex];
+        if (noteIndex === 11) this.octave = this.octave-1; //we reached a new octave (below)
+
+    }
+
 }
 export {Note}
 
