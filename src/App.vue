@@ -107,9 +107,32 @@ function findPositions(fretboard, note, ignoreOctave = true) {
     return positions;
 }
 
-function getNote(position) {
+function getNote(position, chordNotes=null) {
     //Return the note corresponding to a given position on the fretboard
-    return fretboardMatrix[position.string][position.fret];
+
+    //Optional parameter chord is used because sometimes we want the returned note as
+    //it would appear inside a given chord, and getNote on its own may return a different but
+    //enhamornically equivalent note
+
+
+    let note = fretboardMatrix[position.string][position.fret];
+    if (chordNotes===null) return note;
+
+    if (chordNotes.find(x => x === note.pitch)!==undefined)
+    {
+      return note;
+    } else
+    {
+      //Find the correct enharmonic note that fits in the chord
+      for (let i = 0; i < chordNotes.length; i++) {
+        if (note.equalsIgnoreOctave(new Note(chordNotes[i], null)))
+            return new Note(chordNotes[i], note.octave);
+      }
+
+      //As a last check, if someone passes a note which is not contained inside chord notes
+      //here we return that note
+      return note;
+    }
 }
 
 
@@ -455,9 +478,24 @@ function findPositionsOnString(previousPositions, lastNote, minFret, chordNotes,
   //Zero fret must always be considered separately
   chordNotes = chordNotes.slice(); //shallow copy just to be sure
   //Check constraints, if present
-  if (constraints != null)
+  if (constraints !== null)
   {
     //Possibly some checks
+
+    if (constraints.noDoubleP4 && findIntervals(previousPositions, chordNotes).find(x => x.interval === '4P')!==undefined)
+    {
+      chordNotes = chordNotes.filter(note => Tonal.Interval.distance(lastNote.pitch, note)!=='4P')
+
+
+    }
+
+
+    if (constraints.dominant && previousPositions.filter(x => getNote(x).pitch === chordNotes[1]).length > 0)
+    {
+      chordNotes.splice(1, 1); //avoid doubling the third of a dominant function chord (it's the 7th)
+    }
+
+
   }
   let pos = {'string': string, 'fret': 0};
   let posNote = getNote(pos);
@@ -530,7 +568,7 @@ function recursivePositionSearch(previousPositions, lastNote, chordNotes, validP
             let newPositions = previousPositions.slice();
             newPositions.push(nextPosition); //add the new element
             //Again I use splice to create shallow copy, otherwise we will add other voicings together
-            recursivePositionSearch(newPositions, getNote(nextPosition), chordNotes, validPositions, constraints);
+            recursivePositionSearch(newPositions, getNote(nextPosition, chordNotes), chordNotes, validPositions, constraints);
         }
     }
 }
@@ -594,27 +632,27 @@ function computeDistance(previousVoicing, currentVoicing) {
 }
 
 
-function findInterval(pos1, pos2) {
-  return Tonal.Interval.distance(getNote(pos1).pitch+getNote(pos1).octave,
-      getNote(pos2).pitch + getNote(pos2).octave);
+function findInterval(pos1, pos2, chordNotes) {
+  return Tonal.Interval.distance(getNote(pos1, chordNotes).pitch+getNote(pos1, chordNotes).octave,
+      getNote(pos2, chordNotes).pitch + getNote(pos2, chordNotes).octave);
 }
 
 
-function findIntervals(voicing) {
+function findIntervals(voicing, chordNotes) {
   let intervals = [];
   for (let i = 0; i < voicing.length-1; i++) {
     let string1 = voicing[i].string;
     let string2 = voicing[i+1].string;
-    let interval = findInterval(voicing[i], voicing[i+1]);
+    let interval = findInterval(voicing[i], voicing[i+1], chordNotes);
     intervals.push({'string1': string1, 'string2': string2, 'interval': interval});
   }
   return intervals;
 }
 
-function countTritonesResolutions(voicing1, voicing2) {
+function countTritonesResolutions(voicing1, voicing2, chord1, chord2) {
   if (voicing1===null) return 0;
-  let intervals1 = findIntervals(voicing1);
-  let intervals2 = findIntervals(voicing2);
+  let intervals1 = findIntervals(voicing1, chord1.notes);
+  let intervals2 = findIntervals(voicing2, chord2.notes);
 
   let tritoneRes = 0;
 
@@ -623,6 +661,15 @@ function countTritonesResolutions(voicing1, voicing2) {
     let interval2 = intervals2.find(interv => interv.string1 === interval1.string1 && interv.string2 === interval1.string2);
     if (interval2!==undefined)
     {
+      //let condition = interval1.interval ==='4A' || interval1.interval === '5d';
+      // let fretDiff1 = Math.abs(voicing1.find(pos => pos.string === interval1.string1).fret -
+      //                 voicing2.find(pos => pos.string === interval1.string1).fret);
+      // let fretDiff2 = Math.abs(voicing1.find(pos => pos.string === interval1.string2).fret -
+      //     voicing2.find(pos => pos.string === interval1.string2).fret);
+      // condition = condition && (fretDiff1 ===1) && (fretDiff2 ===1);
+
+      //
+      //
       let condition = interval1.interval==='5d' && (interval2.interval ==='3M' || interval2.interval==='4P') ||
           interval1.interval==='4A' && (interval2.interval ==='5P' || interval2.interval==='6m');
 
@@ -636,7 +683,7 @@ function countTritonesResolutions(voicing1, voicing2) {
 
 }
 
-function pickBestVoicingSequence(chordsVoicings, previousVoicing, i) {
+function pickBestVoicingSequence(chordsVoicings, previousVoicing, i, previousChord) {
 
     //Will return the best voicing
     //(For now based only on highest number of common tones)
@@ -654,10 +701,10 @@ function pickBestVoicingSequence(chordsVoicings, previousVoicing, i) {
     let maxTritoneRes = -1;
     let bestSequence = [];
     for (let j = 0; j < currentVoicings.length; j++) {
-        let tritoneRes = countTritonesResolutions(previousVoicing, currentVoicings[j]);
+        let tritoneRes = countTritonesResolutions(previousVoicing, currentVoicings[j], previousChord, currentChord);
         let distance = computeDistance(previousVoicing, currentVoicings[j]);
         if (i < chordsVoicings.length - 1) {
-            let recursiveResult = pickBestVoicingSequence(chordsVoicings, currentVoicings[j], i + 1);
+            let recursiveResult = pickBestVoicingSequence(chordsVoicings, currentVoicings[j], i + 1, currentChord);
             distance = distance + recursiveResult.distance;
             tritoneRes = tritoneRes + recursiveResult.tritoneRes;
             if (tritoneRes > maxTritoneRes) {
@@ -698,6 +745,8 @@ function buildConstraints(chord, nextChord) {
 
   let constraint = {'dominant': false};
 
+  if (nextChord == null) return constraint;
+
   if (chord.type === 'dominant seventh' && Tonal.Interval.distance(chord.notes[0], nextChord.notes[0])==='4P')
   {
     constraint.dominant = true; //chord has dominant function
@@ -707,23 +756,49 @@ function buildConstraints(chord, nextChord) {
 
 }
 
-function getVoicingSequence(chords) {
+function addInversionConstraints(constraints, chord, inversion) {
+
+  //Assume constraints was already initialized
+
+  constraints.noDoubleP4 = inversion === 2 || inversion === 1;
+
+  return constraints;
+}
+
+function getVoicingSequence(chords, allowInversions = true) {
 
     let chordsVoicings = [];
 
     //I added support for constraints but we are not using them now
     for (let i = 0; i < chords.length; i++) {
       let constraints = null;
-      // if (i < chords.length-1)
-      // {
-      //   constraints = buildConstraints(chords[i], chords[i+1]);
-      // }
+      let inversion = 0;
+      if (i < chords.length-1)
+      {
+        constraints = buildConstraints(chords[i], chords[i+1]);
+      } else {
+        constraints = buildConstraints(chords[i], null)
+      }
       let chordVoicings = findVoicings(chords[i], fretboardMatrix, 0, constraints);
       sortVoicings(chordVoicings); //Sort voicings from highest to lowest priority
       //Uncomment next line to keep only the first n voicings in case the algorithm is really slow
       //(which might happen for 6 or more chords sequences. But it's not so common after implementation of
       //the in-depth feasibility check)
       chordVoicings = chordVoicings.slice(0, 10);
+
+      //if inversions are allowed, add them
+      if (allowInversions && i > 0) {
+        for (inversion = 1; inversion < 3; inversion++) {
+          constraints = addInversionConstraints(constraints, chords[i], inversion);
+          let chordVoicingsInverted = findVoicings(chords[i], fretboardMatrix, inversion, constraints);
+          sortVoicings(chordVoicingsInverted);
+          chordVoicingsInverted = chordVoicingsInverted.slice(0, 10);
+          chordVoicingsInverted = chordVoicingsInverted.filter(voicing => checkFeasible(voicing));
+          chordVoicings = chordVoicings.concat(chordVoicingsInverted);
+        }
+      }
+
+
       //In-depth feasibility check (considering fingering)
       chordVoicings = chordVoicings.filter(voicing => checkFeasible(voicing));
 
@@ -784,7 +859,7 @@ export default {
             me.stop()
             let data = me.data
             let chordArray = data.chordsSelect.map((v) => {
-                return Tonal.Chord.getChord(v.name, v.note)
+                return Tonal.Chord.getChord(v.name, v.note, v.note)
             })
             let voicingSequence = getVoicingSequence(chordArray).sequence;
 
