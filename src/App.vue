@@ -4,7 +4,7 @@
             <div class="chords-container overflow-x-scroll">
                 <div class="chords-container-sub clearfix">
                     <div v-for="(chord,index) in data.chordsSelect" class="chord-select-container">
-                        <h5>Chord {{index+1}}</h5>
+                        <h5 :class="chordHighlightClass(index)">Chord {{index+1}}</h5>
                         <div class="input-group mb-3" >
                             <div class="input-group-prepend">
                                 <label class="input-group-text" for="chord-select">Type</label>
@@ -60,19 +60,20 @@
                 <button class="btn btn-primary tuning" data-toggle="popover" data-content="to do">Tuning</button>
             </div>
             <FretboardEL v-show="isFretboardView()" :position="data.dots"></FretboardEL>
-            <Tab v-show="!isFretboardView()" :position="data.tab" v-if="data.dots.length"></Tab>
+            <Tab v-show="!isFretboardView()" :playing="data.playing" :position="data.tab" v-if="data.dots.length"></Tab>
         </div>
         <figure id="fretboard"></figure>
         <div id="output"></div>
     </div>
 </template>
 <script>
-import * as Tonal from 'tonal';
-import {Note, notes} from "./components/note";
-import {enableMidi} from "./components/midi";
-import {playChord, stopChord} from "./components/sound";
+import * as Tonal from 'tonal'
+import {Note, notes} from "./components/note"
+import {enableMidi} from "./components/midi"
+import {playChord, stopChord} from "./components/sound"
 import FretboardEL from "./components/fretboard.vue"
 import Tab from "./components/tablature.vue"
+import {highlightTab} from "./components/tablature.vue";
 
 /* For debugging in webstorm: CTRL+SHIFT+CLICK on the localhost link after
 npm run dev
@@ -814,6 +815,7 @@ function getVoicingSequence(chords, allowInversions = true) {
 export default {
     data() {
         let data = {
+            playingPosition:-1,
             playing:false,
             notes,
             allChords,
@@ -833,6 +835,13 @@ export default {
     mounted() {
         $('[data-toggle="popover"]').popover()
     },
+    watch:{
+        'data.playing'(val){
+            let me = this
+            if(val===false)me.data.playingPosition = -1
+
+        }
+    },
     computed:{
         rootStyle(){
             return {
@@ -841,6 +850,11 @@ export default {
         },
     },
     methods: {
+        chordHighlightClass(chordIndex){
+            let me = this
+            if(me.data.playingPosition===-1) return
+            if(me.data.playingPosition===chordIndex)return {'highlight':true}
+        },
         isFretboardView(){
             return this.data.displayView ==='Fretboard'
         },
@@ -900,9 +914,11 @@ export default {
                 if(!data.playing){
                     return
                 }
+                data.playingPosition = k
                 data.dots = voicingSequence[k].map(x => {
                     return {'string': x['string'] + 1, 'fret': x['fret']}
                 });
+                highlightTab(k);
                 let foundNotes = [];
                 for (let i = 0; i < voicingSequence[k].length; i++) {
                     foundNotes.push(getNote(voicingSequence[k][i]));
@@ -1143,6 +1159,10 @@ export default {
     background: #fff;
     width: @stop-width;
     height: @stop-width;
+}
+.chord-select-container .highlight{
+    color:#ffe581;
+
 }
 
 </style>
