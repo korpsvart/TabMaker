@@ -28,23 +28,31 @@ export default {
         </div>
 
         <div class="modal-body">
-          <slot name="body">default body</slot>
-        </div>
+          <slot name="body">
 
-        <li v-for="item in tuning">
-          {{ item.pitch + " " + item.octave }}
-          <button @click="decrement(item)">-</button>
-          <button @click="increment(item)">+</button>
-        </li>
+          <li class="tuning-list" v-for="item in tuning">
+            <div class="tuning-item-container">
+            <button class="up-down-button" @click="decrement(item)">
+              <img src="../assets/arrow.svg" alt="submit" />
+            </button>
+              <div class="note-name">{{ item.pitch + " " + item.octave }}</div>
+            <button class="up-down-button" style="transform: scaleY(-1);" @click="increment(item)">
+              <img src="../assets/arrow.svg" alt="submit" />
+            </button>
+            </div>
+          </li>
+
+          </slot>
+
+        </div>
 
 
         <div class="modal-footer">
           <slot name="footer">
-            default footer
             <button
                 class="modal-default-button"
                 @click="$emit('close', this.tuning)"
-            >OK</button>
+            >Apply</button>
           </slot>
         </div>
       </div>
@@ -82,10 +90,34 @@ export default {
 
 .modal-body {
   margin: 20px 0;
+  left:50%;
+  transform: translateX(-50%);
 }
 
 .modal-default-button {
   float: right;
+}
+
+.up-down-button {
+  width: 33%;
+  margin: 5px 10px;
+  border-radius: 3px;
+
+}
+
+.tuning-list {
+  list-style-type: none;
+}
+
+.tuning-item-container {
+  display:flex;
+  width: 80%;
+}
+
+.note-name {
+  width: 33%;
+  text-align: center;
+  text-align-all: ;
 }
 
 /*
