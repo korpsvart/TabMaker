@@ -117,7 +117,6 @@ export default {
 .note-name {
   width: 33%;
   text-align: center;
-  text-align-all: ;
 }
 
 /*
