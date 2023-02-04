@@ -2,7 +2,7 @@
   <div class="tab-container" :style="rootStyle">
     <div class="tab">
 <!--        bar -->
-      <div v-for="t in tab" :class="t.className">
+      <div v-for="(t,index) in tab" class="bar" :class="chordHighlightClass(index)">
           <div v-for="line in t.children" :class="line.className">
               {{line.txt}}
               <div v-for="space in line.children" :class="space.className">{{space.txt}}</div>
@@ -19,11 +19,14 @@ let TAB = ['T', 'A', 'B'];
 export default {
   name: "tab",
   props:{
+      playingPosition:{
+          type:Number
+      },
       position: {
           type: Array,
       },
-      playing: {
-          type: Boolean,
+      playingStatus: {
+          type: String,
       },
       number_of_bars: {
           type: Number,
@@ -51,13 +54,14 @@ export default {
     position() {
       this.tab = this.createTabData()
     },
-    playing(val){
-        if(val===false){
-            stopTabHighlight()
-        }
-    }
   },
+
   methods:{
+      chordHighlightClass(index){
+          let me = this
+          if(me.playingStatus==='stop')return
+          if(me.playingPosition===index-1)return {'highlight':true}
+      },
     noteSet(chord, j) {
       let note = {className: [], children: [], txt: ''}
       note.className.push('note')
@@ -116,21 +120,6 @@ export default {
     }
   }
 }
-
-function highlightTab(sel, playTime) {
-    $('.bar').removeClass('highlight')
-    $('.bar').eq(sel+1).addClass('highlight')
-}
-
-function stopTabHighlight(){
-    $('.bar').removeClass('highlight')
-}
-
-function stopTab(){
-  stopTabHighlight();
-}
-
-export{highlightTab}
 
 </script>
 
@@ -243,7 +232,7 @@ export{highlightTab}
 .bar.highlight{
     //background: #FFE4B5;
     .note,.space,.selector{
-        background: #FFE4B5;
+        background: #ffe581;
     }
 }
 </style>

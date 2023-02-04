@@ -46,7 +46,7 @@
                             <span></span>
                         </a>
                     </div>
-                    <div class="stop-container" @click="stop">
+                    <div class="stop-container" @click="pause">
                         <div class="music-play-stop"></div>
                     </div>
                 </div>
@@ -71,7 +71,7 @@
             <FretboardEL v-show="isFretboardView()" :position="data.dots" :standard_tuning="this.data.tuning.map(x => x.pitch).reverse()">
 
             </FretboardEL>
-            <Tab v-show="!isFretboardView()" :playing="data.playing" :position="data.tab" v-if="data.dots.length"></Tab>
+            <Tab v-show="!isFretboardView()" :playingStatus="playingStatus" :playingPosition="data.playingPosition" :position="data.tab" v-if="data.dots.length"></Tab>
         </div>
         <figure id="fretboard"></figure>
         <div id="output"></div>
@@ -85,7 +85,6 @@ import {playChord, stopChord} from "./components/sound"
 import FretboardEL from "./components/fretboard.vue"
 import Tab from "./components/tablature.vue"
 import Tuning from './components/tuning.vue'
-import {highlightTab} from "./components/tablature.vue";
 
 /* For debugging in webstorm: CTRL+SHIFT+CLICK on the localhost link after
 npm run dev
@@ -423,7 +422,7 @@ function addInversionConstraints(constraints, chord, inversion) {
 export default {
     data() {
         let data = {
-            playingPosition:-1,
+            playingPosition:0,
             tuning:[new Note('E', 4),
               new Note('B', 3),
               new Note('G', 3),
@@ -457,14 +456,20 @@ export default {
     mounted() {
         $('[data-toggle="popover"]').popover()
     },
-    watch:{
-        'data.playing'(val){
-            let me = this
-            if(val===false)me.data.playingPosition = -1
-
-        }
-    },
+    // watch:{
+    //     'data.playing'(val){
+    //         let me = this
+    //         if(val===false)me.data.playingPosition = -1
+    //     }
+    // },
     computed:{
+        playingStatus(){
+            let me = this
+            let data = me.data
+            if(data.playing) return 'playing'
+            if(data.pause) return 'pausing'
+            if(!data.pause&&!data.playing) return 'stop'
+        },
         rootStyle(){
             return {
                 '--number_of_chords': this.data.chordsSelect.length
@@ -478,7 +483,7 @@ export default {
         },
         chordHighlightClass(chordIndex){
             let me = this
-            if(me.data.playingPosition===-1) return
+            if(me.playingStatus==='stop')return
             if(me.data.playingPosition===chordIndex)return {'highlight':true}
         },
         isFretboardView(){
@@ -534,14 +539,24 @@ export default {
                 })
             })
         },
+        pause(){
+            let me = this
+            me.data.playing = false
+            me.data.pause = true
+            // stop the playing sound
+            stopChord()
+        },
         stop(){
             let me = this
             if(!me.data.playing){
                 return
             }
+            // set stop status
             me.data.playing = false
+            me.data.pause = false
             // stop the playing sound
             stopChord()
+            me.data.playingPosition = 0
             // reset fretboard view
             me.data.dots = me.data.backupDots
         },
@@ -552,23 +567,23 @@ export default {
                 return Tonal.Chord.getChord(v.name, v.note)
             })
             data.playing = true;
+            data.pause = false;
             let voicingSequence = this.getVoicingSequence(chordArray).sequence;
-            for(let k = 0; k < voicingSequence.length; k++) {
+            for(let k = me.data.playingPosition||0; k < voicingSequence.length; k++) {
                 if(!data.playing){
                     return
                 }
-                data.playingPosition = k
+                data.playingPosition = k;
                 data.dots = voicingSequence[k].map(x => {
                     return {'string': x['string'] + 1, 'fret': x['fret']}
                 });
-                highlightTab(k);
                 let foundNotes = [];
                 for (let i = 0; i < voicingSequence[k].length; i++) {
                     foundNotes.push(this.getNote(voicingSequence[k][i]));
                 }
                 await playChord(foundNotes, voicingSequence[k]);
                 if(k+1===voicingSequence.length){
-                    data.playing = false;
+                    me.stop()
                 }
             }
         },
