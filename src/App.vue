@@ -3,9 +3,9 @@
         <div class="card submit-container" >
             <div class="chords-container overflow-x-scroll">
                 <div class="chords-container-sub clearfix">
-                    <div v-for="(chord,index) in data.chordsSelect" class="chord-select-container">
+                    <div v-for="(chord,index) in data.chordsSelect" class="chord-select-container" :class="chordHighlightClass(index)">
                         <img @click="deleteChord(index)" class="chord-delete" src="@/assets/close.svg">
-                        <h5 :class="chordHighlightClass(index)">Chord {{index+1}}</h5>
+                        <h5 >Chord {{index+1}}</h5>
                         <div class="input-group mb-3" >
                             <div class="input-group-prepend">
                                 <label class="input-group-text" for="chord-select">Type</label>
@@ -1222,9 +1222,9 @@ export default {
     width: @stop-width;
     height: @stop-width;
 }
-.chord-select-container .highlight{
-    color:#ffe581;
-
+.chord-select-container.highlight{
+    border: 1px solid #ffe581;
+    background: #ffe581;
 }
 .chord-delete{
     width: 20px;
