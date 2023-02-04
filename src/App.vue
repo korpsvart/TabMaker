@@ -4,6 +4,7 @@
             <div class="chords-container overflow-x-scroll">
                 <div class="chords-container-sub clearfix">
                     <div v-for="(chord,index) in data.chordsSelect" class="chord-select-container">
+                        <img @click="deleteChord(index)" class="chord-delete" src="@/assets/close.svg">
                         <h5 :class="chordHighlightClass(index)">Chord {{index+1}}</h5>
                         <div class="input-group mb-3" >
                             <div class="input-group-prepend">
@@ -471,6 +472,10 @@ export default {
         },
     },
     methods: {
+        deleteChord(index){
+            let me = this;
+            me.data.chordsSelect.splice(index,1)
+        },
         chordHighlightClass(chordIndex){
             let me = this
             if(me.data.playingPosition===-1) return
@@ -1011,14 +1016,18 @@ export default {
     position: relative;
     width: 100%;
     overflow-x: auto;
+    padding: 20px 0;
     .chords-container-sub{
         position: relative;
-        width: calc( 220px * var(--number_of_chords) + 110px );
+        width: calc( 300px * var(--number_of_chords) + 110px );
     }
     .chord-select-container{
-        margin: 10px;
+        padding:15px 25px;
+        margin: 0 15px;
         float: left;
-        width: 200px;
+        width: 250px;
+        border:1px solid #ced4da;
+        border-radius: 5px;
     }
 }
 .add-container{
@@ -1089,7 +1098,8 @@ export default {
     position: relative;
     //left: 50%;
     //margin-left: -100px;
-    margin:10px;
+    margin:15px;
+    margin-top:0;
 }
 .music-control-container{
     position: absolute;
@@ -1216,5 +1226,14 @@ export default {
     color:#ffe581;
 
 }
-
+.chord-delete{
+    width: 20px;
+    height: 20px;
+    position: absolute;
+    right: 10px;
+    top:10px;
+    &:hover{
+        cursor: pointer;
+    }
+}
 </style>
