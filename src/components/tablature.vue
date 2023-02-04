@@ -65,7 +65,7 @@ export default {
     noteSet(chord, j) {
       let note = {className: [], children: [], txt: ''}
       note.className.push('note')
-      if(chord.some(x => x.string === j + 1)) {
+      if(chord&&chord.some(x => x.string === j + 1)) {
         let s = chord.findIndex(x => x.string === j + 1)
         note.txt += chord[s].fret
       }

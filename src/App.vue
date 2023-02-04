@@ -556,19 +556,22 @@ export default {
             stopChord()
             me.data.playingPosition = 0
             // reset fretboard view
-            me.data.dots = me.data.backupDots
+            // me.data.dots = me.data.backupDots
         },
         async play() {
+            let id = Math.random()
             let me = this
             let data = me.data
+            data.playingID = id
             let chordArray = data.chordsSelect.map((v) => {
                 return Tonal.Chord.getChord(v.name, v.note)
             })
+            if(data.playing){return}
             data.playing = true;
             data.pause = false;
             let voicingSequence = this.getVoicingSequence(chordArray).sequence;
             for(let k = me.data.playingPosition||0; k < voicingSequence.length; k++) {
-                if(!data.playing){
+                if(!data.playing||data.playingID!==id){
                     return
                 }
                 data.playingPosition = k;
@@ -579,10 +582,10 @@ export default {
                 for (let i = 0; i < voicingSequence[k].length; i++) {
                     foundNotes.push(this.getNote(voicingSequence[k][i]));
                 }
-                await playChord(foundNotes, voicingSequence[k]);
-                if(k+1===voicingSequence.length){
-                    me.stop()
-                }
+                await playChord(foundNotes, voicingSequence[k],id);
+            }
+            if(data.playing&&data.playingID===id){
+                me.stop()
             }
         },
 

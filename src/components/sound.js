@@ -2,20 +2,21 @@ import {AudioSynth} from 'keithwhor-audiosynth-packaged/audiosynth.js';
 import {vibrateString} from "@/components/fretboard.vue";
 import {sleep} from "@/components/utils";
 
-let synth = new AudioSynth;
-synth.setVolume(0.18);
-
 let playTime = 2;
 let arpCoeff = 500;
 let strumCoeff = 1200;
-
 let playingStatus = false
+let id;
 // Function which plays first an arpeggio and then a strum of the chord found
-async function playChord(chordNotes, positions) {
+async function playChord(chordNotes, positions,idNum) {
+    id = idNum
+    let synth = new AudioSynth;
+    synth.setVolume(0.18);
+
     playingStatus = true
     // Arpeggio part
     for (let i = 0; i < chordNotes.length; i++) {
-        if(!playingStatus){
+        if(!playingStatus||idNum!==id){
             return
         }
         synth.play('acoustic', chordNotes[i].pitch, chordNotes[i].octave, playTime);
@@ -26,7 +27,7 @@ async function playChord(chordNotes, positions) {
     // Strumming part
     await sleep(playTime*250)
     for (let i = 0; i < chordNotes.length; i++) {
-        if(!playingStatus){
+        if(!playingStatus||idNum!==id){
             return
         }
         synth.play('acoustic', chordNotes[i].pitch, chordNotes[i].octave, 1.5 * playTime);
