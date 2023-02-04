@@ -46,8 +46,9 @@
                             <span></span>
                         </a>
                     </div>
-                    <div class="stop-container" @click="pause">
-                        <div class="music-play-stop"></div>
+                    <div class="pause-container" @click="pause">
+                        <div class="music-pause-line"></div>
+                        <div class="music-pause-line-2"></div>
                     </div>
                 </div>
                 <div class="input-group mb-3 display-view-select">
@@ -1210,7 +1211,7 @@ export default {
 @stop-container-width:80px;
 @stop-width:30px;
 @stop-margin:-15px;
-.stop-container{
+.pause-container{
     position: absolute;
     left:0;
     cursor: pointer;
@@ -1220,19 +1221,28 @@ export default {
     height: @stop-container-width;
     border-radius: 50%;
     background: #000;
+    z-index: 10;
     &:hover{
         opacity: .8;
     }
 }
-.music-play-stop{
-    position: relative;
+.music-pause-line{
+    position: absolute;
     top:50%;
-    margin-top:@stop-margin;
-    left: 50%;
-    margin-left: @stop-margin;
+    margin-top:-17.5px;
+    left:25px;
     background: #fff;
-    width: @stop-width;
-    height: @stop-width;
+    width: 10px;
+    height: 35px;
+}
+.music-pause-line-2{
+    position: absolute;
+    top:50%;
+    margin-top:-17.5px;
+    right: 25px;
+    background: #fff;
+    width: 10px;
+    height: 35px;
 }
 .chord-select-container.highlight{
     border: 1px solid #ffe581;
