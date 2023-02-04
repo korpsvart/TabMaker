@@ -548,9 +548,6 @@ export default {
         },
         stop(){
             let me = this
-            if(!me.data.playing){
-                return
-            }
             // set stop status
             me.data.playing = false
             me.data.pause = false
