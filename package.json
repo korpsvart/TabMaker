@@ -7,6 +7,7 @@
     "preview": "vite preview --port 4173"
   },
   "dependencies": {
+    "@kyvg/vue3-notification": "^2.8.0",
     "@moonwave99/fretboard.js": "^0.2.13",
     "keithwhor-audiosynth-packaged": "1.0.4",
     "tonal": "^4.6.10",

@@ -1,5 +1,14 @@
 <template>
     <div class="app-container" :style="rootStyle">
+        <notifications position="top right">
+            <template #body="props">
+                <div class="my-notification">
+                    <div :class="[props.item.title]" class="alert d-flex align-items-center" role="alert">
+                        <p>{{ props.item.text }}</p>
+                    </div>
+                </div>
+            </template>
+        </notifications>
         <div class="card submit-container" >
             <div class="chords-container overflow-x-scroll">
                 <div class="chords-container-sub clearfix">
@@ -35,6 +44,7 @@
             </div>
             <div class="btn-group action-group">
                 <button class="btn btn-primary"  @click="submit">Submit</button>
+                <img @click="share" class="share-btn" src="@/assets/share.svg">
                 <!--            <button class="btn btn-info" @click="midi">enable midi</button>-->
             </div>
         </div>
@@ -455,14 +465,34 @@ export default {
         Tuning
     },
     mounted() {
+        let me = this;
+        // read url info
+        let search = location.search.split('=')[1]
+        if(search){
+           // set chord select
+            let passedData;
+            try{
+                passedData = JSON.parse(decodeURIComponent(search))
+            }catch (err){
+                console.log(err)
+            }
+            if(passedData){
+                me.data.chordsSelect = passedData
+                console.log(passedData)
+            }
+        }
+        me.genURL()
         $('[data-toggle="popover"]').popover()
     },
-    // watch:{
-    //     'data.playing'(val){
-    //         let me = this
-    //         if(val===false)me.data.playingPosition = -1
-    //     }
-    // },
+    watch:{
+        'data.chordsSelect':{
+            handler() {
+                let me = this
+                me.genURL()
+            },
+            deep: true
+        }
+    },
     computed:{
         playingStatus(){
             let me = this
@@ -478,6 +508,34 @@ export default {
         },
     },
     methods: {
+        // type: success, warning, danger
+        notify(txt,type='success'){
+            let map = {
+                success:'alert-success',
+                warning:'alert-warning',
+                danger:'alert-danger'
+            }
+            let me = this;
+            me.$notify({
+                // trick: just wrap title as class to template
+                title:map[type],
+                text: txt,
+            });
+        },
+        genURL(){
+            let me = this
+            let arrStr = encodeURIComponent(JSON.stringify(me.data.chordsSelect))
+            window.history.replaceState('', '', location.origin + location.pathname + `?chords=${arrStr}`);
+        },
+        share(){
+            let text = 'URL copied to clipboard';
+            let me = this
+            navigator.clipboard.writeText(location.href).then(function() {
+                me.notify(text)
+            }, function(err) {
+                console.error('Async: Could not copy text: ', err);
+            });
+        },
         deleteChord(index){
             let me = this;
             me.data.chordsSelect.splice(index,1)
@@ -1261,4 +1319,13 @@ export default {
         cursor: pointer;
     }
 }
+.share-btn{
+    position: relative;
+    top:5px;
+    margin-left: 15px;
+    cursor: pointer;
+    width: 30px;
+    height: 30px;
+}
+
 </style>
