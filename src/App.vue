@@ -60,10 +60,10 @@
                         <div class="music-pause-line"></div>
                         <div class="music-pause-line-2"></div>
                     </div>
-                    <div class="skip-forward">
+                    <div class="skip-forward" @click="skip(true)">
                         <img class="skip-forward-btn" src="@/assets/skip-forward.svg"/>
                     </div>
-                    <div class="skip-back">
+                    <div class="skip-back" @click="skip(false)">
                         <img class="skip-back-btn" src="@/assets/skip-forward.svg"/>
                     </div>
                 </div>
@@ -602,6 +602,30 @@ export default {
                     return {'string': note['string'] + 1, 'fret': note['fret']}
                 })
             })
+        },
+        skip(forward=false){
+            let me = this
+            let data = me.data
+            let index = data.playingPosition
+            let len = data.tab.length
+            if(forward){
+                index+=1
+            }
+            else {
+                index-=1
+            }
+            // range loop
+            if(index<0){
+                index+=len
+            }
+            if(index+1>len){
+                index-=len
+            }
+            if(me.playingStatus!=='stop'){
+                me.stop()
+            }
+            data.playingPosition = index
+            me.play()
         },
         pause(){
             let me = this
@@ -1342,6 +1366,7 @@ export default {
     position: relative;
     width: 50px;
     height: 50px;
+    color:red;
 }
 .skip-back{
     cursor: pointer;

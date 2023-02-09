@@ -115,7 +115,6 @@ export default {
         }
         arr.push(bar)
       }
-      console.log(arr)
       return arr
     }
   }
