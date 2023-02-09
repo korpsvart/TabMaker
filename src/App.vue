@@ -60,6 +60,12 @@
                         <div class="music-pause-line"></div>
                         <div class="music-pause-line-2"></div>
                     </div>
+                    <div class="skip-forward">
+                        <img class="skip-forward-btn" src="@/assets/skip-forward.svg"/>
+                    </div>
+                    <div class="skip-back">
+                        <img class="skip-back-btn" src="@/assets/skip-forward.svg"/>
+                    </div>
                 </div>
                 <div class="input-group mb-3 display-view-select">
                     <div class="input-group-prepend">
@@ -1326,5 +1332,24 @@ export default {
     width: 30px;
     height: 30px;
 }
-
+.skip-forward{
+    cursor: pointer;
+    position: absolute;
+    top:-40px;
+    right: -70px;
+}
+.skip-forward-btn,.skip-back-btn{
+    position: relative;
+    width: 50px;
+    height: 50px;
+}
+.skip-back{
+    cursor: pointer;
+    position: absolute;
+    top:-40px;
+    left: -70px;
+    .skip-back-btn{
+        rotate: 180deg;
+    }
+}
 </style>
