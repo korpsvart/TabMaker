@@ -478,7 +478,6 @@ export default {
             }
             if(passedData){
                 me.data.chordsSelect = passedData
-                console.log(passedData)
             }
         }
         me.genURL()
