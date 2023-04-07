@@ -5,6 +5,8 @@ import {sleep} from "@/components/utils";
 let playTime = 2;
 let arpCoeff = 500;
 let strumCoeff = 1200;
+let speed = 2;
+let playArpeggio = false;
 let playingStatus = false
 let id;
 // Function which plays first an arpeggio and then a strum of the chord found
@@ -15,17 +17,21 @@ async function playChord(chordNotes, positions,idNum) {
 
     playingStatus = true
     // Arpeggio part
-    for (let i = 0; i < chordNotes.length; i++) {
-        if(!playingStatus||idNum!==id){
-            return
+    if (playArpeggio)
+    {
+        for (let i = 0; i < chordNotes.length; i++) {
+            if(!playingStatus||idNum!==id){
+                return
+            }
+            synth.play('acoustic', chordNotes[i].pitch, chordNotes[i].octave, playTime);
+            let str = positions[i].string;
+            vibrateString(str, playTime, arpCoeff);
+            await sleep(600/speed)
         }
-        synth.play('acoustic', chordNotes[i].pitch, chordNotes[i].octave, playTime);
-        let str = positions[i].string;
-        vibrateString(str, playTime, arpCoeff);
-        await sleep(600)
     }
+
     // Strumming part
-    await sleep(playTime*250)
+    await sleep(playTime*250/speed)
     for (let i = 0; i < chordNotes.length; i++) {
         if(!playingStatus||idNum!==id){
             return
@@ -35,7 +41,7 @@ async function playChord(chordNotes, positions,idNum) {
         vibrateString(str, playTime, strumCoeff);
         await sleep(62)
     }
-    await sleep(3200)
+    await sleep(3200/speed)
 }
 
 function stopChordAnimation(){

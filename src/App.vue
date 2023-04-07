@@ -569,6 +569,11 @@ export default {
           let me = this
           me.data.tuning = newTuning;
           me.data.fretboardMatrix = createFretboard(numStrings, numFrets, me.data.tuning);
+          if (me.voicingSequence !== null)
+          {
+            //Regenerate voicing sequence
+            me.submit();
+          }
 
         },
 
