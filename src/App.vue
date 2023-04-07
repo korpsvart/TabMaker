@@ -457,6 +457,7 @@ export default {
             showTuning:false,
             allChords,
             chordsSelect: [{name: 'm7', note: 'D'}, {name: '7', note: 'G'}, {name: 'maj7', note: 'C'}],
+            voicingSequence: null,
             dots: [],
             tab:[],
             backupDots:[],
@@ -587,17 +588,17 @@ export default {
             let chordArray = data.chordsSelect.map((v) => {
                 return Tonal.Chord.getChord(v.name, v.note, v.note)
             })
-            let voicingSequence = this.getVoicingSequence(chordArray).sequence;
+            me.voicingSequence = this.getVoicingSequence(chordArray).sequence;
 
             function firstVoicing() {
-                data.dots = voicingSequence[0].map(x => {
+                data.dots = me.voicingSequence[0].map(x => {
                     return {'string': x['string'] + 1, 'fret': x['fret']}
               })
             }
             firstVoicing();
             data.backupDots = [...me.data.dots]
             // gen array for tab view
-            data.tab = voicingSequence.map((chord)=>{
+            data.tab = me.voicingSequence.map((chord)=>{
                 return chord.map(note=>{
                     return {'string': note['string'] + 1, 'fret': note['fret']}
                 })
@@ -656,20 +657,22 @@ export default {
             if(data.playing){return}
             data.playing = true;
             data.pause = false;
-            let voicingSequence = this.getVoicingSequence(chordArray).sequence;
-            for(let k = me.data.playingPosition||0; k < voicingSequence.length; k++) {
+            //Generate voicing sequence if it wasn't already
+            if (me.voicingSequence===null)
+              me.voicingSequence = this.getVoicingSequence(chordArray).sequence;
+            for(let k = me.data.playingPosition||0; k < me.voicingSequence.length; k++) {
                 if(!data.playing||data.playingID!==id){
                     return
                 }
                 data.playingPosition = k;
-                data.dots = voicingSequence[k].map(x => {
+                data.dots = me.voicingSequence[k].map(x => {
                     return {'string': x['string'] + 1, 'fret': x['fret']}
                 });
                 let foundNotes = [];
-                for (let i = 0; i < voicingSequence[k].length; i++) {
-                    foundNotes.push(this.getNote(voicingSequence[k][i]));
+                for (let i = 0; i < me.voicingSequence[k].length; i++) {
+                    foundNotes.push(this.getNote(me.voicingSequence[k][i]));
                 }
-                await playChord(foundNotes, voicingSequence[k],id);
+                await playChord(foundNotes, me.voicingSequence[k],id);
             }
             if(data.playing&&data.playingID===id){
                 me.stop()
@@ -695,7 +698,7 @@ export default {
     //Uncomment next line to keep only the first n voicings in case the algorithm is really slow
     //(which might happen for 6 or more chords sequences. But it's not so common after implementation of
     //the in-depth feasibility check)
-    chordVoicings = chordVoicings.slice(0, 10);
+    chordVoicings = chordVoicings.slice(0, 5);
 
     //if inversions are allowed, add them
     if (allowInversions && i > 0) {
@@ -703,7 +706,7 @@ export default {
         constraints = addInversionConstraints(constraints, chords[i], inversion);
         let chordVoicingsInverted = this.findVoicings(chords[i], this.data.fretboardMatrix, inversion, constraints);
         this.sortVoicings(chordVoicingsInverted);
-        chordVoicingsInverted = chordVoicingsInverted.slice(0, 10);
+        chordVoicingsInverted = chordVoicingsInverted.slice(0, 5);
         chordVoicingsInverted = chordVoicingsInverted.filter(voicing => checkFeasible(voicing));
         chordVoicings = chordVoicings.concat(chordVoicingsInverted);
       }
