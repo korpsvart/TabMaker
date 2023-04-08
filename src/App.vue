@@ -88,7 +88,8 @@
             <FretboardEL v-show="isFretboardView()" :position="data.dots" :standard_tuning="this.data.tuning.map(x => x.pitch).reverse()">
 
             </FretboardEL>
-            <Tab v-show="!isFretboardView()" :playingStatus="playingStatus" :playingPosition="data.playingPosition" :position="data.tab" v-if="data.dots.length"></Tab>
+            <Tab v-show="!isFretboardView()" :playingStatus="playingStatus" :playingPosition="data.playingPosition" :position="data.tab" v-if="data.dots.length"
+            :number_of_bars="data.tab.length+1"></Tab>
         </div>
         <figure id="fretboard"></figure>
         <div id="output"></div>
@@ -601,6 +602,7 @@ export default {
             })
             me.voicingSequence = this.getVoicingSequence(chordArray, this.recursiveDepth);
             console.log(me.voicingSequence);
+
 
             function firstVoicing() {
                 data.dots = me.voicingSequence[0].map(x => {
