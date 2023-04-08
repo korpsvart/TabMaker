@@ -102,6 +102,7 @@ import {playChord, stopChord} from "./components/sound"
 import FretboardEL from "./components/fretboard.vue"
 import Tab from "./components/tablature.vue"
 import Tuning from './components/tuning.vue'
+import {debug} from "tone";
 
 /* For debugging in webstorm: CTRL+SHIFT+CLICK on the localhost link after
 npm run dev
@@ -460,6 +461,11 @@ export default {
             voicingSequence: null,
             dots: [],
             tab:[],
+            //Recursive depth bounds the max amount of previous chords
+            //Which are considered when picking the best sequence
+            //Increasing this number could lead to better sequences but also drastically worsens performances.
+            //Furthermore, it's unlikely that values above 4 will lead to any change in the resulting voicing
+            recursiveDepth: 4,
             backupDots:[],
             displayView:'Fretboard',
             displayViewOptions:['Fretboard','Tab'],
@@ -593,7 +599,8 @@ export default {
             let chordArray = data.chordsSelect.map((v) => {
                 return Tonal.Chord.getChord(v.name, v.note, v.note)
             })
-            me.voicingSequence = this.getVoicingSequence(chordArray).sequence;
+            me.voicingSequence = this.getVoicingSequence(chordArray, this.recursiveDepth);
+            console.log(me.voicingSequence);
 
             function firstVoicing() {
                 data.dots = me.voicingSequence[0].map(x => {
@@ -664,7 +671,7 @@ export default {
             data.pause = false;
             //Generate voicing sequence if it wasn't already
             if (me.voicingSequence===null)
-              me.voicingSequence = this.getVoicingSequence(chordArray).sequence;
+              me.voicingSequence = this.getVoicingSequence(chordArray, me.recursiveDepth).sequence;
             for(let k = me.data.playingPosition||0; k < me.voicingSequence.length; k++) {
                 if(!data.playing||data.playingID!==id){
                     return
@@ -684,7 +691,7 @@ export default {
             }
         },
 
-      getVoicingSequence(chords, allowInversions = true) {
+      getVoicingSequence(chords, recursiveDepth = 4, allowInversions = true) {
 
   let chordsVoicings = [];
 
@@ -723,7 +730,8 @@ export default {
 
     chordsVoicings.push({'chord': chords[i], 'voicings': chordVoicings});
   }
-  let bestSequence = this.pickBestVoicingSequence(chordsVoicings, null, 0);
+  //let bestSequence = this.pickBestVoicingSequence(chordsVoicings, null, 0);
+        let bestSequence = this.pickBoundedVoicingSequence(chordsVoicings, recursiveDepth);
 
   return bestSequence;
 
@@ -1034,6 +1042,33 @@ export default {
   return tritoneRes;
 
 },
+
+
+      pickBoundedVoicingSequence(chordsVoicings, bound) {
+          let start = 0;
+          let bestSequence = [];
+          let previousVoicing = null;
+          let previousChord = null;
+          let chordsWindow = chordsVoicings.slice(start,start+bound);
+          let currentVoicings = null;
+          while (chordsWindow.length > 0){
+
+            currentVoicings = this.pickBestVoicingSequence(chordsWindow, previousVoicing, 0, previousChord).sequence;
+            console.log(currentVoicings);
+            bestSequence = bestSequence.concat(currentVoicings);
+            //Prepare next iteration
+            previousChord = chordsWindow[chordsWindow.length-1];
+            previousVoicing = currentVoicings[currentVoicings.length-1];
+            console.log(previousVoicing);
+            start = start + bound;
+            console.log(start);
+            chordsWindow = chordsVoicings.slice(start,start+bound);
+            console.log(chordsWindow);
+            console.log(bestSequence);
+          }
+          console.log(bestSequence);
+          return bestSequence;
+      },
 
  pickBestVoicingSequence(chordsVoicings, previousVoicing, i, previousChord) {
 
