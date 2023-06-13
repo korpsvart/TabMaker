@@ -44,6 +44,15 @@
             </div>
             <div class="btn-group action-group">
                 <button class="btn btn-primary"  @click="submit">Submit</button>
+                <button class="btn btn-primary" @click="data.showOptions=true">Options</button>
+                <Teleport to="body">
+                  <!-- use the modal component, pass in the prop -->
+                  <options :options=data.options :show="data.showOptions" @close="(newOptions) =>  {changeOptions(newOptions); data.showOptions = false;}">
+                    <template #header>
+                      <h3>Options</h3>
+                    </template>
+                  </options>
+                </Teleport>
                 <img @click="share" class="share-btn" src="@/assets/share.svg">
                 <!--            <button class="btn btn-info" @click="midi">enable midi</button>-->
             </div>
@@ -103,6 +112,7 @@ import {playChord, stopChord} from "./components/sound"
 import FretboardEL from "./components/fretboard.vue"
 import Tab from "./components/tablature.vue"
 import Tuning from './components/tuning.vue'
+import Options from './components/options.vue'
 import {debug} from "tone";
 
 /* For debugging in webstorm: CTRL+SHIFT+CLICK on the localhost link after
@@ -110,6 +120,12 @@ npm run dev
  */
 
 let allChords = Tonal.ChordType.symbols()
+//Current implementation only support 7th chords
+allChords = allChords.filter(chord => {let n = Tonal.Chord.getChord(chord, "C").notes.length; return n===3 || n===4;} );
+
+
+//Only keep at most 4 notes chords
+
 
 // let tuning = [new Note('E', 4),
 //     new Note('B', 3),
@@ -198,57 +214,6 @@ function canApplyBarre(position, frettedNotes) {
 
 }
 
-function checkFeasibleIntermediate(voicing, availableFingers, usedFingers)
-{
-
-  if (voicing.length === 0) return true;
-
-  if (availableFingers.length === 0) return false;
-
-  //Create a local shallow copy of voicing
-  let voicingTmp = voicing.slice();
-
-  let currentPos = voicingTmp.shift(); //also remove it from the voicing array
-  let currentFret = currentPos.fret;
-
-
-  //Check available fingers for this position
-  for (let j = 0; j < availableFingers.length; j++) {
-    let finger = availableFingers[j];
-    let usable = true;
-    for (let k = 0; k < usedFingers.length && usable; k++) {
-      //Check distance and check not crossing rule
-      let usedFinger = usedFingers[k].finger;
-      let usedFret = usedFingers[k].pos.fret;
-      let crossing = (finger-usedFinger)*(currentFret-usedFret) < 0; //if one grows and other decreases, they cross
-      let fingerDistance = Math.abs(finger-usedFinger);
-      let fretDistance = Math.abs(currentFret-usedFret);
-      usable = !crossing && fingerDistance >= fretDistance;
-    }
-    if (usable) {
-      //If usable, try using this finger
-      //(it means this finger is surely usable, however this might not be the correct choice.
-      //To know it for sure we must try fretting all notes. Hence all allowed combinations must be considered.)
-
-
-      //Shallow copy
-      let usedFingersTmp = usedFingers.slice();
-      let availableFingersTmp = availableFingers.slice();
-      //Add new finger
-      usedFingersTmp.push({'finger': finger, 'pos': currentPos});
-      //Remove from available fingers
-      availableFingersTmp.splice(j, 1);
-      //Recursive call
-      //Stop as soon as you find a feasible fingering
-      if (checkFeasibleIntermediate(voicingTmp, availableFingersTmp, usedFingersTmp)) return true;
-    }
-  }
-  //If no next finger led to a feasible fingering position
-  //(Or there were no more fingers available)
-  // then the chord is not feasible
-  return false;
-
-}
 
 function posEqual(pos1, pos2) {
 
@@ -256,97 +221,6 @@ function posEqual(pos1, pos2) {
 
 }
 
-function checkFeasible(voicing) {
-  //A more in-depth check to see if a voicing is actually feasible,
-  //taking into account the fingering
-
-  //The idea is as follows:
-  //1) Fingers cannot cross
-  //2) We will always play the min fret using index finger
-  // (this is a fair assumption, as in most cases were some "spontaneous" fingering may not follow this rule,
-  // we can still find an alternative feasible fingering which does follow this rule)
-  //3) Fret distance between fingers cannot be higher than "finger distance"
-  //(This is a more restrictive assumption. It works fairly well with major, minor and 7th chords but it makes
-  //many 9 chords impossible to play, since they naturally require at least a stretch of 2 frets for two consecutive
-  //fingers.
-  //TODO (difficult, mid priority): relax this assumption by allowing (in some contexts) a stretch of 2 frets
-
-
-  let voicingLocal = voicing.slice(); //shallow copy
-
-
-  let availableFingers = [1, 2, 3];
-  let usedFingers = [];
-
-  let frettedNotesCount = countFrettedNotes(voicing);
-  let isBarre = canApplyBarre(voicing, frettedNotesCount);
-
-  //Remove all open strings, as they don't need to be checked
-  voicingLocal = voicingLocal.filter(x => x.fret !== 0);
-
-  //If all strings are open (unlikely but check it), return true already
-  if (voicingLocal.length === 0) return true;
-
-  //Use index finger to play minimum non-zero fret
-  let minFret = getMinFret(voicingLocal);
-  //Take one string (doesn't matter which) having min fret
-  let indexPos = voicingLocal.find(pos => pos.fret === minFret);
-
-  //Add index finger to usedFingers structure
-  usedFingers.push({'finger': 0, 'pos': indexPos});
-
-
-  //Remove the position assigned to index
-  if (isBarre) {
-    //If it's a barre chord, then remove all the positions having fret = minFret
-    voicingLocal = voicingLocal.filter(pos => pos.fret !== minFret);
-  } else {
-    //Not a barre chord, remove only one exact position
-    voicingLocal = voicingLocal.filter(pos => !posEqual(pos, indexPos));
-  }
-  //Again, before proceeding check if we run out of positions to cover. In that case return true
-  if (voicingLocal.length === 0) return true;
-  //Take the next position (doesn't matter which one it is)
-    let currentPos = voicingLocal.shift(); //also remove it from the voicing array
-    let currentFret = currentPos.fret;
-    //Check available fingers for this position
-    for (let j = 0; j < availableFingers.length; j++) {
-      let finger = availableFingers[j];
-      let usable = true;
-      for (let k = 0; k < usedFingers.length && usable; k++) {
-        //Check distance and check not crossing rule
-        let usedFinger = usedFingers[k].finger;
-        let usedFret = usedFingers[k].pos.fret;
-        let crossing = (finger-usedFinger)*(currentFret-usedFret) < 0; //if one grows and other decreases, they cross
-        let fingerDistance = Math.abs(finger-usedFinger);
-        let fretDistance = Math.abs(currentFret-usedFret);
-        usable = !crossing && fingerDistance >= fretDistance;
-      }
-      if (usable) {
-        //If usable, try using this finger
-        //(it means this finger is surely usable, however this might not be the correct choice.
-        //To know it for sure we must try fretting all notes. Hence all allowed combinations must be considered.)
-
-
-        //Shallow copy
-        let usedFingersTmp = usedFingers.slice();
-        let availableFingersTmp = availableFingers.slice();
-        //Add new finger
-        usedFingersTmp.push({'finger': finger, 'pos': currentPos});
-        //Remove from available fingers
-        availableFingersTmp.splice(j, 1);
-        //Recursive call
-        //Stop as soon as you find a feasible fingering
-        if (checkFeasibleIntermediate(voicingLocal, availableFingersTmp, usedFingersTmp)) return true;
-      }
-    }
-    //If no next finger led to a feasible fingering position
-    //(Or there were no more fingers available)
-    // then the chord is not feasible
-    return false;
-
-
-}
 
 function countFrettedNotes(positions) {
   return positions.reduce((x, y) => {
@@ -457,6 +331,8 @@ export default {
             playing:false,
             notes,
             showTuning:false,
+            showOptions: false,
+            options: {"difficultMode": false},
             allChords,
             chordsSelect: [{name: 'm7', note: 'D'}, {name: '7', note: 'G'}, {name: 'maj7', note: 'C'}],
             voicingSequence: null,
@@ -476,7 +352,8 @@ export default {
     components: {
         FretboardEL,
         Tab,
-        Tuning
+        Tuning,
+        Options
     },
     mounted() {
         let me = this;
@@ -583,6 +460,14 @@ export default {
           }
 
         },
+
+      changeOptions(newOptions) {
+        //Not so efficient, just for a quick implementation
+        let me = this
+        me.data.options = newOptions;
+      },
+
+
 
       propsToPass() {
         let result = ['E', 'A', 'D', 'G', 'B', 'E'];
@@ -693,12 +578,163 @@ export default {
             }
         },
 
+      checkFeasible(voicing) {
+  //A more in-depth check to see if a voicing is actually feasible,
+  //taking into account the fingering
+
+  //The idea is as follows:
+  //1) Fingers cannot cross
+  //2) We will always play the min fret using index finger
+  // (this is a fair assumption, as in most cases were some "spontaneous" fingering may not follow this rule,
+  // we can still find an alternative feasible fingering which does follow this rule)
+  //3) Fret distance between fingers cannot be higher than "finger distance"
+  //(This is a more restrictive assumption. It works fairly well with major, minor and 7th chords but it makes
+  //many 9 chords impossible to play, since they naturally require at least a stretch of 2 frets for two consecutive
+  //fingers.
+  //TODO (difficult, mid priority): relax this assumption by allowing (in some contexts) a stretch of 2 frets
+
+  let extraFretSpace = this.data.options.difficultMode ? 1 : 0;
+
+  let voicingLocal = voicing.slice(); //shallow copy
+
+
+  let availableFingers = [1, 2, 3];
+  let usedFingers = [];
+
+  let frettedNotesCount = countFrettedNotes(voicing);
+  let isBarre = canApplyBarre(voicing, frettedNotesCount);
+
+  //Remove all open strings, as they don't need to be checked
+  voicingLocal = voicingLocal.filter(x => x.fret !== 0);
+
+  //If all strings are open (unlikely but check it), return true already
+  if (voicingLocal.length === 0) return true;
+
+  //Use index finger to play minimum non-zero fret
+  let minFret = getMinFret(voicingLocal);
+  //Take one string (doesn't matter which) having min fret
+  let indexPos = voicingLocal.find(pos => pos.fret === minFret);
+
+  //Add index finger to usedFingers structure
+  usedFingers.push({'finger': 0, 'pos': indexPos});
+
+
+  //Remove the position assigned to index
+  if (isBarre) {
+    //If it's a barre chord, then remove all the positions having fret = minFret
+    voicingLocal = voicingLocal.filter(pos => pos.fret !== minFret);
+  } else {
+    //Not a barre chord, remove only one exact position
+    voicingLocal = voicingLocal.filter(pos => !posEqual(pos, indexPos));
+  }
+  //Again, before proceeding check if we run out of positions to cover. In that case return true
+  if (voicingLocal.length === 0) return true;
+  //Take the next position (doesn't matter which one it is)
+  let currentPos = voicingLocal.shift(); //also remove it from the voicing array
+  let currentFret = currentPos.fret;
+  //Check available fingers for this position
+  for (let j = 0; j < availableFingers.length; j++) {
+    let finger = availableFingers[j];
+    let usable = true;
+    for (let k = 0; k < usedFingers.length && usable; k++) {
+      //Check distance and check not crossing rule
+      let usedFinger = usedFingers[k].finger;
+      let usedFret = usedFingers[k].pos.fret;
+      let crossing = (finger-usedFinger)*(currentFret-usedFret) < 0; //if one grows and other decreases, they cross
+      let fingerDistance = Math.abs(finger-usedFinger);
+      let fretDistance = Math.abs(currentFret-usedFret);
+      usable = !crossing && fingerDistance >= fretDistance - extraFretSpace;
+    }
+    if (usable) {
+      //If usable, try using this finger
+      //(it means this finger is surely usable, however this might not be the correct choice.
+      //To know it for sure we must try fretting all notes. Hence all allowed combinations must be considered.)
+
+
+      //Shallow copy
+      let usedFingersTmp = usedFingers.slice();
+      let availableFingersTmp = availableFingers.slice();
+      //Add new finger
+      usedFingersTmp.push({'finger': finger, 'pos': currentPos});
+      //Remove from available fingers
+      availableFingersTmp.splice(j, 1);
+      //Recursive call
+      //Stop as soon as you find a feasible fingering
+      if (this.checkFeasibleIntermediate(voicingLocal, availableFingersTmp, usedFingersTmp)) return true;
+    }
+  }
+  //If no next finger led to a feasible fingering position
+  //(Or there were no more fingers available)
+  // then the chord is not feasible
+  return false;
+
+
+},
+
+      checkFeasibleIntermediate(voicing, availableFingers, usedFingers)
+{
+
+
+  let extraFretSpace = this.data.options.difficultMode ? 1 : 0;
+
+  if (voicing.length === 0) return true;
+
+  if (availableFingers.length === 0) return false;
+
+  //Create a local shallow copy of voicing
+  let voicingTmp = voicing.slice();
+
+  let currentPos = voicingTmp.shift(); //also remove it from the voicing array
+  let currentFret = currentPos.fret;
+
+
+  //Check available fingers for this position
+  for (let j = 0; j < availableFingers.length; j++) {
+    let finger = availableFingers[j];
+    let usable = true;
+    for (let k = 0; k < usedFingers.length && usable; k++) {
+      //Check distance and check not crossing rule
+      let usedFinger = usedFingers[k].finger;
+      let usedFret = usedFingers[k].pos.fret;
+      let crossing = (finger-usedFinger)*(currentFret-usedFret) < 0; //if one grows and other decreases, they cross
+      let fingerDistance = Math.abs(finger-usedFinger);
+      let fretDistance = Math.abs(currentFret-usedFret);
+      usable = !crossing && fingerDistance >= fretDistance - extraFretSpace;
+    }
+    if (usable) {
+      //If usable, try using this finger
+      //(it means this finger is surely usable, however this might not be the correct choice.
+      //To know it for sure we must try fretting all notes. Hence all allowed combinations must be considered.)
+
+
+      //Shallow copy
+      let usedFingersTmp = usedFingers.slice();
+      let availableFingersTmp = availableFingers.slice();
+      //Add new finger
+      usedFingersTmp.push({'finger': finger, 'pos': currentPos});
+      //Remove from available fingers
+      availableFingersTmp.splice(j, 1);
+      //Recursive call
+      //Stop as soon as you find a feasible fingering
+      if (this.checkFeasibleIntermediate(voicingTmp, availableFingersTmp, usedFingersTmp)) return true;
+    }
+  }
+  //If no next finger led to a feasible fingering position
+  //(Or there were no more fingers available)
+  // then the chord is not feasible
+  return false;
+
+},
+
+
+
       getVoicingSequence(chords, recursiveDepth = 4, allowInversions = true) {
 
   let chordsVoicings = [];
 
   //I added support for constraints but we are not using them now
   for (let i = 0; i < chords.length; i++) {
+    console.log("chord: " + chords[i].notes);
     let constraints = null;
     let inversion = 0;
     if (i < chords.length-1)
@@ -714,6 +750,9 @@ export default {
     //the in-depth feasibility check)
     chordVoicings = chordVoicings.slice(0, 5);
 
+    //In-depth feasibility check (considering fingering)
+    chordVoicings = chordVoicings.filter(voicing => this.checkFeasible(voicing));
+
     //if inversions are allowed, add them
     if (allowInversions && i > 0) {
       for (inversion = 1; inversion < 3; inversion++) {
@@ -721,14 +760,17 @@ export default {
         let chordVoicingsInverted = this.findVoicings(chords[i], this.data.fretboardMatrix, inversion, constraints);
         this.sortVoicings(chordVoicingsInverted);
         chordVoicingsInverted = chordVoicingsInverted.slice(0, 5);
-        chordVoicingsInverted = chordVoicingsInverted.filter(voicing => checkFeasible(voicing));
+        chordVoicingsInverted = chordVoicingsInverted.filter(voicing => this.checkFeasible(voicing));
         chordVoicings = chordVoicings.concat(chordVoicingsInverted);
       }
     }
 
+    if (chordVoicings.length === 0)
+    {
+      window.alert("Unable to find a playable shape for the chord: " + chords[i].name);
+      return [];
+    }
 
-    //In-depth feasibility check (considering fingering)
-    chordVoicings = chordVoicings.filter(voicing => checkFeasible(voicing));
 
     chordsVoicings.push({'chord': chords[i], 'voicings': chordVoicings});
   }
@@ -1128,7 +1170,7 @@ export default {
   return {'distance': minDistance, 'sequence': bestSequence, tritoneRes: maxTritoneRes};
 
 
-}
+},
 
 
 
