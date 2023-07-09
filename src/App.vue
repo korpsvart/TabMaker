@@ -287,13 +287,14 @@ function computeDistance(previousVoicing, currentVoicing) {
 
 function buildConstraints(chord, nextChord) {
 
-  let constraint = {'dominant': false};
+  let constraint = {'noDouble3rd': false};
 
   if (nextChord == null) return constraint;
 
   if (chord.type === 'dominant seventh' && Tonal.Interval.distance(chord.notes[0], nextChord.notes[0])==='4P')
   {
-    constraint.dominant = true; //chord has dominant function
+    //Chord has dominant function => avoid doubling the third
+    constraint.noDouble3rd = true;
   }
 
   return constraint;
@@ -587,11 +588,11 @@ export default {
   //2) We will always play the min fret using index finger
   // (this is a fair assumption, as in most cases were some "spontaneous" fingering may not follow this rule,
   // we can still find an alternative feasible fingering which does follow this rule)
-  //3) Fret distance between fingers cannot be higher than "finger distance"
+  //3) If difficult mode is disabled: Fret distance between fingers cannot be higher than "finger distance"
   //(This is a more restrictive assumption. It works fairly well with major, minor and 7th chords but it makes
   //many 9 chords impossible to play, since they naturally require at least a stretch of 2 frets for two consecutive
   //fingers.
-  //TODO (difficult, mid priority): relax this assumption by allowing (in some contexts) a stretch of 2 frets
+  //4) if difficultMode is enabled, fret distance must be <= finger distance + 1
 
   let extraFretSpace = this.data.options.difficultMode ? 1 : 0;
 
@@ -960,9 +961,9 @@ export default {
     }
 
 
-    if (constraints.dominant && previousPositions.filter(x => this.getNote(x).pitch === chordNotes[1]).length > 0)
+    if (constraints.noDouble3rd && previousPositions.filter(x => this.getNote(x).pitch === chordNotes[1]).length > 0)
     {
-      chordNotes.splice(1, 1); //avoid doubling the third of a dominant function chord (it's the 7th)
+      chordNotes.splice(1, 1); //avoid doubling the third (e.g. of a dominant function chord (it's the 7th))
     }
 
 
