@@ -89,7 +89,7 @@ export default {
           bar.children.push(selector)
         }
         // creates a line for each string
-        for(let j = 0; j <= me.number_of_lines; j++) {
+        for(let j = 0; j < me.number_of_lines; j++) {
           let line = {className: [], children: [], txt: ''}
           line.className.push('line')
           // creates the 'TAB' characters in the first bar

@@ -247,43 +247,33 @@ function computeStepRes(previousVoicing, currentVoicing) {
 }
 
 function computeDistance(previousVoicing, currentVoicing) {
-  if (previousVoicing == null) return 0;
-  let distance = 0;
+  if (previousVoicing == null) return 6 - currentVoicing.length;
+
+  //let distance = 6 - currentVoicing.length;
+  let distance=0;
   let totalStringsUsed = 0;
+  let stringsNotPlayed = 0;
 
   for (let i = 0; i < 6; i++) {
-    let pos1= currentVoicing.find(x => x.string === i);
+    let pos1 = currentVoicing.find(x => x.string === i);
     let pos2 = previousVoicing.find(x => x.string === i);
-    if ((pos1!==undefined && pos2 === undefined) ||
-        (pos1===undefined && pos2 !== undefined))
-    {
-      //When one string appears in only one of the chord, I count it as distance 4
-      //This is to avoid prioritizing chords with less notes
-      distance+=4;
+
+    if (pos1 !== undefined && pos2 !== undefined) {
+      distance += Math.abs(pos1.fret - pos2.fret);
       totalStringsUsed++;
-    }
-    else if (pos1!== undefined && pos2!== undefined) {
-      distance = distance + Math.abs(pos1.fret - pos2.fret);
-      totalStringsUsed++;
+    } else if (pos1 === undefined && pos2 !== undefined) {
+      stringsNotPlayed++;
     }
   }
 
-  // for (let i = 0; i < previousVoicing.length; i++) {
-  //   let sameStringPos = currentVoicing.filter(x => x.string === previousVoicing[i].string);
-  //   if (sameStringPos && sameStringPos.length > 0) {
-  //     sameStringPos = sameStringPos[0];
-  //     distance = distance + Math.abs(sameStringPos.fret - previousVoicing[i].fret);
-  //   } else {
-  //     //When one string appears in only one of the chord, I count it as distance 1
-  //     //This is to avoid prioritizing chords with less notes
-  //     distance = distance + 1;
-  //   }
-  // }
+  // Calculate the penalty based on the number of strings not played
+  const penalty = stringsNotPlayed * 4; // Adjust the penalty weight as needed
 
-  //Weigh the distance over the total number of strings used
-  //This is used, again, to prevent the algorithm from choosing chords with less notes
-  return distance/totalStringsUsed;
+  // Weigh the distance over the total number of strings used
+  // and add the penalty to avoid reducing the number of strings from one chord to the next
+  return (distance + penalty) / totalStringsUsed;
 }
+
 
 function buildConstraints(chord, nextChord) {
 
@@ -970,12 +960,12 @@ export default {
   }
   let pos = {'string': string, 'fret': 0};
   let posNote = this.getNote(pos);
-  //Check if it's part of chord notes and it's not equal to lastNote (both in pitch class and octave)
-  if (chordNotes.some(x => posNote.equalsIgnoreOctave(new Note(x, 0))) && !posNote.equals(lastNote)) positions.push(pos);
+  //Check if it's part of chord notes and it's not equal to lastNote (even different octave)
+  if (chordNotes.some(x => posNote.equalsIgnoreOctave(new Note(x, 0))) && !posNote.equalsIgnoreOctave(lastNote)) positions.push(pos);
   for (let j = startIndex; j <= stopIndex; j++) {
     pos = {'string': string, 'fret': j};
     posNote = this.getNote(pos);
-    if (chordNotes.some(x => posNote.equalsIgnoreOctave(new Note(x, 0))) && !posNote.equals(lastNote)) positions.push(pos);
+    if (chordNotes.some(x => posNote.equalsIgnoreOctave(new Note(x, 0))) && !posNote.equalsIgnoreOctave(lastNote)) positions.push(pos);
   }
   return positions;
 },
@@ -1141,6 +1131,7 @@ export default {
       tritoneRes = tritoneRes + recursiveResult.tritoneRes;
       if (tritoneRes > maxTritoneRes) {
         maxTritoneRes = tritoneRes;
+        minDistance = distance;
         //Make copy of recursiveResult to avoid mess
         bestSequence = recursiveResult.sequence.slice();
         bestSequence.unshift(currentVoicings[j]); //add picked voicing
