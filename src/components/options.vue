@@ -7,7 +7,8 @@ export default {
   props: {
     show: Boolean,
     options: {
-      "difficultMode": false
+      "difficultMode": false,
+      "allowInversions": true
     },
     toggleOptions: [
       {label: "normal", value: false, checked: "warning"},
@@ -40,10 +41,16 @@ export default {
         <div class="modal-body">
           <slot name="body">
             <div>Chords difficulty: </div>
-              <ToggleButton
+              <ToggleButton id="1"
                   v-model="options.difficultMode" :model-value="options.difficultMode"
                   label-disable-text="Easy" label-enable-text="Hard"
               />
+
+            <div>Allow inversions: </div>
+            <ToggleButton id="2"
+                v-model="options.allowInversions" :model-value="options.allowInversions"
+                label-disable-text="Disabled" label-enable-text="Enabled"
+            />
           </slot>
 
         </div>

@@ -323,7 +323,7 @@ export default {
             notes,
             showTuning:false,
             showOptions: false,
-            options: {"difficultMode": false},
+            options: {"difficultMode": false, "allowInversions": true},
             allChords,
             chordsSelect: [{name: 'm7', note: 'D'}, {name: '7', note: 'G'}, {name: 'maj7', note: 'C'}],
             voicingSequence: null,
@@ -719,7 +719,7 @@ export default {
 
 
 
-      getVoicingSequence(chords, recursiveDepth = 4, allowInversions = true) {
+      getVoicingSequence(chords, recursiveDepth = 4) {
 
   let chordsVoicings = [];
 
@@ -745,7 +745,7 @@ export default {
     chordVoicings = chordVoicings.filter(voicing => this.checkFeasible(voicing));
 
     //if inversions are allowed, add them
-    if (allowInversions && i > 0) {
+    if (this.data.options.allowInversions && i > 0) {
       for (inversion = 1; inversion < 3; inversion++) {
         constraints = addInversionConstraints(constraints, chords[i], inversion);
         let chordVoicingsInverted = this.findVoicings(chords[i], this.data.fretboardMatrix, inversion, constraints);
@@ -800,7 +800,7 @@ export default {
     return note;
   }
 },
-      recursivePositionSearch(previousPositions, lastNote, chordNotes, validPositions, constraints) {
+      recursivePositionSearch(previousPositions, lastNote, chordNotes, validPositions, constraints, lastInterval=null) {
   //Recursively find valid positions for a chord
   //Check if this voicing is acceptable
   //1) Only check if we have at least 3 notes (otherwise we don't consider it a chord yet)
@@ -830,7 +830,7 @@ export default {
   if (lastPosition.string !== 0) {
     //Find next positions and do recursive call
     //Implement a function that returns that next possible positions based on the basic constraints
-    let nextPositions = this.findNextPositions(previousPositions, lastNote, chordNotes, constraints);
+    let nextPositions = this.findNextPositions(previousPositions, lastNote, chordNotes, constraints, lastInterval);
     //Find all possible valid voicings with more notes
     for (let i in nextPositions) {
       let nextPosition = nextPositions[i];
@@ -839,7 +839,9 @@ export default {
       let newPositions = previousPositions.slice();
       newPositions.push(nextPosition); //add the new element
       //Again I use splice to create shallow copy, otherwise we will add other voicings together
-      this.recursivePositionSearch(newPositions, this.getNote(nextPosition, chordNotes), chordNotes, validPositions, constraints);
+      let nextNote = this.getNote(nextPosition, chordNotes);
+      lastInterval = Tonal.Interval.distance(lastNote.pitch, nextNote.pitch);
+      this.recursivePositionSearch(newPositions, this.getNote(nextPosition, chordNotes), chordNotes, validPositions, constraints, lastInterval);
     }
   }
 },
@@ -913,7 +915,7 @@ export default {
   }
 },
 
-      findPositionsOnString(previousPositions, lastNote, minFret, chordNotes, constraints) {
+      findPositionsOnString(previousPositions, lastNote, minFret, chordNotes, constraints, lastInterval) {
 
   //Need to do some fixes on minFret (minFret should never be 0)
   let lastPosition = previousPositions[previousPositions.length-1];
@@ -961,13 +963,26 @@ export default {
   let pos = {'string': string, 'fret': 0};
   let posNote = this.getNote(pos);
   //Check if it's part of chord notes and it's not equal to lastNote (even different octave)
-  if (chordNotes.some(x => posNote.equalsIgnoreOctave(new Note(x, 0))) && !posNote.equalsIgnoreOctave(lastNote)) positions.push(pos);
+  if (this.checkNoteValidity(chordNotes, posNote, lastNote, lastInterval, previousPositions)) positions.push(pos);
   for (let j = startIndex; j <= stopIndex; j++) {
     pos = {'string': string, 'fret': j};
     posNote = this.getNote(pos);
-    if (chordNotes.some(x => posNote.equalsIgnoreOctave(new Note(x, 0))) && !posNote.equalsIgnoreOctave(lastNote)) positions.push(pos);
+    if (this.checkNoteValidity(chordNotes, posNote, lastNote, lastInterval, previousPositions)) positions.push(pos);
   }
   return positions;
+},
+
+checkNoteValidity(chordNotes, posNote, lastNote, lastInterval, previousPositions)
+{
+  //Do not repeat notes having both equal pitch and octave
+  //Do not place a P8 interval between two adjacent strings
+  let cond1 = chordNotes.some(x => posNote.equalsIgnoreOctave(new Note(x, 0))) && !posNote.equalsIgnoreOctave(lastNote);
+  let currentInterval = Tonal.Interval.distance(lastNote.pitch, posNote.pitch);
+  //Do not stack two tritone intervals (create strong dissonance)
+  let cond2 = (lastInterval!=='4A' && lastInterval!=='5d') ||(currentInterval!=='4A' && currentInterval!=='5d');
+  //Avoid tripling tones (overemphasize that tone)
+  let cond3 = previousPositions.filter(x => this.getNote(x).equalsIgnoreOctave(posNote)).length < 2;
+  return cond1 && cond2 && cond3;
 },
 
       findInterval(pos1, pos2, chordNotes) {
@@ -1016,8 +1031,7 @@ export default {
 
 
 },
-      findNextPositions(positions, lastNote, chordNotes, constraints) {
-  //TODO
+      findNextPositions(positions, lastNote, chordNotes, constraints, lastInterval) {
 
   //Return the next candidate positions, based on three principles
   //1) fret distance is not > 2 frets compared to lastPosition fret
@@ -1026,7 +1040,7 @@ export default {
   //4)Notes belong to the chord (chordNotes)
   //5)Special exceptional rules applies for the 0 fret
   let minFret = getMinFret(positions);
-  return this.findPositionsOnString(positions, lastNote, minFret, chordNotes, constraints);
+  return this.findPositionsOnString(positions, lastNote, minFret, chordNotes, constraints, lastInterval);
 
 },
 
@@ -1145,6 +1159,7 @@ export default {
       }
     } else { //no recursive call
       if (tritoneRes > maxTritoneRes) {
+        minDistance = distance;
         maxTritoneRes = tritoneRes;
         //Make copy of recursiveResult to avoid mess
         bestSequence = [currentVoicings[j]];
