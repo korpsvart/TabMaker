@@ -634,7 +634,9 @@ export default {
       let crossing = (finger-usedFinger)*(currentFret-usedFret) < 0; //if one grows and other decreases, they cross
       let fingerDistance = Math.abs(finger-usedFinger);
       let fretDistance = Math.abs(currentFret-usedFret);
-      usable = !crossing && fingerDistance >= fretDistance - extraFretSpace;
+      //Add the extra fret space (=1 if difficult mode), but only if it's not between medium and ring finger
+      if ((finger+usedFinger)!==3) fretDistance-=extraFretSpace;
+      usable = !crossing && fingerDistance >= fretDistance;
     }
     if (usable) {
       //If usable, try using this finger
@@ -690,7 +692,8 @@ export default {
       let crossing = (finger-usedFinger)*(currentFret-usedFret) < 0; //if one grows and other decreases, they cross
       let fingerDistance = Math.abs(finger-usedFinger);
       let fretDistance = Math.abs(currentFret-usedFret);
-      usable = !crossing && fingerDistance >= fretDistance - extraFretSpace;
+      if ((finger+usedFinger)!==3) fretDistance-=extraFretSpace;
+      usable = !crossing && fingerDistance >= fretDistance;
     }
     if (usable) {
       //If usable, try using this finger
