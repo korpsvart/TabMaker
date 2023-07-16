@@ -93,6 +93,10 @@ export default {
     }
 
     function recognizeChordFromNotes(notes) {
+      //The notes are sorted in order of onset time, so sort them instead by midi number
+      //(same as sorting them by frequency)
+      //This is to avoid weird results produced by chord detection
+      notes.sort();
       let noteNames = notes.map(note => Midi.midiToNoteName(note));
       return Chord.detect(noteNames);
     }
