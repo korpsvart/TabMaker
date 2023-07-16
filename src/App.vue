@@ -42,6 +42,10 @@
                     </div>
                 </div>
             </div>
+            <div>
+              <!-- MIDI input component -->
+              <MidiInput :midiEnabled="data.midiEnabled" />
+            </div>
             <div class="btn-group action-group">
                 <button class="btn btn-primary"  @click="submit">Submit</button>
                 <button class="btn btn-primary" @click="data.showOptions=true">Options</button>
@@ -54,7 +58,10 @@
                   </options>
                 </Teleport>
                 <img @click="share" class="share-btn" src="@/assets/share.svg">
-                <!--            <button class="btn btn-info" @click="midi">enable midi</button>-->
+              <!-- Enable/Disable MIDI button -->
+              <button class="btn btn-info" @click="toggleMidiEnabled">
+                {{ data.midiEnabled ? 'Disable Midi' : 'Enable Midi'}}
+              </button>
             </div>
         </div>
         <div class="fretboard-figure-container card" v-show="data.dots&&data.dots.length">
@@ -113,6 +120,7 @@ import FretboardEL from "./components/fretboard.vue"
 import Tab from "./components/tablature.vue"
 import Tuning from './components/tuning.vue'
 import Options from './components/options.vue'
+import MidiInput from "@/components/MidiInput.vue";
 import {debug} from "tone";
 
 /* For debugging in webstorm: CTRL+SHIFT+CLICK on the localhost link after
@@ -307,6 +315,7 @@ export default {
     data() {
         let data = {
             playingPosition:0,
+            midiEnabled: false,
             tuning:[new Note('E', 4),
               new Note('B', 3),
               new Note('G', 3),
@@ -344,7 +353,8 @@ export default {
         FretboardEL,
         Tab,
         Tuning,
-        Options
+        Options,
+        MidiInput
     },
     mounted() {
         let me = this;
@@ -416,6 +426,9 @@ export default {
             }, function(err) {
                 console.error('Async: Could not copy text: ', err);
             });
+        },
+        toggleMidiEnabled() {
+          this.data.midiEnabled = !this.data.midiEnabled;
         },
         deleteChord(index){
             let me = this;
