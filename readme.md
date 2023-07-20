@@ -60,7 +60,7 @@ The "clear" button clears the input chord sequence, making it empty.
 The "submit" button starts the generation algorithm with the currently selected chord sequence.
 
 
-### Voicing Visualization
+### Voicing Playback
 
 The lower part of the GUI is dedicated to the visualization and playing of the generated sequence, and the tuning customization.
 
@@ -69,6 +69,8 @@ LOWER GUI IMAGE
 The "play" button starts the sequence playback: each chord is reproduced with a brief strum from the lowest string to the highest one. During the playback phase, it switches to a "stop" button which can be used to interrupt the sound.
 
 The "fast forward" and "rewind" buttons can be used to navigate the sequence during playback (ONLY DURING PLAYBACK?)
+
+### Sequence/Voicings Visualization
 
 There are two available visualization modes:
 - Fretboard: chords position and notes name are shown on a guitar fretboard. As the progression is played back, voicings are displayed one after the other together with the sound.
