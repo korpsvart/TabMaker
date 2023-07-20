@@ -39,17 +39,21 @@ The voicings are not found in a database look-up fashion but in an algorithmic w
 
 The upper part of the GUI is dedicated to the selection of the chord sequence.
 
-Chords can be added or removed from the sequence and for each one we can specify:
-- tonic;
-- type. E.g. Major (M), Minor (m), Major seventh (maj7), Minor seventh (m7), Dominant seventh (7)...
+UPPER GUI IMAGE
 
-The "options" button opens a pop-up menu which contains some toggle buttons, which controls the generation mechanism. These are the customizable options:
-- Chords difficulty: controls the technical complexity of the generated voicing sequence. In "Easy mode" adjacent fingers must be on the same or adjacent frets, and fingers cannot stretch over more than 4 frets. "Hard mode" allows for one fret stretch between consecutive fingers (except for middle and ring finger), and the maximum total stretch is increased to 5 frets.
-- Allow inversions: allows the use of chord inversions when generating voicings for chords after the first one. Inversions are allowed by default and it's recommended to use them, but it could be desirable to switch them off when voicing basic chord sequences involving only simple triads.
+For each chord, the user can specify:
+- fundamental note;
+- type (e.g. Major (M), Minor (m), Major seventh (maj7), Minor seventh (m7), Dominant seventh (7)...)
 
-The "share" button copies the customized URL which embeds the current chord sequence, so that it can be shared or saved for later use without the need to re-select the chord sequence from scratch.
+Chords can also be added by clicking the "plus" button and removed using the small crosses in the top right corners.
 
-The "Enable/Disable MIDI" button toggles the MIDI input mode for the selection of the chord sequence. When this mode is enabled, the program will listen to incoming MIDI data, apply a chord recognition algorithm and append the recognized chords at the end of the chord sequence.
+The "options" button opens a pop-up menu that contains some toggle buttons for controlling the generation mechanism. The customizable options are:
+- Chords difficulty: it controls the technical complexity of the generated voicing sequence. In "Easy mode", adjacent fingers must be on the same or adjacent frets and can not stretch over more than 4 frets. "Hard mode" allows for one fret stretch between two consecutive fingers (except for middle and ring finger), bringing the maximum total stretch to 5 frets.
+- Allow inversions: it allows the use of chord inversions when generating voicings (except for the first one). Inversions are allowed by default and it's recommended to use them, although it could be desirable to switch them off when chord progressions only involve simple triads.
+
+The "share" button copies the customized URL which embeds the current chord sequence, so that it can be shared or saved for later use without the need to re-select the entire progression from scratch.
+
+The "Enable/Disable MIDI" button toggles the MIDI input mode for the selection of the chord sequence. When this mode is enabled, the program will listen to incoming MIDI data, apply a chord recognition algorithm and append the recognized chords at the end of the progression.
 
 The "clear" button clears the input chord sequence, making it empty.
 
