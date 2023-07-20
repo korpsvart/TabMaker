@@ -67,8 +67,8 @@ The lower part of the GUI is dedicated to the visualization and playing of the g
 LOWER GUI IMAGE
 
 There are two available visualization modes:
--Fretboard: chords position and notes name are shown on a guitar fretboard. As the progression is played back, voicings are displayed one after the other together with the sound.
--TAB: the entire chord sequence is shown with the well known TAB notation. As the progression is played back, the current chord is highlighted, always in sync with the sound.
+- Fretboard: chords position and notes name are shown on a guitar fretboard. As the progression is played back, voicings are displayed one after the other together with the sound.
+- TAB: the entire chord sequence is shown with the well known TAB notation. As the progression is played back, the current chord is highlighted, always in sync with the sound.
 
 
 
