@@ -116,3 +116,7 @@ This function checks if the barre technique can be applied to a chord voicing. I
 A simplyfing assumption is made: the barre can be applied only on the leftmost fret, with the index finger.
 
 ### compareVoicings
+
+This function is employed to sort the possible voicings found for a chord:
+- it prioritize chords with more distinct pitch classes and, in case these are always equal, it put first the chord with the highest overall number of notes
+- it leaves the order as it is (returns 0) if the controls performed before give a negative feedback (e.g. there are the exact same pitches and number of notes in each voicing)
