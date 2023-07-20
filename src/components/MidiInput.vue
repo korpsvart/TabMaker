@@ -16,7 +16,7 @@ export default {
   setup(props) {
     const state = reactive({
       midiInputs: [],
-      activeChords: [],
+      activeChord: {notes: [], onsetTime: 0},
       recognizedChords: [],
       thresholdTime: 200, //200 ms
     });
@@ -46,50 +46,49 @@ export default {
           var note = message[1];
           var onsetTime = event.timeStamp; // Get the onset time of the note
 
-          var chordFound = false;
-          for (var i = 0; i < state.activeChords.length; i++) {
-            var chord = state.activeChords[i];
-            var timeDiff = onsetTime - chord.onsetTime;
+          var chord = state.activeChord;
+          if (chord.notes.length>0 && onsetTime - chord.onsetTime<= state.thresholdTime) {
+            chord.notes.push(note);
+          } else
+          {
+            if (chord.notes.length>2)
+            {
+              //if the current chord has at least 3 notes, before replacing it
+              //recognize it and add it to the current list
 
-            if (timeDiff <= state.thresholdTime) { // Add the note to an existing chord
-              chord.notes.push(note);
-              chordFound = true;
-              break;
+              // Perform chord recognition on current chord
+              var recognizedChord = recognizeChordFromNotes(state.activeChord.notes);
+              console.log('Chord recognized: ' + recognizedChord);
+              state.recognizedChords.push(recognizedChord);
             }
-          }
-
-          if (!chordFound) { // Create a new chord
-            state.activeChords.push({
+            state.activeChord = {
               notes: [note],
               onsetTime: onsetTime
-            });
+            };
           }
+
         } else if (messageType === 0x80) { // Note off message
-          // Do nothing?
+
+          //same as above, in case the chord is the last in the sequence
+          if (state.activeChord.notes.length>2)
+          {
+            //if the current chord has at least 3 notes, before replacing it
+            //recognize it and add it to the current list
+
+            // Perform chord recognition on current chord
+            var recognizedChord = recognizeChordFromNotes(state.activeChord.notes);
+            console.log('Chord recognized: ' + recognizedChord);
+            state.recognizedChords.push(recognizedChord);
+
+            //reset active chord
+            state.activeChord = {
+              notes: [],
+              onsetTime: 0
+            };
+          }
         }
 
-        // Perform chord recognition using the updated activeChords list
-        state.recognizedChords =  recognizeChords(state.activeChords);
       }
-    }
-
-
-
-    function recognizeChords(chords) {
-      // Sort the chords based on onset time
-      let recognizedChords = [];
-      chords.sort(function(a, b) {
-        return a.onsetTime - b.onsetTime;
-      });
-
-      // Perform chord recognition on each chord
-      for (var i = 0; i < chords.length; i++) {
-        var chord = chords[i];
-        var recognizedChord = recognizeChordFromNotes(chord.notes);
-        console.log('Chord', i + 1, ':', recognizedChord);
-        recognizedChords.push(recognizedChord);
-      }
-      return recognizedChords;
     }
 
     function recognizeChordFromNotes(notes) {
