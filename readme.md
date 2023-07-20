@@ -66,9 +66,14 @@ The lower part of the GUI is dedicated to the visualization and playing of the g
 
 LOWER GUI IMAGE
 
+The "play" button starts the sequence playback: each chord is reproduced with a brief strum from the lowest string to the highest one. During the playback phase, it switches to a "stop" button which can be used to interrupt the sound.
+
+The "fast forward" and "rewind" buttons can be used to navigate the sequence during playback (ONLY DURING PLAYBACK?)
+
 There are two available visualization modes:
 - Fretboard: chords position and notes name are shown on a guitar fretboard. As the progression is played back, voicings are displayed one after the other together with the sound.
 - TAB: the entire chord sequence is shown with the well known TAB notation. As the progression is played back, the current chord is highlighted, always in sync with the sound.
+
 
 
 
