@@ -66,7 +66,7 @@ The "play" button starts the sequence playback: each chord is reproduced with a 
 
 The "fast forward" and "rewind" buttons can be used to navigate the sequence during playback (ONLY DURING PLAYBACK?)
 
-The "tuning" button opens a pop-up menu which allows the user to select the note for each open string: this option is useful to find voicings for customized tunings and enables expert musicians to experiment new sonorities.
+The "tuning" button opens a pop-up menu which allows the user to select the note for each open string: this option is useful to find voicings on customized tunings and enables expert musicians to experiment new sonorities.
 
 There are two available visualization modes:
 - Fretboard: chord positions and note names are shown on a guitar fretboard. As the progression is played back, voicings are displayed one after the other together with the sound.
