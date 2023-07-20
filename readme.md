@@ -110,5 +110,9 @@ To be filled, but maybe we will skip this part here (or keep it minimal).
 
 ### canApplyBarre
 
+This function checks if the barre technique can be applied to a chord voicing. It is called when the number of fretted notes is greater than 4:
+- it returns true if the
+- it returns false otherwise (the voicing is actually judged unplayable)
+A simplyfing assumption is made: the barre can be applied only on the leftmost fret, with the index finger.
 
 ### compareVoicings
