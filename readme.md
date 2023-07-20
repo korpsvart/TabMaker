@@ -73,7 +73,7 @@ The "fast forward" and "rewind" buttons can be used to navigate the sequence dur
 The "tuning" button opens a pop-up menu which allows the user to select the note for each open string: this option is useful to find voicings for customized tunings and enables expert musicians to experiment new sonorities.
 
 There are two available visualization modes:
-- Fretboard: chords position and notes name are shown on a guitar fretboard. As the progression is played back, voicings are displayed one after the other together with the sound.
+- Fretboard: chord positions and note names are shown on a guitar fretboard. As the progression is played back, voicings are displayed one after the other together with the sound.
 - TAB: the entire chord sequence is shown with the well known TAB notation. As the progression is played back, the current chord is highlighted, always in sync with the sound.
 
 
