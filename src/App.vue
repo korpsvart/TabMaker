@@ -44,7 +44,7 @@
             </div>
             <div>
               <!-- MIDI input component -->
-              <MidiInput :midiEnabled="data.midiEnabled" />
+              <MidiInput :midiEnabled="data.midiEnabled" @chordFound="addChordFromMidi"/>
             </div>
             <div class="btn-group action-group">
                 <button class="btn btn-primary"  @click="submit">Submit</button>
@@ -448,6 +448,10 @@ export default {
         addChord() {
             let me = this
             me.data.chordsSelect.push({name: 'm7', note: 'D'})
+        },
+        addChordFromMidi(recognizedChord) {
+          let chordObj = Tonal.Chord.get(recognizedChord[0]);
+          this.data.chordsSelect.push({name: chordObj.aliases[0], note: chordObj.tonic});
         },
         midi() {
             enableMidi();

@@ -13,11 +13,10 @@ export default {
   methods: {
 
   },
-  setup(props) {
+  setup(props, context) {
     const state = reactive({
       midiInputs: [],
       activeChord: {notes: [], onsetTime: 0},
-      recognizedChords: [],
       thresholdTime: 200, //200 ms
     });
 
@@ -57,9 +56,7 @@ export default {
               //recognize it and add it to the current list
 
               // Perform chord recognition on current chord
-              var recognizedChord = recognizeChordFromNotes(state.activeChord.notes);
-              console.log('Chord recognized: ' + recognizedChord);
-              state.recognizedChords.push(recognizedChord);
+              recognizeAndAdd();
             }
             state.activeChord = {
               notes: [note],
@@ -76,9 +73,7 @@ export default {
             //recognize it and add it to the current list
 
             // Perform chord recognition on current chord
-            var recognizedChord = recognizeChordFromNotes(state.activeChord.notes);
-            console.log('Chord recognized: ' + recognizedChord);
-            state.recognizedChords.push(recognizedChord);
+            recognizeAndAdd();
 
             //reset active chord
             state.activeChord = {
@@ -89,6 +84,12 @@ export default {
         }
 
       }
+    }
+
+    function recognizeAndAdd() {
+      var recognizedChord = recognizeChordFromNotes(state.activeChord.notes);
+      console.log('Chord recognized: ' + recognizedChord);
+      context.emit('chordFound', recognizedChord);
     }
 
     function recognizeChordFromNotes(notes) {
