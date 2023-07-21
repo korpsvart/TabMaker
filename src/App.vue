@@ -57,11 +57,11 @@
                     </template>
                   </options>
                 </Teleport>
-                <img @click="share" class="share-btn" src="@/assets/share.svg">
               <!-- Enable/Disable MIDI button -->
-              <button class="btn btn-info" @click="toggleMidiEnabled">
+              <button class="btn btn-primary" @click="toggleMidiEnabled">
                 {{ data.midiEnabled ? 'Disable Midi' : 'Enable Midi'}}
               </button>
+                <img @click="share" class="share-btn" src="@/assets/share.svg">
             </div>
         </div>
         <div class="fretboard-figure-container card" v-show="data.dots&&data.dots.length">
@@ -1358,6 +1358,7 @@ checkNoteValidity(chordNotes, posNote, lastNote, lastInterval, previousPositions
     border-radius: 50%;
     animation: pulse-border 1500ms ease-out infinite;
 }
+
 
 .music-play-button:after {
     content: "";
