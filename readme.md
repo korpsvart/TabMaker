@@ -89,6 +89,9 @@ To be filled, but maybe we will skip this part here (or keep it minimal).
 
 ### getVoicingSequence
 
+This function gets as input the chord sequence (fundamental notes and chord types) and set the "recursiveDepth" (the maximum number of valid voicings which can be found for each chord before stopping the recursive search; for now it is set equal to 4 by default).
+It calls "buildConstraints" and "findVoicings"
+
 ### buildConstraints
 
 This function sets two constraints for the generation of the voicings, based on the chord type and inversion:
