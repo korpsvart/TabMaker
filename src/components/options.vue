@@ -1,5 +1,7 @@
 <script>
 
+//Component for handling user options
+
 import ToggleButton from './ToggleButton.vue'
 
 

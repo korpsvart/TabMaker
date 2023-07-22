@@ -14,6 +14,8 @@
 
 <script>
 
+//Component for TAB visualization
+
 let TAB = ['T', 'A', 'B'];
 
 export default {

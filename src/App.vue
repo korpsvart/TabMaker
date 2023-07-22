@@ -120,6 +120,7 @@ import Tab from "./components/tablature.vue"
 import Tuning from './components/tuning.vue'
 import Options from './components/options.vue'
 import MidiInput from "@/components/MidiInput.vue";
+import * as voicingUtils from './components/utils/voicing'
 
 /* For debugging in webstorm: CTRL+SHIFT+CLICK on the localhost link after
 npm run dev
@@ -136,137 +137,13 @@ const numStrings = 6;
 const numFrets = 24;
 //We represent a fretboard as a matrix of Note objects
 
-function findPositions(fretboard, note, ignoreOctave = true) {
-    //Find all positions corresponding to a particular note
-    //If ignoreOctave = true it returns all positions corresponding
-    //to the pitch class
-    let positions = []; //array of positions
-    for (let i = 0; i < fretboard.length; i++) {
-        for (let j = 0; j < fretboard[i].length; j++) {
-            let condition = (fretboard[i][j].equalsIgnoreOctave(note) && ignoreOctave) ||
-                fretboard[i][j].equals(note);
-            if (condition)
-                positions.push({string: i, fret: j});
-        }
-    }
-    return positions;
-}
-
-function createFretboard(numString, numFrets, tuning) {
-    //Return a matrix fretboard of notes
-    let fretboard = [];
-    for (let i = 0; i < numString; i++) {
-        let string = [];
-        let noteIndex = notes.indexOf(tuning[i].pitch);
-        let octave = tuning[i].octave;
-        for (let j = 0; j < numFrets; j++) {
-            let pitch = notes[noteIndex];
-            let note = new Note(pitch, octave);
-            string.push(note);
-            noteIndex = (noteIndex + 1) % 12;
-            if (noteIndex === 0) octave++; //we reached a new octave
-        }
-        fretboard.push(string);
-    }
-    return fretboard;
-}
-
-function getMinFret(positions) {
-  //Return the minimum fret between the given positions, open fret (0) excluded
-
-  return Math.min(...positions.filter(x => x.fret > 0 ).map(y => y.fret));
-}
-
-function canApplyBarre(position, frettedNotes) {
-    //Check if barre can be applied
-    //For now we assume barre can only be done on the minimum fret position
-
-    let minFret = getMinFret(position);
-    if (!position || !Array.isArray(position) || !position.length) {
-        return false
-    }
-
-    if (Math.min(...position.map(x => x.fret)) === 0) return false; //Can never apply barre on open strings
-    //(Do not use minFret for checking this, since it can't contain the zero fret)
-
-    let minFretsAmount = position.filter(x => x.fret === minFret).length;
-
-    return frettedNotes - minFretsAmount + 1 < 5; //check if we now can play the chord with less than 5 fingers
-
-}
-
-function posEqual(pos1, pos2) {
-
-  return pos1.string === pos2.string && pos1.fret === pos2.fret;
-
-}
-
-function countFrettedNotes(positions) {
-  return positions.reduce((x, y) => {
-    return y.fret !== 0 ? x + 1 : x;
-  }, 0);
-}
-
-function computeDistance(previousVoicing, currentVoicing) {
-  if (previousVoicing == null) return 6 - currentVoicing.length;
-
-  let distance=0;
-  let totalStringsUsed = 0;
-  let stringsNotPlayed = 0;
-
-  for (let i = 0; i < 6; i++) {
-    let pos1 = currentVoicing.find(x => x.string === i);
-    let pos2 = previousVoicing.find(x => x.string === i);
-
-    if (pos1 !== undefined && pos2 !== undefined) {
-      distance += Math.abs(pos1.fret - pos2.fret);
-      totalStringsUsed++;
-    } else if (pos1 === undefined && pos2 !== undefined) {
-      stringsNotPlayed++;
-    }
-  }
-
-  // Calculate the penalty based on the number of strings not played
-  const penalty = stringsNotPlayed * 4; // Adjust the penalty weight as needed
-
-  // Weigh the distance over the total number of strings used
-  // and add the penalty to avoid reducing the number of strings from one chord to the next
-  return (distance + penalty) / totalStringsUsed;
-}
-
-
-function buildConstraints(chord, nextChord) {
-
-  let constraint = {'noDouble3rd': false};
-
-  if (nextChord == null) return constraint;
-
-  if (chord.type === 'dominant seventh' && Tonal.Interval.distance(chord.notes[0], nextChord.notes[0])==='4P')
-  {
-    //Chord has dominant function => avoid doubling the third
-    constraint.noDouble3rd = true;
-  }
-
-  return constraint;
-
-}
-
-function addInversionConstraints(constraints, chord, inversion) {
-
-  //Assume constraints was already initialized
-
-  constraints.noDoubleP4 = inversion === 2 || inversion === 1;
-
-  return constraints;
-}
-
-
-
 
 export default {
     data() {
         let data = {
             playingPosition:0,
+            numStrings:6,
+            numFrets:24,
             midiEnabled: false,
             tuning:[new Note('E', 4),
               new Note('B', 3),
@@ -274,7 +151,7 @@ export default {
               new Note('D', 3),
               new Note('A', 2),
               new Note('E', 2)],
-            fretboardMatrix:createFretboard(numStrings, numFrets, [new Note('E', 4),
+            fretboardMatrix:voicingUtils.createFretboard(numStrings, numFrets, [new Note('E', 4),
                 new Note('B', 3),
                 new Note('G', 3),
                 new Note('D', 3),
@@ -543,8 +420,8 @@ export default {
   let availableFingers = [1, 2, 3];
   let usedFingers = [];
 
-  let frettedNotesCount = countFrettedNotes(voicing);
-  let isBarre = canApplyBarre(voicing, frettedNotesCount);
+  let frettedNotesCount = voicingUtils.countFrettedNotes(voicing);
+  let isBarre = voicingUtils.canApplyBarre(voicing, frettedNotesCount);
 
   //Remove all open strings, as they don't need to be checked
   voicingLocal = voicingLocal.filter(x => x.fret !== 0);
@@ -553,7 +430,7 @@ export default {
   if (voicingLocal.length === 0) return true;
 
   //Use index finger to play minimum non-zero fret
-  let minFret = getMinFret(voicingLocal);
+  let minFret = voicingUtils.getMinFret(voicingLocal);
   //Take one string (doesn't matter which) having min fret
   let indexPos = voicingLocal.find(pos => pos.fret === minFret);
 
@@ -567,7 +444,7 @@ export default {
     voicingLocal = voicingLocal.filter(pos => pos.fret !== minFret);
   } else {
     //Not a barre chord, remove only one exact position
-    voicingLocal = voicingLocal.filter(pos => !posEqual(pos, indexPos));
+    voicingLocal = voicingLocal.filter(pos => !voicingUtils.posEqual(pos, indexPos));
   }
   //Again, before proceeding check if we run out of positions to cover. In that case return true
   if (voicingLocal.length === 0) return true;
@@ -684,9 +561,9 @@ export default {
     let inversion = 0;
     if (i < chords.length-1)
     {
-      constraints = buildConstraints(chords[i], chords[i+1]);
+      constraints = voicingUtils.buildConstraints(chords[i], chords[i+1]);
     } else {
-      constraints = buildConstraints(chords[i], null)
+      constraints = voicingUtils.buildConstraints(chords[i], null)
     }
     let chordVoicings = this.findVoicings(chords[i], this.data.fretboardMatrix, 0, constraints);
     this.sortVoicings(chordVoicings); //Sort voicings from highest to lowest priority
@@ -701,7 +578,7 @@ export default {
     //if inversions are allowed, add them
     if (this.data.options.allowInversions && i > 0) {
       for (inversion = 1; inversion < 3; inversion++) {
-        constraints = addInversionConstraints(constraints, chords[i], inversion);
+        constraints = voicingUtils.addInversionConstraints(constraints, chords[i], inversion);
         let chordVoicingsInverted = this.findVoicings(chords[i], this.data.fretboardMatrix, inversion, constraints);
         this.sortVoicings(chordVoicingsInverted);
         chordVoicingsInverted = chordVoicingsInverted.slice(0, 5);
@@ -760,10 +637,10 @@ export default {
     //2) Check if it contains the necessary chord tones
     //(If it doesn't do not skip yet, unless we've already reached the last string)
     if (this.containsChordTones(previousPositions, this.data.fretboardMatrix, chordNotes)) {
-      const frettedNotes = countFrettedNotes(previousPositions);
+      const frettedNotes = voicingUtils.countFrettedNotes(previousPositions);
       if (frettedNotes > 4) {
         //Check if we can use barre
-        if (canApplyBarre(previousPositions, frettedNotes)) {
+        if (voicingUtils.canApplyBarre(previousPositions, frettedNotes)) {
           validPositions.push(previousPositions);
         } else {
           //Chord is not valid, discard (return, so to avoid also following paths)
@@ -810,7 +687,7 @@ export default {
 
 
   //Find bass position
-  let allBassPositions = findPositions(fretboard, new Note(chord.notes[inversion].toString(), 0), true);
+  let allBassPositions = voicingUtils.findPositions(fretboard, new Note(chord.notes[inversion].toString(), 0), true);
   //Select only frets before the 5th one
   let posBefore5 = allBassPositions.filter(pos => pos.fret < 5);
   //Pick the position on the lowest string (highest numbered)
@@ -990,7 +867,7 @@ checkNoteValidity(chordNotes, posNote, lastNote, lastInterval, previousPositions
   //3) distance from min fret is not > 4 frets
   //4)Notes belong to the chord (chordNotes)
   //5)Special exceptional rules applies for the 0 fret
-  let minFret = getMinFret(positions);
+  let minFret = voicingUtils.getMinFret(positions);
   return this.findPositionsOnString(positions, lastNote, minFret, chordNotes, constraints, lastInterval);
 
 },
@@ -1080,7 +957,7 @@ checkNoteValidity(chordNotes, posNote, lastNote, lastInterval, previousPositions
   let bestSequence = [];
   for (let j = 0; j < currentVoicings.length; j++) {
     let tritoneRes = this.countTritonesResolutions(previousVoicing, currentVoicings[j], previousChord, currentChord);
-    let distance = computeDistance(previousVoicing, currentVoicings[j]);
+    let distance = voicingUtils.computeDistance(previousVoicing, currentVoicings[j]);
     if (i < chordsVoicings.length - 1) {
       let recursiveResult = this.pickBestVoicingSequence(chordsVoicings, currentVoicings[j], i + 1, currentChord);
       distance = distance + recursiveResult.distance;

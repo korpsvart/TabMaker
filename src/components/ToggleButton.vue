@@ -9,6 +9,9 @@
 </template>
 
 <script>
+
+//A simple toggle button component
+
 export default {
   props: {
     disabled: {

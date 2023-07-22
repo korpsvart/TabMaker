@@ -1,18 +1,5 @@
 <template>
     <div class="fretboard-container" :style="rootStyle">
-<!--        <label for="number_of_frets_selector">Number of frets: </label>-->
-<!--        <input type="number" id="number_of_frets_selector" min="5" max="36" value="15" @change="numberOfFretsSelector">-->
-<!--        <div class="accidental_selector form-check row justify-content-start" @click="accidentalSelector">-->
-<!--            <div class="form-check col-2">-->
-<!--                <input type="radio" class="acc_select form-check-input" id="flats" name="accidentals" value="flats" checked>-->
-<!--                <label class="form-check-label"  for="flats">b</label>-->
-<!--            </div>-->
-<!--            <div class="form-check col-2">-->
-<!--                <input type="radio" class="acc_select form-check-input" id="sharps" name="accidentals" value="sharps">-->
-<!--                <label class="form-check-label"  for="sharps">#</label>-->
-<!--            </div>-->
-
-<!--        </div>-->
         <div class="fretboard">
             <div v-for="item in fretboard" class="string" :class="item.className">
                 <div v-if="!!item.children" :note="note.noteName" v-for="note in item.children" :class="note.className">
@@ -26,11 +13,12 @@
 
 <script>
 
+//Component for fretboard visualization
+
 let accidentals = 'sharps';
 let sharp_notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 let flat_notes = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
 
-//let standard_tuning = ['E', 'A', 'D', 'G', 'B', 'E'];
 
 export default {
     name: "fretboard",

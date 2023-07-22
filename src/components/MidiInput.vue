@@ -1,6 +1,9 @@
 
 
 <script>
+
+//Component for handling MIDI input and chord recognition
+
 import {onMounted, reactive} from 'vue';
 import {Chord, Midi} from "tonal";
 

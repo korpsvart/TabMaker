@@ -1,6 +1,6 @@
 import {AudioSynth} from 'keithwhor-audiosynth-packaged/audiosynth.js';
 import {vibrateString} from "@/components/fretboard.vue";
-import {sleep} from "@/components/utils";
+import {sleep} from "@/components/utils/misc";
 
 let playTime = 2;
 let arpCoeff = 500;

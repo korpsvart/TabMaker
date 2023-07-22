@@ -1,4 +1,7 @@
 <script>
+
+//Component for handling tuning changes
+
 export default {
   props: {
     show: Boolean,
