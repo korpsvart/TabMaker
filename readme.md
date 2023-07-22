@@ -91,6 +91,10 @@ To be filled, but maybe we will skip this part here (or keep it minimal).
 
 ### buildConstraints
 
+This function sets two constraints for the generation of the voicings, based on the chord type and inversion:
+- it prohibits the doubling of the third if the chord have a dominant function (the type is "dominant seventh" and there's a perfect fourth between its root and the following chord one)
+- it prevents the voicing from having two perfect fourth intervals if the chord is inverted
+After, it calls "findVoicings".
 
 ### findVoicings
 
