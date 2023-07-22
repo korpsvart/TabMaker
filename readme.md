@@ -109,6 +109,7 @@ This function finds all the possible voicings for a single chord, considering th
 4. keeps only the first 5 voicings obtained in the previous step
 5. applies the in-depth feasibility check to filter returned voicings by calling "checkFeasible"
 6. if chord inversions are allowed ("allowInversions" == true), then repeats the above process using the other chord tones in bass position and adds the found voicings to the list (notes: inversions with seventh in bass position are not allowed and the first chord can not be inverted)
+
 Finally, it calls "pickBoundedVoicingSequence" to build the best voicing sequences from the lists of voicings found for each chord of the progression.
 
 ### recursivePositionSearch
