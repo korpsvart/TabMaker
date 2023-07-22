@@ -114,7 +114,7 @@ This function sorts the possible voicings found for a chord, according to the ou
 ### checkFeasible
 
 This function performs a more in-depth check to determine the feasibility of a voicing. 
-- 
+- 1
 
 ### canApplyBarre
 
