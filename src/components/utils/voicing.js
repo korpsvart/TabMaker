@@ -1,5 +1,6 @@
 import {Note, notes} from "@/components/note";
 import * as Tonal from "tonal";
+import fretboard from "@/components/fretboard.vue";
 
 export function findPositions(fretboard, note, ignoreOctave = true) {
     //Find all positions corresponding to a particular note
@@ -64,6 +65,76 @@ export function posEqual(pos1, pos2) {
 
     return pos1.string === pos2.string && pos1.fret === pos2.fret;
 
+}
+
+export function countTritonesResolutions(voicing1, voicing2, chord1, chord2, fretboard) {
+    if (voicing1===null) return 0;
+    let intervals1 = findIntervals(voicing1, chord1.notes, fretboard);
+    let intervals2 = findIntervals(voicing2, chord2.notes, fretboard);
+
+    let tritoneRes = 0;
+
+    for (let i = 0; i < intervals1.length; i++) {
+        let interval1 = intervals1[i];
+        let interval2 = intervals2.find(interv => interv.string1 === interval1.string1 && interv.string2 === interval1.string2);
+        if (interval2!==undefined)
+        {
+            let condition = interval1.interval==='5d' && (interval2.interval ==='3M' || interval2.interval==='4P') ||
+                interval1.interval==='4A' && (interval2.interval ==='5P' || interval2.interval==='6m');
+
+            if (condition) tritoneRes++;
+        }
+    }
+
+
+    //return 0; //to deactivate the function use this
+    return tritoneRes;
+
+}
+
+
+export function getNote(position, fretboard, chordNotes=null) {
+    //Return the note corresponding to a given position on the fretboard
+
+    //Optional parameter chord is used because sometimes we want the returned note as
+    //it would appear inside a given chord, and getNote on its own may return a different but
+    //enhamornically equivalent note
+
+
+    let note = fretboard[position.string][position.fret];
+    if (chordNotes===null) return note;
+
+    if (chordNotes.find(x => x === note.pitch)!==undefined)
+    {
+        return note;
+    } else
+    {
+        //Find the correct enharmonic note that fits in the chord
+        for (let i = 0; i < chordNotes.length; i++) {
+            if (note.equalsIgnoreOctave(new Note(chordNotes[i], null)))
+                return new Note(chordNotes[i], note.octave);
+        }
+
+        //As a last check, if someone passes a note which is not contained inside chord notes
+        //here we return that note
+        return note;
+    }
+}
+
+export function findInterval(pos1, pos2, chordNotes, fretboard) {
+    return Tonal.Interval.distance(getNote(pos1, fretboard, chordNotes).pitch+getNote(pos1, fretboard, chordNotes).octave,
+        getNote(pos2, fretboard, chordNotes).pitch + getNote(pos2, fretboard, chordNotes).octave);
+}
+
+export function findIntervals(voicing, chordNotes, fretboard) {
+    let intervals = [];
+    for (let i = 0; i < voicing.length-1; i++) {
+        let string1 = voicing[i].string;
+        let string2 = voicing[i+1].string;
+        let interval = findInterval(voicing[i], voicing[i+1], chordNotes, fretboard);
+        intervals.push({'string1': string1, 'string2': string2, 'interval': interval});
+    }
+    return intervals;
 }
 
 export function countFrettedNotes(positions) {

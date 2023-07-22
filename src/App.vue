@@ -121,6 +121,8 @@ import Tuning from './components/tuning.vue'
 import Options from './components/options.vue'
 import MidiInput from "@/components/MidiInput.vue";
 import * as voicingUtils from './components/utils/voicing'
+import * as feasibilityUtils from './components/utils/feasibility'
+import fretboard from "@/components/fretboard.vue";
 
 /* For debugging in webstorm: CTRL+SHIFT+CLICK on the localhost link after
 npm run dev
@@ -283,7 +285,7 @@ export default {
           //Not so efficient, just for a quick implementation
           let me = this
           me.data.tuning = newTuning;
-          me.data.fretboardMatrix = createFretboard(numStrings, numFrets, me.data.tuning);
+          me.data.fretboardMatrix = voicingUtils.createFretboard(numStrings, numFrets, me.data.tuning);
           if (me.voicingSequence !== null)
           {
             //Regenerate voicing sequence
@@ -388,7 +390,7 @@ export default {
                 });
                 let foundNotes = [];
                 for (let i = 0; i < me.voicingSequence[k].length; i++) {
-                    foundNotes.push(this.getNote(me.voicingSequence[k][i]));
+                    foundNotes.push(voicingUtils.getNote(me.voicingSequence[k][i], this.data.fretboardMatrix));
                 }
                 await playChord(foundNotes, me.voicingSequence[k],id);
             }
@@ -396,159 +398,6 @@ export default {
                 me.stop()
             }
         },
-
-      checkFeasible(voicing) {
-  //A more in-depth check to see if a voicing is actually feasible,
-  //taking into account the fingering
-
-  //The idea is as follows:
-  //1) Fingers cannot cross
-  //2) We will always play the min fret using index finger
-  // (this is a fair assumption, as in most cases were some "spontaneous" fingering may not follow this rule,
-  // we can still find an alternative feasible fingering which does follow this rule)
-  //3) If difficult mode is disabled: Fret distance between fingers cannot be higher than "finger distance"
-  //(This is a more restrictive assumption. It works fairly well with major, minor and 7th chords but it makes
-  //many 9 chords impossible to play, since they naturally require at least a stretch of 2 frets for two consecutive
-  //fingers.
-  //4) if difficultMode is enabled, fret distance must be <= finger distance + 1
-
-  let extraFretSpace = this.data.options.difficultMode ? 1 : 0;
-
-  let voicingLocal = voicing.slice(); //shallow copy
-
-
-  let availableFingers = [1, 2, 3];
-  let usedFingers = [];
-
-  let frettedNotesCount = voicingUtils.countFrettedNotes(voicing);
-  let isBarre = voicingUtils.canApplyBarre(voicing, frettedNotesCount);
-
-  //Remove all open strings, as they don't need to be checked
-  voicingLocal = voicingLocal.filter(x => x.fret !== 0);
-
-  //If all strings are open (unlikely but check it), return true already
-  if (voicingLocal.length === 0) return true;
-
-  //Use index finger to play minimum non-zero fret
-  let minFret = voicingUtils.getMinFret(voicingLocal);
-  //Take one string (doesn't matter which) having min fret
-  let indexPos = voicingLocal.find(pos => pos.fret === minFret);
-
-  //Add index finger to usedFingers structure
-  usedFingers.push({'finger': 0, 'pos': indexPos});
-
-
-  //Remove the position assigned to index
-  if (isBarre) {
-    //If it's a barre chord, then remove all the positions having fret = minFret
-    voicingLocal = voicingLocal.filter(pos => pos.fret !== minFret);
-  } else {
-    //Not a barre chord, remove only one exact position
-    voicingLocal = voicingLocal.filter(pos => !voicingUtils.posEqual(pos, indexPos));
-  }
-  //Again, before proceeding check if we run out of positions to cover. In that case return true
-  if (voicingLocal.length === 0) return true;
-  //Take the next position (doesn't matter which one it is)
-  let currentPos = voicingLocal.shift(); //also remove it from the voicing array
-  let currentFret = currentPos.fret;
-  //Check available fingers for this position
-  for (let j = 0; j < availableFingers.length; j++) {
-    let finger = availableFingers[j];
-    let usable = true;
-    for (let k = 0; k < usedFingers.length && usable; k++) {
-      //Check distance and check not crossing rule
-      let usedFinger = usedFingers[k].finger;
-      let usedFret = usedFingers[k].pos.fret;
-      let crossing = (finger-usedFinger)*(currentFret-usedFret) < 0; //if one grows and other decreases, they cross
-      let fingerDistance = Math.abs(finger-usedFinger);
-      let fretDistance = Math.abs(currentFret-usedFret);
-      //Add the extra fret space (=1 if difficult mode), but only if it's not between medium and ring finger
-      if ((finger+usedFinger)!==3) fretDistance-=extraFretSpace;
-      usable = !crossing && fingerDistance >= fretDistance;
-    }
-    if (usable) {
-      //If usable, try using this finger
-      //(it means this finger is surely usable, however this might not be the correct choice.
-      //To know it for sure we must try fretting all notes. Hence all allowed combinations must be considered.)
-
-
-      //Shallow copy
-      let usedFingersTmp = usedFingers.slice();
-      let availableFingersTmp = availableFingers.slice();
-      //Add new finger
-      usedFingersTmp.push({'finger': finger, 'pos': currentPos});
-      //Remove from available fingers
-      availableFingersTmp.splice(j, 1);
-      //Recursive call
-      //Stop as soon as you find a feasible fingering
-      if (this.checkFeasibleIntermediate(voicingLocal, availableFingersTmp, usedFingersTmp)) return true;
-    }
-  }
-  //If no next finger led to a feasible fingering position
-  //(Or there were no more fingers available)
-  // then the chord is not feasible
-  return false;
-
-
-},
-
-      checkFeasibleIntermediate(voicing, availableFingers, usedFingers)
-{
-
-
-  let extraFretSpace = this.data.options.difficultMode ? 1 : 0;
-
-  if (voicing.length === 0) return true;
-
-  if (availableFingers.length === 0) return false;
-
-  //Create a local shallow copy of voicing
-  let voicingTmp = voicing.slice();
-
-  let currentPos = voicingTmp.shift(); //also remove it from the voicing array
-  let currentFret = currentPos.fret;
-
-
-  //Check available fingers for this position
-  for (let j = 0; j < availableFingers.length; j++) {
-    let finger = availableFingers[j];
-    let usable = true;
-    for (let k = 0; k < usedFingers.length && usable; k++) {
-      //Check distance and check not crossing rule
-      let usedFinger = usedFingers[k].finger;
-      let usedFret = usedFingers[k].pos.fret;
-      let crossing = (finger-usedFinger)*(currentFret-usedFret) < 0; //if one grows and other decreases, they cross
-      let fingerDistance = Math.abs(finger-usedFinger);
-      let fretDistance = Math.abs(currentFret-usedFret);
-      if ((finger+usedFinger)!==3) fretDistance-=extraFretSpace;
-      usable = !crossing && fingerDistance >= fretDistance;
-    }
-    if (usable) {
-      //If usable, try using this finger
-      //(it means this finger is surely usable, however this might not be the correct choice.
-      //To know it for sure we must try fretting all notes. Hence all allowed combinations must be considered.)
-
-
-      //Shallow copy
-      let usedFingersTmp = usedFingers.slice();
-      let availableFingersTmp = availableFingers.slice();
-      //Add new finger
-      usedFingersTmp.push({'finger': finger, 'pos': currentPos});
-      //Remove from available fingers
-      availableFingersTmp.splice(j, 1);
-      //Recursive call
-      //Stop as soon as you find a feasible fingering
-      if (this.checkFeasibleIntermediate(voicingTmp, availableFingersTmp, usedFingersTmp)) return true;
-    }
-  }
-  //If no next finger led to a feasible fingering position
-  //(Or there were no more fingers available)
-  // then the chord is not feasible
-  return false;
-
-},
-
-
 
       getVoicingSequence(chords, recursiveDepth = 4) {
 
@@ -573,7 +422,7 @@ export default {
     chordVoicings = chordVoicings.slice(0, 5);
 
     //In-depth feasibility check (considering fingering)
-    chordVoicings = chordVoicings.filter(voicing => this.checkFeasible(voicing));
+    chordVoicings = chordVoicings.filter(voicing => feasibilityUtils.checkFeasible(voicing));
 
     //if inversions are allowed, add them
     if (this.data.options.allowInversions && i > 0) {
@@ -582,7 +431,7 @@ export default {
         let chordVoicingsInverted = this.findVoicings(chords[i], this.data.fretboardMatrix, inversion, constraints);
         this.sortVoicings(chordVoicingsInverted);
         chordVoicingsInverted = chordVoicingsInverted.slice(0, 5);
-        chordVoicingsInverted = chordVoicingsInverted.filter(voicing => this.checkFeasible(voicing));
+        chordVoicingsInverted = chordVoicingsInverted.filter(voicing => feasibilityUtils.checkFeasible(voicing));
         chordVoicings = chordVoicings.concat(chordVoicingsInverted);
       }
     }
@@ -601,33 +450,6 @@ export default {
 },
 
 
-      getNote(position, chordNotes=null) {
-  //Return the note corresponding to a given position on the fretboard
-
-  //Optional parameter chord is used because sometimes we want the returned note as
-  //it would appear inside a given chord, and getNote on its own may return a different but
-  //enhamornically equivalent note
-
-
-  let note = this.data.fretboardMatrix[position.string][position.fret];
-  if (chordNotes===null) return note;
-
-  if (chordNotes.find(x => x === note.pitch)!==undefined)
-  {
-    return note;
-  } else
-  {
-    //Find the correct enharmonic note that fits in the chord
-    for (let i = 0; i < chordNotes.length; i++) {
-      if (note.equalsIgnoreOctave(new Note(chordNotes[i], null)))
-        return new Note(chordNotes[i], note.octave);
-    }
-
-    //As a last check, if someone passes a note which is not contained inside chord notes
-    //here we return that note
-    return note;
-  }
-},
       recursivePositionSearch(previousPositions, lastNote, chordNotes, validPositions, constraints, lastInterval=null) {
   //Recursively find valid positions for a chord
   //Check if this voicing is acceptable
@@ -667,15 +489,15 @@ export default {
       let newPositions = previousPositions.slice();
       newPositions.push(nextPosition); //add the new element
       //Again I use splice to create shallow copy, otherwise we will add other voicings together
-      let nextNote = this.getNote(nextPosition, chordNotes);
+      let nextNote = voicingUtils.getNote(nextPosition, this.data.fretboardMatrix, chordNotes);
       lastInterval = Tonal.Interval.distance(lastNote.pitch, nextNote.pitch);
-      this.recursivePositionSearch(newPositions, this.getNote(nextPosition, chordNotes), chordNotes, validPositions, constraints, lastInterval);
+      this.recursivePositionSearch(newPositions, voicingUtils.getNote(nextPosition, this.data.fretboardMatrix, chordNotes), chordNotes, validPositions, constraints, lastInterval);
     }
   }
 },
 
       getDistinctPitchesFromVoicing(voicing) {
-  let voicingPitches = voicing.map(x => this.getNote(x).pitch);
+  let voicingPitches = voicing.map(x => voicingUtils.getNote(x, this.data.fretboardMatrix).pitch);
   return new Set(voicingPitches);
 },
 
@@ -695,7 +517,7 @@ export default {
 
   //Get the exact note corresponding to the position found
   //(we need to know the octave)
-  let bassNote = this.getNote(bassPos[0]);
+  let bassNote = voicingUtils.getNote(bassPos[0], this.data.fretboardMatrix);
 
   let chordVoicings = []; //will be filled with all the voicings for the complete chord
   //This will be a list of objects of the form
@@ -723,7 +545,7 @@ export default {
   //Set of the notes which have been found during positions research
   let notesFound = [];
   for (let i = 0; i < positions.length; i++) {
-    notesFound.push(this.getNote(positions[i]));
+    notesFound.push(voicingUtils.getNote(positions[i], this.data.fretboardMatrix));
   }
   //If the chord has only three notes, then check if it contains all of them
   if (chordNotes.length === 3) {
@@ -773,7 +595,7 @@ export default {
   {
     //Possibly some checks
 
-    if (constraints.noDoubleP4 && this.findIntervals(previousPositions, chordNotes).find(x => x.interval === '4P')!==undefined)
+    if (constraints.noDoubleP4 && voicingUtils.findIntervals(previousPositions, chordNotes, this.data.fretboardMatrix).find(x => x.interval === '4P')!==undefined)
     {
       chordNotes = chordNotes.filter(note => Tonal.Interval.distance(lastNote.pitch, note)!=='4P')
 
@@ -781,7 +603,7 @@ export default {
     }
 
 
-    if (constraints.noDouble3rd && previousPositions.filter(x => this.getNote(x).pitch === chordNotes[1]).length > 0)
+    if (constraints.noDouble3rd && previousPositions.filter(x => voicingUtils.getNote(x, this.data.fretboardMatrix).pitch === chordNotes[1]).length > 0)
     {
       chordNotes.splice(1, 1); //avoid doubling the third (e.g. of a dominant function chord (it's the 7th))
     }
@@ -789,12 +611,12 @@ export default {
 
   }
   let pos = {'string': string, 'fret': 0};
-  let posNote = this.getNote(pos);
+  let posNote = voicingUtils.getNote(pos, this.data.fretboardMatrix);
   //Check if it's part of chord notes and it's not equal to lastNote (even different octave)
   if (this.checkNoteValidity(chordNotes, posNote, lastNote, lastInterval, previousPositions)) positions.push(pos);
   for (let j = startIndex; j <= stopIndex; j++) {
     pos = {'string': string, 'fret': j};
-    posNote = this.getNote(pos);
+    posNote = voicingUtils.getNote(pos, this.data.fretboardMatrix);
     if (this.checkNoteValidity(chordNotes, posNote, lastNote, lastInterval, previousPositions)) positions.push(pos);
   }
   return positions;
@@ -809,14 +631,10 @@ checkNoteValidity(chordNotes, posNote, lastNote, lastInterval, previousPositions
   //Do not stack two tritone intervals (create strong dissonance)
   let cond2 = (lastInterval!=='4A' && lastInterval!=='5d') ||(currentInterval!=='4A' && currentInterval!=='5d');
   //Avoid tripling tones (overemphasize that tone)
-  let cond3 = previousPositions.filter(x => this.getNote(x).equalsIgnoreOctave(posNote)).length < 2;
+  let cond3 = previousPositions.filter(x => voicingUtils.getNote(x, this.data.fretboardMatrix).equalsIgnoreOctave(posNote)).length < 2;
   return cond1 && cond2 && cond3;
 },
 
-      findInterval(pos1, pos2, chordNotes) {
-  return Tonal.Interval.distance(this.getNote(pos1, chordNotes).pitch+this.getNote(pos1, chordNotes).octave,
-      this.getNote(pos2, chordNotes).pitch + this.getNote(pos2, chordNotes).octave);
-},
 
       sortVoicings(voicings) {
   //Sort voicings from the "best" to the worst based on some principles
@@ -873,45 +691,6 @@ checkNoteValidity(chordNotes, posNote, lastNote, lastInterval, previousPositions
 },
 
 
-      findIntervals(voicing, chordNotes) {
-  let intervals = [];
-  for (let i = 0; i < voicing.length-1; i++) {
-    let string1 = voicing[i].string;
-    let string2 = voicing[i+1].string;
-    let interval = this.findInterval(voicing[i], voicing[i+1], chordNotes);
-    intervals.push({'string1': string1, 'string2': string2, 'interval': interval});
-  }
-  return intervals;
-},
-
-
-
-      countTritonesResolutions(voicing1, voicing2, chord1, chord2) {
-  if (voicing1===null) return 0;
-  let intervals1 = this.findIntervals(voicing1, chord1.notes);
-  let intervals2 = this.findIntervals(voicing2, chord2.notes);
-
-  let tritoneRes = 0;
-
-  for (let i = 0; i < intervals1.length; i++) {
-    let interval1 = intervals1[i];
-    let interval2 = intervals2.find(interv => interv.string1 === interval1.string1 && interv.string2 === interval1.string2);
-    if (interval2!==undefined)
-    {
-      let condition = interval1.interval==='5d' && (interval2.interval ==='3M' || interval2.interval==='4P') ||
-          interval1.interval==='4A' && (interval2.interval ==='5P' || interval2.interval==='6m');
-
-      if (condition) tritoneRes++;
-    }
-  }
-
-
-  //return 0; //to deactivate the function use this
-  return tritoneRes;
-
-},
-
-
       pickBoundedVoicingSequence(chordsVoicings, bound) {
           let start = 0;
           let bestSequence = [];
@@ -956,7 +735,7 @@ checkNoteValidity(chordNotes, posNote, lastNote, lastInterval, previousPositions
   let maxTritoneRes = -1;
   let bestSequence = [];
   for (let j = 0; j < currentVoicings.length; j++) {
-    let tritoneRes = this.countTritonesResolutions(previousVoicing, currentVoicings[j], previousChord, currentChord);
+    let tritoneRes = voicingUtils.countTritonesResolutions(previousVoicing, currentVoicings[j], previousChord, currentChord, this.data.fretboardMatrix);
     let distance = voicingUtils.computeDistance(previousVoicing, currentVoicings[j]);
     if (i < chordsVoicings.length - 1) {
       let recursiveResult = this.pickBestVoicingSequence(chordsVoicings, currentVoicings[j], i + 1, currentChord);
