@@ -16,7 +16,7 @@ An hosted running version of the app can be found at: ...
 Chord voicings are not found in a database look-up fashion but in an algorithmic way. While this increases generation time, it offers some advantages:
 - the user is not constrained by stored and common positions;
 - it works with custom tunings;
-- it works with more or less strings (theoretically, not implemented at the moment).
+- it potentially works with more or less strings (not implemented yet).
 
 ## Usage
 
