@@ -81,11 +81,16 @@ If you whish to build or run the app in you local environment, you will need to:
   - command ```npm run dev``` (development mode)
   - building the production version with ```npm run build``` and pre-viewing it locally with ```npm run preview```
 
+## Dependencies
+
+The applications relies mainly on three dependencies:
+- Vue.js: active as the main framework ...................
+- tonal.js: used for chord selection (chord tones database), chord recognition and computation of intervallic distance between notes
+- audiosynth.js: employed for acoustic guitar sound synthesis (to avoid the use of samples)
 
 ## Documentation
 
-To be filled, but maybe we will skip this part here (or keep it minimal).
-
+Here the main functions of the generation algorithm are listed and described.
 
 ### getVoicingSequence
 
@@ -127,7 +132,7 @@ Then it searches for new notes by calling "findNextPositions", which finds all p
 
 This function returns the next candidate note positions (on the next string), based on the following principles:
 - fret distance is not greater than two frets, compared to "lastPosition" fret (actually, the fret chosen for the previously examined string)
-- note is different from "lastNote" (at least the note or the octave must be different ???????????????????'??)
+- note is different from "lastNote" (at least the note or the octave must be different)
 - the distance from "minFret" is not greater than four frets (the distance from the first fret considered and the actual one must not exceed four)
 - the notes belong to the chord (the tones of the chord are gathered in "chordNotes")
 - special exceptional rules applies for the zero fret (open string) (WHICH ONES???????????????????)
