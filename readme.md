@@ -102,12 +102,14 @@ This function sets two constraints for the generation of the voicings, based on 
 
 ### findVoicings
 
-This function finds all the possible voicings for a single chord, considering the provided constraints. The following steps are performed:
-1. find the bass position (whenever possible, among the first 5 frets and on the lowest string possible)
+This function finds all the possible voicings for a single chord, considering the provided constraints. It performs the following steps:
+1. finds the bass position (whenever possible, among the first 5 frets and on the lowest string possible)
 2. calls "recursivePositionSearch"
 3. calls "sortVoicings"
-4. keep only the first 5 voicings returned from sortVoicings
-
+4. keeps only the first 5 voicings obtained in the previous step
+5. applies the in-depth feasibility check to filter returned voicings by calling "checkFeasible"
+6. if chord inversions are allowed ("allowInversions" == true), then repeats the above process using the other chord tones in bass position and adds the found voicings to the list (notes: inversions with seventh in bass position are not allowed and the first chord can not be inverted)
+Finally, it calls "pickBoundedVoicingSequence" to build the best voicing sequences from the lists of voicings found for each chord of the progression.
 
 ### recursivePositionSearch
 
