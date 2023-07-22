@@ -9,6 +9,7 @@ An hosted running version of the app can be found at: ...
 - [Overview](#overview)
 - [Usage](#usage)
 - [Build and Run the App Locally](#build-and-run-the-app-locally)
+- [Dependencies](#dependencies)
 - [Documentation](#documentation)
 
 ## Overview
