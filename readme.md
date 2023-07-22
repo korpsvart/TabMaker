@@ -91,7 +91,7 @@ To be filled, but maybe we will skip this part here (or keep it minimal).
 
 This function gets as input:
 - the chord sequence (fundamental notes and types)
-- the "recursiveDepth", that is the maximum number of valid voicings which can be found for each chord before stopping the recursive search (for now it is set equal to 4 by default)
+- the "recursiveDepth", that is the maximum number of valid sequences which can be found before stopping the recursive search (for now it is set equal to 4 by default)
 After, it calls "buildConstraints" and then "findVoicings".
 
 ### buildConstraints
@@ -101,6 +101,13 @@ This function sets two constraints for the generation of the voicings, based on 
 - it prevents the voicing from having two perfect fourth intervals if the chord is inverted
 
 ### findVoicings
+
+This function finds all the possible voicings for a single chord, considering the provided constraints. The following steps are performed:
+1. find the bass position (whenever possible, among the first 5 frets and on the lowest string possible)
+2. calls "recursivePositionSearch"
+3. calls "sortVoicings"
+4. keep only the first 5 voicings returned from sortVoicings
+
 
 ### recursivePositionSearch
 
