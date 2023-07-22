@@ -89,15 +89,16 @@ To be filled, but maybe we will skip this part here (or keep it minimal).
 
 ### getVoicingSequence
 
-This function gets as input the chord sequence (fundamental notes and chord types) and set the "recursiveDepth" (the maximum number of valid voicings which can be found for each chord before stopping the recursive search; for now it is set equal to 4 by default).
-It calls "buildConstraints" and "findVoicings"
+This function gets as input:
+- the chord sequence (fundamental notes and types)
+- the "recursiveDepth", that is the maximum number of valid voicings which can be found for each chord before stopping the recursive search (for now it is set equal to 4 by default)
+After, it calls "buildConstraints" and then "findVoicings".
 
 ### buildConstraints
 
 This function sets two constraints for the generation of the voicings, based on the chord type and inversion:
 - it prohibits the doubling of the third if the chord have a dominant function (the type is "dominant seventh" and there's a perfect fourth between its root and the following chord one)
 - it prevents the voicing from having two perfect fourth intervals if the chord is inverted
-After, it calls "findVoicings".
 
 ### findVoicings
 
