@@ -115,7 +115,13 @@ Finally, it calls "pickBoundedVoicingSequence" to build the best voicing sequenc
 
 ### findNextPositions
 
-
+This function returns the next candidate positions (on the next string) (POSITION OF WHAT?), based on the following principles:
+- fret distance is not greater than two frets, compared to "lastPosition" fret (actually, the fret chosen for the previously examined string)
+- note is different from "lastNote" (at least the note or the octave must be different ????)
+- the distance from "minFret" is not greater than four frets (the distance from the first fret considered and the actual one must not exceed four)
+- the notes belong to the chord (the tones of the chord are gathered in "chordNotes")
+- special exceptional rules applies for the zero fret (open string) (WHICH ONES?????)
+Notice that this function does not perform a perfect check on the chords playability: it only excludes the ones which are obviously not playable. The in-depth check will be done by the "checkFeasible" function.
 
 ### sortVoicings
 
@@ -135,7 +141,7 @@ It works recursively and it stops as soon as a feasible fingering is found.
 
 ### canApplyBarre
 
-This function checks if the barre technique can be applied to a chord voicing. It is called when the number of fretted notes is greater than 4:
+This function checks if the barre technique can be applied to a chord voicing. It is called when the number of fretted notes is greater than four:
 - it returns true if the
 - it returns false otherwise (the voicing is actually judged unplayable)
 A simplyfing assumption is made: the barre can be applied only on the leftmost fret, with the index finger.
