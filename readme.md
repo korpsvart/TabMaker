@@ -10,16 +10,6 @@ An hosted running version of the app can be found at: ...
 - [Usage](#usage)
 - [Build and Run the App Locally](#build-and-run-the-app-locally)
 - [Documentation](#documentation)
-  - [getVoicingSequence](#getvoicingsequence)
-  - [buildConstraints](#buildconstraints)
-  - [findVoicings](#findvoicings)
-  - [recursivePositionSearch](#recursivepositionsearch)
-  - [findNextPositions](#findnextpositions)
-  - [sortVoicings](#sortvoicings)
-  - [pickBoundedVoicingSequence](#pickboundedvoicingsequence)
-  - [checkFeasible](#checkfeasible)
-  - [canApplyBarre](#canapplybarre)
-  - [compareVoicings](#comparevoicings)
 
 ## Overview
 
