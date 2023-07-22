@@ -92,6 +92,7 @@ To be filled, but maybe we will skip this part here (or keep it minimal).
 This function gets as input:
 - the chord sequence (fundamental notes and types)
 - the "recursiveDepth", that is the maximum number of valid sequences which can be found before stopping the recursive search (for now it is set equal to 4 by default)
+
 After, it calls "buildConstraints" and then "findVoicings".
 
 ### buildConstraints
@@ -122,6 +123,7 @@ This function returns the next candidate positions (on the next string) (POSITIO
 - the distance from "minFret" is not greater than four frets (the distance from the first fret considered and the actual one must not exceed four)
 - the notes belong to the chord (the tones of the chord are gathered in "chordNotes")
 - special exceptional rules applies for the zero fret (open string) (WHICH ONES?????)
+
 Notice that this function does not perform a perfect check on the chords playability: it only excludes the ones which are obviously not playable. The in-depth check will be done by the "checkFeasible" function.
 
 ### sortVoicings
@@ -138,6 +140,7 @@ This function performs a more in-depth check to determine the feasibility of a v
 - the minimum fret is always played with the index finger (even in situations where spontaneous fingering may not follow this principle, an alternative one which respects such rule can typically be found)
 - if the "difficultMode" is disabled, no stretches between consecutive fingers are allowed (this assumption is quite restrictive since it makes many ninth chords impossible to play. However, it works well for major, minor, and seventh chords)
 - id the "difficultMode" is enabled, one fret stretch between two consecutive fingers (except for middle and ring finger) is allowed
+
 It works recursively and it stops as soon as a feasible fingering is found.
 
 ### canApplyBarre
@@ -145,7 +148,8 @@ It works recursively and it stops as soon as a feasible fingering is found.
 This function checks if the barre technique can be applied to a chord voicing. It is called when the number of fretted notes is greater than four:
 - it returns true if the
 - it returns false otherwise (the voicing is actually judged unplayable)
-A simplyfing assumption is made: the barre can be applied only on the leftmost fret, with the index finger.
+
+A simplyfing assumption is made: barre can be applied only on the leftmost fret, with the index finger.
 
 ### compareVoicings
 
