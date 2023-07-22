@@ -115,16 +115,24 @@ Finally, it calls "pickBoundedVoicingSequence" to build the best voicing sequenc
 
 ### recursivePositionSearch
 
+This function recursively finds valid voicings for the chord. 
+At first, it performs some checks:
+- voicing completeness (checks if it contains all the chord tones, with the exception of the fifth for a tetrade)
+- search for more extended version of the chord (if completeness is guaranteed and there are free guitar strings left to analyze)
+- barre voicing (if there are more than four fretted notes)
+
+Then it searches for new notes by calling "findNextPositions", which finds all possible frets to be played on the next string. Each valid position is added to the current voicing and "findNextPositions" is recursively called the on the updated voicing.
+
 ### findNextPositions
 
-This function returns the next candidate positions (on the next string) (POSITION OF WHAT????????????????), based on the following principles:
+This function returns the next candidate note positions (on the next string), based on the following principles:
 - fret distance is not greater than two frets, compared to "lastPosition" fret (actually, the fret chosen for the previously examined string)
 - note is different from "lastNote" (at least the note or the octave must be different ???????????????????'??)
 - the distance from "minFret" is not greater than four frets (the distance from the first fret considered and the actual one must not exceed four)
 - the notes belong to the chord (the tones of the chord are gathered in "chordNotes")
 - special exceptional rules applies for the zero fret (open string) (WHICH ONES???????????????????)
 
-Notice that this function does not perform a perfect check on the chords playability: it only excludes the ones which are obviously not playable. The in-depth check will be done by the "checkFeasible" function.
+Notice that this function does not perform a perfect check on chords playability: it only excludes the ones which are obviously not playable. The in-depth check will be done by the "checkFeasible" function.
 
 ### sortVoicings
 
@@ -132,6 +140,7 @@ This function sorts the possible voicings found for a chord, according to the ou
 
 ### pickBoundedVoicingSequence
 
+?????????????????????????
 
 ### checkFeasible
 
