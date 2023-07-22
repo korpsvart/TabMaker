@@ -114,14 +114,12 @@
 <script>
 import * as Tonal from 'tonal'
 import {Note, notes} from "./components/note"
-import {enableMidi} from "./components/midi"
 import {playChord, stopChord} from "./components/sound"
 import FretboardEL from "./components/fretboard.vue"
 import Tab from "./components/tablature.vue"
 import Tuning from './components/tuning.vue'
 import Options from './components/options.vue'
 import MidiInput from "@/components/MidiInput.vue";
-import {debug} from "tone";
 
 /* For debugging in webstorm: CTRL+SHIFT+CLICK on the localhost link after
 npm run dev
@@ -134,17 +132,9 @@ allChords = allChords.filter(chord => {let n = Tonal.Chord.getChord(chord, "C").
 
 //Only keep at most 4 notes chords
 
-
-// let tuning = [new Note('E', 4),
-//     new Note('B', 3),
-//     new Note('G', 3),
-//     new Note('D', 3),
-//     new Note('A', 2),
-//     new Note('E', 2)];
 const numStrings = 6;
 const numFrets = 24;
 //We represent a fretboard as a matrix of Note objects
-//let fretboardMatrix = createFretboard(numStrings, numFrets, tuning);
 
 function findPositions(fretboard, note, ignoreOctave = true) {
     //Find all positions corresponding to a particular note
@@ -181,23 +171,6 @@ function createFretboard(numString, numFrets, tuning) {
     return fretboard;
 }
 
-
-function filterVoicings(voicings, chord, nextChord) {
-
-  //If the chord has dominant function, then we should not double the leading tone
-  if (chord.type === 'dominant seventh' && Tonal.Interval.distance(chord.notes[0], nextChord.notes[0])==='P5')
-  {
-    for (let i = 0; i < voicings.length; i++) {
-
-    }
-  }
-
-
-
-}
-
-
-
 function getMinFret(positions) {
   //Return the minimum fret between the given positions, open fret (0) excluded
 
@@ -222,13 +195,11 @@ function canApplyBarre(position, frettedNotes) {
 
 }
 
-
 function posEqual(pos1, pos2) {
 
   return pos1.string === pos2.string && pos1.fret === pos2.fret;
 
 }
-
 
 function countFrettedNotes(positions) {
   return positions.reduce((x, y) => {
@@ -236,28 +207,9 @@ function countFrettedNotes(positions) {
   }, 0);
 }
 
-function computeOverlap(previousVoicing, currentVoicing) {
-    //Compute number of common tones for two voicings
-    if (previousVoicing === null) return 0;
-    return previousVoicing.filter(x => currentVoicing.some(y => y.fret === x.fret && y.string === x.string)).length;
-}
-
-function computeStepRes(previousVoicing, currentVoicing) {
-  //Only on same string
-  if (previousVoicing == null) return 0;
-  let count = 0;
-  for (let i = 0; i < previousVoicing.length; i++) {
-    let pos = previousVoicing[i];
-    if (currentVoicing.filter(x => x.string === pos.string && Math.abs(x.fret - pos.fret) === 1).length > 0)
-      count++;
-  }
-  return count;
-}
-
 function computeDistance(previousVoicing, currentVoicing) {
   if (previousVoicing == null) return 6 - currentVoicing.length;
 
-  //let distance = 6 - currentVoicing.length;
   let distance=0;
   let totalStringsUsed = 0;
   let stringsNotPlayed = 0;
@@ -442,9 +394,6 @@ export default {
         isFretboardView(){
             return this.data.displayView ==='Fretboard'
         },
-        openTuningDialog(){
-
-        },
         addChord() {
             let me = this
             me.data.chordsSelect.push({name: 'm7', note: 'D'})
@@ -452,9 +401,6 @@ export default {
         addChordFromMidi(recognizedChord) {
           let chordObj = Tonal.Chord.get(recognizedChord[0]);
           this.data.chordsSelect.push({name: chordObj.aliases[0], note: chordObj.tonic});
-        },
-        midi() {
-            enableMidi();
         },
         changeTuning(newTuning) {
           //Not so efficient, just for a quick implementation
@@ -473,18 +419,6 @@ export default {
         //Not so efficient, just for a quick implementation
         let me = this
         me.data.options = newOptions;
-      },
-
-
-
-      propsToPass() {
-        let result = ['E', 'A', 'D', 'G', 'B', 'E'];
-
-        if (this.data.tuning) {
-          result = this.data.tuning.map(note => note.pitch);
-        }
-
-        return result;
       },
         submit() {
             let me = this
@@ -785,10 +719,7 @@ export default {
 
     chordsVoicings.push({'chord': chords[i], 'voicings': chordVoicings});
   }
-  //let bestSequence = this.pickBestVoicingSequence(chordsVoicings, null, 0);
-        let bestSequence = this.pickBoundedVoicingSequence(chordsVoicings, recursiveDepth);
-
-  return bestSequence;
+        return this.pickBoundedVoicingSequence(chordsVoicings, recursiveDepth);
 
 },
 
@@ -1090,15 +1021,6 @@ checkNoteValidity(chordNotes, posNote, lastNote, lastInterval, previousPositions
     let interval2 = intervals2.find(interv => interv.string1 === interval1.string1 && interv.string2 === interval1.string2);
     if (interval2!==undefined)
     {
-      //let condition = interval1.interval ==='4A' || interval1.interval === '5d';
-      // let fretDiff1 = Math.abs(voicing1.find(pos => pos.string === interval1.string1).fret -
-      //                 voicing2.find(pos => pos.string === interval1.string1).fret);
-      // let fretDiff2 = Math.abs(voicing1.find(pos => pos.string === interval1.string2).fret -
-      //     voicing2.find(pos => pos.string === interval1.string2).fret);
-      // condition = condition && (fretDiff1 ===1) && (fretDiff2 ===1);
-
-      //
-      //
       let condition = interval1.interval==='5d' && (interval2.interval ==='3M' || interval2.interval==='4P') ||
           interval1.interval==='4A' && (interval2.interval ==='5P' || interval2.interval==='6m');
 
@@ -1214,7 +1136,6 @@ checkNoteValidity(chordNotes, posNote, lastNote, lastInterval, previousPositions
     height: 100vh;
     color: #333;
     background: #f5f5f5
-    //background: radial-gradient(ellipse at center, #f5f5f5 0%,#ddd 100%);
 }
 .fretboard-figure-container{
     margin-top: 60px;
@@ -1313,8 +1234,6 @@ checkNoteValidity(chordNotes, posNote, lastNote, lastInterval, previousPositions
 .action-group{
     width: 200px;
     position: relative;
-    //left: 50%;
-    //margin-left: -100px;
     margin:15px;
     margin-top:0;
 }
@@ -1328,9 +1247,6 @@ checkNoteValidity(chordNotes, posNote, lastNote, lastInterval, previousPositions
 .play-container{
     position: relative;
     top:-50px;
-    //left: 50%;
-    //margin-left: -16px;
-
 }
 .music-play-button {
     position: relative;

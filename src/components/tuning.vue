@@ -1,5 +1,4 @@
 <script>
-import {Note, notes} from "./note.js"
 export default {
   props: {
     show: Boolean,
