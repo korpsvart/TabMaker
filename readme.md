@@ -33,14 +33,17 @@ Chord voicings are not found in a database look-up fashion but in an algorithmic
   - `ToggleButton.vue`: simple component implementing a custom toggle button
   - `Tuning.vue`: displays the tuning customization pop-up menu
 - `components/utils/` folder contains JS modules with functions and variables needed by the components to perform specific tasks:
-  - [feasibility.js](#feasibility.js)
-  - [fretboardModel.js](#fretboardModel.js)
+  - `feasibility.js`
+  - `fretboardModel.js`
   - `midiInput.js`: functions for handling MIDI data and applying chord recognition
   - `note.js`: classes and functions for musical notes representation
   - `sound.js`: functions for sound reproduction
-  - [voicing.js](#voicing.js)
+  - `voicing.js`
   - `tuning.js`: contains standard guitar tuning
   - `misc.js`: other miscellaneous functions
+
+The most important utility functions are lated described in detail in the [Documentation](#Documentation) section.
+
 
 ## Usage
 
@@ -102,10 +105,10 @@ If you wish to build or run the app in your local environment, you will need to:
 
 ## Dependencies
 
-The application relies mainly on three dependencies:
-- Vue.js: active as the main framework;
-- tonal.js: used for chord selection (chord tones database), chord recognition and computation of intervallic distance between notes;
-- audiosynth.js: employed for acoustic guitar sound synthesis (to avoid the use of samples).
+The application relies on three dependencies:
+- [Vue.js](https://vuejs.org/):  main framework used to realize the GUI;
+- [tonal.js](https://github.com/tonaljs/tonal): used for chord selection (chord tones database), chord recognition and computation of intervallic distance between notes;
+- [audiosynth](https://github.com/keithwhor/audiosynth).js: employed for acoustic guitar sound synthesis (to avoid the use of samples).
 
 ## Documentation
 
