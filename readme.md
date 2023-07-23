@@ -111,7 +111,7 @@ If you wish to build or run the app in your local environment, you will need to:
 The application relies on three dependencies:
 - [Vue.js](https://vuejs.org/):  main framework used to realize the GUI;
 - [tonal.js](https://github.com/tonaljs/tonal): used for chord selection (chord tones database), chord recognition and computation of intervallic distance between notes;
-- [audiosynth](https://github.com/keithwhor/audiosynth).js: employed for acoustic guitar sound synthesis (to avoid the use of samples).
+- [audiosynth.js](https://github.com/keithwhor/audiosynth): employed for acoustic guitar sound synthesis (to avoid the use of samples).
 
 ## Documentation
 
