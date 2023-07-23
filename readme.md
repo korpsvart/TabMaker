@@ -36,7 +36,7 @@ Chords can also be added by clicking the "Plus" button and removed using the sma
 <img src="/img/options.png" width="181" height="220">
 
 The "Options" button opens a pop-up menu that contains some toggle buttons for controlling the generation mechanism. The customizable options are:
-- "Chords difficulty": it controls the technical complexity of the generated voicing sequence. In "Easy mode", adjacent fingers must be on the same or adjacent frets and the total stretch can't cover more than 4 frets. "Hard mode" allows for one fret stretch between two consecutive fingers (except for middle and ring finger), bringing the maximum total stretch to 5 frets.
+- "Chords difficulty": it controls the technical complexity of the generated voicing sequence. In "Easy mode", adjacent fingers must be on the same or adjacent frets and the total stretch can't cover more than 4 frets. "Hard mode" allows for one fret stretch between two consecutive fingers (except for middle and ring finger), bringing the maximum total stretch to 5 frets;
 - "Allow inversions": it allows the use of chord inversions when generating voicings (except for the first one). Inversions are allowed by default and it's recommended to use them, although it could be desirable to switch them off when chord progressions only involve simple triads.
 
 The "Share" button copies the customized URL which embeds the current chord sequence, so that it can be shared or saved for later use without the need to re-select the entire progression from scratch.
@@ -60,7 +60,7 @@ The "Fast forward" and "Rewind"  buttons can be used to navigate the sequence du
 The "Tuning" button opens a pop-up menu which allows the user to select the note for each open string: this option is useful to find voicings on customized tunings and enables expert musicians to experiment new sonorities.
 
 There are two available visualization modes:
-- Fretboard: chord positions and note names are shown on a guitar fretboard. As the progression is played back, voicings are displayed one after the other together with the sound.
+- Fretboard: chord positions and note names are shown on a guitar fretboard. As the progression is played back, voicings are displayed one after the other together with the sound;
 - TAB: the entire chord sequence is shown using tablature notation, which illustrates the fingering to be used on the fretboard. As the progression is played back, the current chord is highlighted in sync with the sound.
 
 ## Build and Run the App Locally
@@ -75,9 +75,9 @@ If you whish to build or run the app in you local environment, you will need to:
 ## Dependencies
 
 The applications relies mainly on three dependencies:
-- Vue.js: active as the main framework
-- tonal.js: used for chord selection (chord tones database), chord recognition and computation of intervallic distance between notes
-- audiosynth.js: employed for acoustic guitar sound synthesis (to avoid the use of samples)
+- Vue.js: active as the main framework;
+- tonal.js: used for chord selection (chord tones database), chord recognition and computation of intervallic distance between notes;
+- audiosynth.js: employed for acoustic guitar sound synthesis (to avoid the use of samples).
 
 ## Documentation
 
@@ -86,26 +86,26 @@ Here the main functions of the generation algorithm are listed and described.
 ### getVoicingSequence
 
 This function gets as input:
-- the chord sequence (fundamental notes and types)
-- the "recursiveDepth", that is the maximum number of valid sequences which can be found before stopping the recursive search (for now it is set equal to 4 by default)
+- the chord sequence (fundamental notes and types).
+- the "recursiveDepth", that is the maximum number of valid sequences which can be found before stopping the recursive search (for now it is set equal to 4 by default).
 
 After, it calls "buildConstraints" and then "findVoicings".
 
 ### buildConstraints
 
 This function sets two constraints for the generation of the voicings, based on the chord type and inversion:
-- it prohibits the doubling of the third if the chord have a dominant function (the type is "dominant seventh" and there's a perfect fourth between its root and the following chord one)
-- it prevents the voicing from having two perfect fourth intervals if the chord is inverted
+- it prohibits the doubling of the third if the chord have a dominant function (the type is "dominant seventh" and there's a perfect fourth between its root and the following chord one).
+- it prevents the voicing from having two perfect fourth intervals if the chord is inverted.
 
 ### findVoicings
 
 This function finds all the possible voicings for a single chord, considering the provided constraints. It performs the following steps:
-1. finds the bass position (whenever possible, among the first 5 frets and on the lowest string possible)
-2. calls "recursivePositionSearch"
-3. calls "sortVoicings"
-4. keeps only the first 5 voicings obtained in the previous step
-5. applies the in-depth feasibility check to filter returned voicings by calling "checkFeasible"
-6. if chord inversions are allowed ("allowInversions" == true), then repeats the above process using the other chord tones in bass position and adds the found voicings to the list (notes: inversions with seventh in bass position are not allowed and the first chord can not be inverted)
+1. finds the bass position (whenever possible, among the first 5 frets and on the lowest string possible);
+2. calls "recursivePositionSearch";
+3. calls "sortVoicings";
+4. keeps only the first 5 voicings obtained in the previous step;
+5. applies the in-depth feasibility check to filter returned voicings by calling "checkFeasible";
+6. if chord inversions are allowed ("allowInversions" == true), then repeats the above process using the other chord tones in bass position and adds the found voicings to the list (notes: inversions with seventh in bass position are not allowed and the first chord can not be inverted).
 
 Finally, it calls "pickBoundedVoicingSequence" to build the best voicing sequences from the lists of voicings found for each chord of the progression.
 
@@ -113,20 +113,20 @@ Finally, it calls "pickBoundedVoicingSequence" to build the best voicing sequenc
 
 This function recursively finds valid voicings for the chord. 
 At first, it performs some checks:
-- voicing completeness (checks if it contains all the chord tones, with the exception of the fifth for a tetrade)
-- search for more extended version of the chord (if completeness is guaranteed and there are free guitar strings left to analyze)
-- barre voicing (if there are more than four fretted notes)
+- voicing completeness (checks if it contains all the chord tones, with the exception of the fifth for a tetrade);
+- search for more extended version of the chord (if completeness is guaranteed and there are free guitar strings left to analyze);
+- barre voicing (if there are more than four fretted notes).
 
 Then it searches for new notes by calling "findNextPositions", which finds all possible frets to be played on the next string. Each valid position is added to the current voicing and "findNextPositions" is recursively called the on the updated voicing.
 
 ### findNextPositions
 
 This function returns the next candidate note positions (on the next string), based on the following principles:
-- fret distance is not greater than two frets, compared to "lastPosition" fret (actually, the fret chosen for the previously examined string)
-- note is different from "lastNote" (at least the note or the octave must be different)
-- the distance from "minFret" is not greater than four frets (the distance from the first fret considered and the actual one must not exceed four)
-- the notes belong to the chord (the tones of the chord are gathered in "chordNotes")
-- special exceptional rules applies for the zero fret (open string) (WHICH ONES???????????????????)
+- fret distance is not greater than two frets, compared to "lastPosition" fret (actually, the fret chosen for the previously examined string);
+- note is different from "lastNote" (at least the note or the octave must be different);
+- the distance from "minFret" is not greater than four frets (the distance from the first fret considered and the actual one must not exceed four);
+- the notes belong to the chord (the tones of the chord are gathered in "chordNotes");
+- special exceptional rules applies for the zero fret (open string) (WHICH ONES???????????????????).
 
 Notice that this function does not perform a perfect check on chords playability: it only excludes the ones which are obviously not playable. The in-depth check will be done by the "checkFeasible" function.
 
@@ -141,10 +141,10 @@ This function sorts the possible voicings found for a chord, according to the ou
 ### checkFeasible
 
 This function performs a more in-depth check to determine the feasibility of a voicing by analyzing the fingering: 
-- fingers can not cross
-- the minimum fret is always played with the index finger (even in situations where spontaneous fingering may not follow this principle, an alternative one which respects such rule can typically be found)
-- if the "difficultMode" is disabled, no stretches between consecutive fingers are allowed (this assumption is quite restrictive since it makes many ninth chords impossible to play. However, it works well for major, minor, and seventh chords)
-- id the "difficultMode" is enabled, one fret stretch between two consecutive fingers (except for middle and ring finger) is allowed
+- fingers can not cross;
+- the minimum fret is always played with the index finger (even in situations where spontaneous fingering may not follow this principle, an alternative one which respects such rule can typically be found);
+- if the "difficultMode" is disabled, no stretches between consecutive fingers are allowed (this assumption is quite restrictive since it makes many ninth chords impossible to play. However, it works well for major, minor, and seventh chords);
+- id the "difficultMode" is enabled, one fret stretch between two consecutive fingers (except for middle and ring finger) is allowed.
 
 It works recursively and it stops as soon as a feasible fingering is found.
 
@@ -152,12 +152,12 @@ It works recursively and it stops as soon as a feasible fingering is found.
 
 This function checks if the barre technique can be applied to a chord voicing. It is called when the number of fretted notes is greater than four:
 - it returns true if the ???????????????????????
-- it returns false otherwise (the voicing is actually judged unplayable)
+- it returns false otherwise (the voicing is actually judged unplayable).
 
 A simplyfing assumption is made: barre can be applied only on the leftmost fret, with the index finger.
 
 ### compareVoicings
 
 This function is employed to sort the possible voicings found for a chord:
-- it prioritizes chords with more distinct pitch classes and, in case these are always equal, it puts first the chord with the highest overall number of notes
-- it leaves the order as it is (returns 0) if the controls performed before give a negative feedback (e.g. there are the exact same pitches and number of notes in each voicing)
+- it prioritizes chords with more distinct pitch classes and, in case these are always equal, it puts first the chord with the highest overall number of notes;
+- it leaves the order as it is (returns 0) if the controls performed before give a negative feedback (e.g. there are the exact same pitches and number of notes in each voicing).
