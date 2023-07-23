@@ -7,6 +7,7 @@ A hosted running version of the app can be found at: [https://korpsvart.github.i
 ## Table of Contents
 
 - [Overview](#overview)
+- [Files Organization](#files-organization)
 - [Usage](#usage)
 - [Build and Run the App Locally](#build-and-run-the-app-locally)
 - [Dependencies](#dependencies)
