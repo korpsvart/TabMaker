@@ -25,7 +25,7 @@ Chord voicings are not found in a database look-up fashion but in an algorithmic
 
 The upper part of the GUI is dedicated to the selection of the chord sequence.
 
-![](/img/UPPER.png)
+![](/img/upper.png)
 
 For each chord, the user can specify:
 - fundamental note;
