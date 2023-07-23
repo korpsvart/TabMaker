@@ -57,7 +57,8 @@ For each chord, the user can specify:
 - fundamental note;
 - type (e.g. Major (M), Minor (m), Major seventh (maj7), Minor seventh (m7), Dominant seventh (7), ...).
 
-Chords can also be added by clicking the "Plus" button and removed using the small crosses in the top right corners.
+Chords can added by clicking the "Plus" button and removed using the small crosses in the top right corners.
+Additionally, each chord "card" can be dragged and dropped in order to reorder the way the appear in the sequence.
 
 The "Options" button opens a pop-up menu that contains some toggle buttons for controlling the generation mechanism. The customizable options are:
 - "Chords difficulty": it controls the technical complexity of the generated voicing sequence. In "Easy mode", adjacent fingers must be on the same or adjacent frets and the total stretch can't cover more than 4 frets. "Hard mode" allows for one fret stretch between two consecutive fingers (except for middle and ring finger), bringing the maximum total stretch to 5 frets;

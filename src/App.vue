@@ -12,7 +12,10 @@
         <div class="card submit-container" >
             <div class="chords-container overflow-x-scroll">
                 <div class="chords-container-sub clearfix">
-                    <div v-for="(chord,index) in data.chordsSelect" class="chord-select-container" :class="chordHighlightClass(index)">
+                    <div v-for="(chord,index) in data.chordsSelect" class="chord-select-container" :class="chordHighlightClass(index)" draggable="true"
+                         @dragstart="handleDragStart(index)"
+                         @dragover="handleDragOver($event, index)"
+                         @drop="handleDrop($event, index)">
                         <img @click="deleteChord(index)" class="chord-delete" src="@/assets/close.svg">
                         <h5 >Chord {{index+1}}</h5>
                         <div class="input-group mb-3" >
@@ -287,6 +290,35 @@ export default {
           }
 
         },
+
+      //Drag methods
+      handleDragStart(index) {
+        // Store the index of the dragged chord in the dataTransfer object
+        event.dataTransfer.setData("text/plain", index);
+      },
+
+      handleDragOver(event, index) {
+        // Allow dropping only if the target index is different from the source index
+        const sourceIndex = parseInt(event.dataTransfer.getData("text/plain"));
+        if (index !== sourceIndex) {
+          event.preventDefault();
+        }
+      },
+
+      handleDrop(event, index) {
+        event.preventDefault();
+        const sourceIndex = parseInt(event.dataTransfer.getData("text/plain"));
+        this.reorderChords(sourceIndex, index);
+      },
+
+      reorderChords(sourceIndex, targetIndex) {
+        const tempChord = this.data.chordsSelect[sourceIndex];
+
+        // remove current chord
+        this.data.chordsSelect.splice(sourceIndex, 1);
+        // Shift all successive chords
+        this.data.chordsSelect.splice(targetIndex, 0, tempChord);
+      },
 
       changeOptions(newOptions) {
         //Not so efficient, just for a quick implementation
