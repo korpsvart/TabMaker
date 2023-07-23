@@ -63,7 +63,7 @@ There are two available visualization modes:
 - Fretboard: chord positions and note names are shown on a guitar fretboard. As the progression is played back, voicings are displayed one after the other together with the sound;
 - TAB: the entire chord sequence is shown using tablature notation, which illustrates the fingering to be used on the fretboard. As the progression is played back, the current chord is highlighted in sync with the sound.
 
-<img src="/img/tab.png">
+<img src="/img/tab.png" width="1039" height="332">
 
 ## Build and Run the App Locally
 
