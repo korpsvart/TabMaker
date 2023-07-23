@@ -57,6 +57,9 @@
               <button class="btn btn-primary" @click="toggleMidiEnabled">
                 {{ data.midiEnabled ? 'Disable Midi' : 'Enable Midi'}}
               </button>
+              <button class="btn btn-primary" @click="clearSequence">
+                Clear sequence
+              </button>
                 <img @click="share" class="share-btn" src="@/assets/share.svg">
             </div>
         </div>
@@ -248,6 +251,9 @@ export default {
         toggleMidiEnabled() {
           this.data.midiEnabled = !this.data.midiEnabled;
           setMIDIEnabled(this.data.midiEnabled);
+        },
+        clearSequence() {
+          this.data.chordsSelect = [];
         },
         deleteChord(index){
             let me = this;

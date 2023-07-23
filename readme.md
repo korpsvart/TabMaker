@@ -71,6 +71,8 @@ The "Enable/Disable MIDI" button toggles the MIDI input mode for the selection o
 
 The "Submit" button starts the generation algorithm with the currently selected chord sequence.
 
+The "Clear sequence" button empties the input chord sequence.
+
 ### Sequence Playback and Visualization
 
 The lower part of the GUI is dedicated to the visualization and playing of the generated sequence, and the tuning customization (this section appears once the "Submit" button has been clicked).
