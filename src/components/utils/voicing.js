@@ -251,7 +251,7 @@ export function recursivePositionSearch(previousPositions, lastNote, chordNotes,
     }
 }
 
-export function getVoicingSequence(chords, fretboard, numFrets, allowInversions, recursiveDepth = 4) {
+export function getVoicingSequence(chords, fretboard, numFrets, allowInversions, difficultModeEnabled, recursiveDepth = 4) {
 
     let chordsVoicings = [];
 
@@ -274,7 +274,7 @@ export function getVoicingSequence(chords, fretboard, numFrets, allowInversions,
         chordVoicings = chordVoicings.slice(0, 5);
 
         //In-depth feasibility check (considering fingering)
-        chordVoicings = chordVoicings.filter(voicing => feasibilityUtils.checkFeasible(voicing));
+        chordVoicings = chordVoicings.filter(voicing => feasibilityUtils.checkFeasible(voicing, difficultModeEnabled));
 
         //if inversions are allowed, add them
         if (allowInversions && i > 0) {
@@ -283,7 +283,7 @@ export function getVoicingSequence(chords, fretboard, numFrets, allowInversions,
                 let chordVoicingsInverted = findVoicings(chords[i], fretboard, numFrets, inversion, constraints);
                 sortVoicings(chordVoicingsInverted, fretboard);
                 chordVoicingsInverted = chordVoicingsInverted.slice(0, 5);
-                chordVoicingsInverted = chordVoicingsInverted.filter(voicing => feasibilityUtils.checkFeasible(voicing));
+                chordVoicingsInverted = chordVoicingsInverted.filter(voicing => feasibilityUtils.checkFeasible(voicing, difficultModeEnabled));
                 chordVoicings = chordVoicings.concat(chordVoicingsInverted);
             }
         }

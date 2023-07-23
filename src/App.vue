@@ -332,7 +332,7 @@ export default {
             let chordArray = data.chordsSelect.map((v) => {
                 return Tonal.Chord.getChord(v.name, v.note, v.note)
             })
-            me.voicingSequence = voicingUtils.getVoicingSequence(chordArray, data.fretboardMatrix, data.numFrets,data.options.allowInversions, data.recursiveDepth);
+            me.voicingSequence = voicingUtils.getVoicingSequence(chordArray, data.fretboardMatrix, data.numFrets,data.options.allowInversions, data.options.difficultMode, data.recursiveDepth);
             console.log(me.voicingSequence);
 
 
@@ -405,7 +405,7 @@ export default {
             data.pause = false;
             //Generate voicing sequence if it wasn't already
             if (me.voicingSequence===null)
-              me.voicingSequence = voicingUtils.getVoicingSequence(chordArray, data.fretboardMatrix, data.numFrets, data.options.allowInversions, data.recursiveDepth).sequence;
+              me.voicingSequence = voicingUtils.getVoicingSequence(chordArray, data.fretboardMatrix, data.numFrets, data.options.allowInversions, data.options.difficultMode, data.recursiveDepth).sequence;
             for(let k = me.data.playingPosition||0; k < me.voicingSequence.length; k++) {
                 if(!data.playing||data.playingID!==id){
                     return

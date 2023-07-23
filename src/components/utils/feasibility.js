@@ -159,7 +159,7 @@ export function checkFeasibleIntermediate(voicing, availableFingers, usedFingers
             availableFingersTmp.splice(j, 1);
             //Recursive call
             //Stop as soon as you find a feasible fingering
-            if (checkFeasibleIntermediate(voicingTmp, availableFingersTmp, usedFingersTmp)) return true;
+            if (checkFeasibleIntermediate(voicingTmp, availableFingersTmp, usedFingersTmp, difficultModeEnabled)) return true;
         }
     }
     //If no next finger led to a feasible fingering position
