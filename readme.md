@@ -49,7 +49,7 @@ The "submit" button starts the generation algorithm with the currently selected 
 
 The lower part of the GUI is dedicated to the visualization and playing of the generated sequence, and the tuning customization.
 
-![GUI_lower](/img/lower.png)
+
 
 The "play" button starts the sequence playback: each chord is reproduced with a brief strum from the lowest string to the highest one. During the playback phase, it switches to a "stop" button which can be used to interrupt the sound.
 
@@ -60,6 +60,8 @@ The "tuning" button opens a pop-up menu which allows the user to select the note
 There are two available visualization modes:
 - Fretboard: chord positions and note names are shown on a guitar fretboard. As the progression is played back, voicings are displayed one after the other together with the sound.
 - TAB: the entire chord sequence is shown using tablature notation, which illustrates the fingering to be used on the fretboard. As the progression is played back, the current chord is highlighted in sync with the sound.
+
+![GUI_lower](/img/lower.png)
 
 ## Build and Run the App Locally
 
@@ -73,7 +75,7 @@ If you whish to build or run the app in you local environment, you will need to:
 ## Dependencies
 
 The applications relies mainly on three dependencies:
-- Vue.js: active as the main framework ...................
+- Vue.js: active as the main framework
 - tonal.js: used for chord selection (chord tones database), chord recognition and computation of intervallic distance between notes
 - audiosynth.js: employed for acoustic guitar sound synthesis (to avoid the use of samples)
 
