@@ -109,17 +109,17 @@
 </template>
 <script>
 import * as Tonal from 'tonal'
-import {notes} from "./components/utils/Note"
-import {playChord, stopChord} from "./components/utils/Sound"
+import {notes} from "./components/utils/note"
+import {playChord, stopChord} from "./components/utils/sound"
 import FretboardEL from "./components/fretboard.vue"
 import Tab from "./components/tablature.vue"
 import Tuning from './components/tuning.vue'
 import Options from './components/options.vue'
 import * as voicingUtils from './components/utils/voicing'
 import * as tuningUtils from './components/utils/tuning'
-import * as midiInputUtils from './components/utils/MidiInput'
-import {setMIDIEnabled} from './components/utils/MidiInput'
-import {createFretboard, getNote} from "@/components/utils/fretboardModel";
+import * as midiInputUtils from './components/utils/midiInput'
+import {setMIDIEnabled} from './components/utils/midiInput'
+import {createFretboard, getNote} from "./components/utils/fretboardModel";
 
 /* For debugging in webstorm: CTRL+SHIFT+CLICK on the localhost link after
 npm run dev

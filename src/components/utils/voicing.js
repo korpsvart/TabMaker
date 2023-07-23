@@ -1,4 +1,4 @@
-import {Note} from "@/components/utils/Note";
+import {Note} from "@/components/utils/note";
 import * as Tonal from "tonal";
 import * as feasibilityUtils from "@/components/utils/feasibility";
 import {canApplyBarre} from "@/components/utils/feasibility";
