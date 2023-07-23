@@ -18,7 +18,7 @@
 let accidentals = 'sharps';
 let sharp_notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 let flat_notes = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
-
+let stringTimeOutIds = {};
 
 export default {
     name: "fretboard",
@@ -122,11 +122,20 @@ export default {
 }
 
 function vibrateString(str, playTime, coeff) {
+  if (stringTimeOutIds[str])
+    clearTimeout(stringTimeOutIds[str]);
   document.querySelectorAll('.string').item(str).style.setProperty('--animation-iteration-count','infinite');
-  setTimeout(() => { document.querySelectorAll('.string').item(str).style.setProperty('--animation-iteration-count','0'); }, playTime * coeff);
+  stringTimeOutIds[str] = setTimeout(() => { document.querySelectorAll('.string').item(str).style.setProperty('--animation-iteration-count','0'); }, playTime * coeff);
+}
+function stopChordAnimation(){
+  for (let str = 0; str < 6; str++) {
+    document.querySelectorAll('.string').item(str).style.setProperty('--animation-iteration-count','0');
+    if (stringTimeOutIds[str])  clearTimeout(stringTimeOutIds.str);
+  }
+
 }
 
-export{vibrateString}
+export{vibrateString, stopChordAnimation}
 
 </script>
 

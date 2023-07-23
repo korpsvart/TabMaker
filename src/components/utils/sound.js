@@ -1,5 +1,5 @@
 import {AudioSynth} from 'keithwhor-audiosynth-packaged/audiosynth.js';
-import {vibrateString} from "@/components/Fretboard.vue";
+import {vibrateString, stopChordAnimation} from "@/components/Fretboard.vue";
 import {sleep} from "@/components/utils/misc";
 
 let playTime = 2;
@@ -38,15 +38,12 @@ async function playChord(chordNotes, positions,idNum) {
         }
         synth.play('acoustic', chordNotes[i].pitch, chordNotes[i].octave, 1.5 * playTime);
         let str = positions[i].string;
-        vibrateString(str, playTime, strumCoeff);
+        vibrateString(str, playTime/2, strumCoeff);
         await sleep(62)
     }
     await sleep(3200/speed)
 }
 
-function stopChordAnimation(){
-    $('.string').css('--animation-iteration-count','0')
-}
 
 function stopChord(){
     playingStatus = false
