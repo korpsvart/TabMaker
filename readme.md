@@ -2,7 +2,7 @@
 
 TabMaker is a JavaScript (Vue) application designed to generate guitar voicings for a chosen chord sequence, ensuring both playability and "musical quality".
 
-An hosted running version of the app can be found at: ...
+An hosted running version of the app can be found at: https://korpsvart.github.io/TabMaker/
 
 ## Table of Contents
 
