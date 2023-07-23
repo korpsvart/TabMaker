@@ -11,6 +11,7 @@ An hosted running version of the app can be found at: https://korpsvart.github.i
 - [Build and Run the App Locally](#build-and-run-the-app-locally)
 - [Dependencies](#dependencies)
 - [Documentation](#documentation)
+- [Credits](#credits)
 
 ## Overview
 
@@ -150,7 +151,7 @@ Then it searches for new notes by calling "findNextPositions", which finds all p
 
 This function computes the distance between the previous voicing and the current one:
 - for the first element of the sequence (no previous chords are present) simply returns the difference bewteen the number of strings and the length of the chord voicing.
-- for the other chords, it computes the total the distance (sum of the distances between each note of the actual and previous voicings) and a "penalty factor" (which is four times the number of unused strings). Then these two factors are summed and weighted by the number of strings used iin the voicing.
+- for the other chords, it computes the total the distance (sum of the distances between each note of the actual and previous voicings) and a "penalty factor" (which is four times the number of unused strings). Then these two factors are summed and weighted by the number of strings used in the voicing.
 
 The weighted result is needed to prioritize the choice of chords with a higher number of played notes.
 
@@ -160,8 +161,7 @@ This function returns the next candidate note positions (on the next string), ba
 - fret distance is not greater than two frets, compared to "lastPosition" fret (actually, the fret chosen for the previously examined string);
 - note is different from "lastNote" (at least the note or the octave must be different);
 - the distance from "minFret" is not greater than four frets (the distance from the first fret considered and the actual one must not exceed four);
-- the notes belong to the chord (the tones of the chord are gathered in "chordNotes");
-- special exceptional rules applies for the zero fret (open string) (WHICH ONES???????????????????).
+- the notes belong to the chord (the tones of the chord are gathered in "chordNotes").
 
 Notice that this function does not perform a perfect check on chords playability: it only excludes the ones which are obviously not playable. The in-depth check will be done by the "checkFeasible" function.
 
@@ -190,8 +190,8 @@ It works recursively and it stops as soon as a feasible fingering is found.
 ### canApplyBarre
 
 This function checks if the barre technique can be applied to a chord voicing. It is called when the number of fretted notes is greater than four:
-- it returns true if the ???????????????????????
-- it returns false otherwise (the voicing is actually judged unplayable).
+- it returns true if the number of fretted notes after removing the one played with barre stays equal/less than four;
+- it returns false otherwise (the voicing is actually judged unplayable or there are open strings in the voicing).
 
 A simplyfing assumption is made: barre can be applied only on the leftmost fret, with the index finger.
 
@@ -204,3 +204,10 @@ This function is employed to sort the possible voicings found for a chord:
 ### createFretboard
 
 This function builds the fretboard data as a matrix of "note" objects: each row represents a string and each column a different fret.
+
+## Credits
+
+Group members:
+- Riccardo Di Bella
+- Stefano Ravasi
+- Yan Zhuang
