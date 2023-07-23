@@ -33,7 +33,7 @@ For each chord, the user can specify:
 
 Chords can also be added by clicking the "Plus" button and removed using the small crosses in the top right corners.
 
-![GUI_options](/img/options.png)
+<img src="/img/options.png" width="181" height="220">
 
 The "Options" button opens a pop-up menu that contains some toggle buttons for controlling the generation mechanism. The customizable options are:
 - "Chords difficulty": it controls the technical complexity of the generated voicing sequence. In "Easy mode", adjacent fingers must be on the same or adjacent frets and the total stretch can't cover more than 4 frets. "Hard mode" allows for one fret stretch between two consecutive fingers (except for middle and ring finger), bringing the maximum total stretch to 5 frets.
@@ -55,7 +55,7 @@ The "Play" button starts the sequence playback: each chord is reproduced with a 
 
 The "Fast forward" and "Rewind"  buttons can be used to navigate the sequence during playback.
 
-<img src="/img/tuning.png" width="201" height="358">
+<img src="/img/tuning.png" width="181" height="322">
 
 The "Tuning" button opens a pop-up menu which allows the user to select the note for each open string: this option is useful to find voicings on customized tunings and enables expert musicians to experiment new sonorities.
 
