@@ -47,7 +47,7 @@ The "Submit" button starts the generation algorithm with the currently selected 
 
 ### Sequence Playback and Visualization
 
-The lower part of the GUI is dedicated to the visualization and playing of the generated sequence, and the tuning customization.
+The lower part of the GUI is dedicated to the visualization and playing of the generated sequence, and the tuning customization (this section appears once the "Submit" button has been clicked).
 
 ![GUI_lower](/img/lower.png)
 
@@ -62,6 +62,8 @@ The "Tuning" button opens a pop-up menu which allows the user to select the note
 There are two available visualization modes:
 - Fretboard: chord positions and note names are shown on a guitar fretboard. As the progression is played back, voicings are displayed one after the other together with the sound;
 - TAB: the entire chord sequence is shown using tablature notation, which illustrates the fingering to be used on the fretboard. As the progression is played back, the current chord is highlighted in sync with the sound.
+
+
 
 ## Build and Run the App Locally
 
