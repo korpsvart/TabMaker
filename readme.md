@@ -42,7 +42,7 @@ Chord voicings are not found in a database look-up fashion but in an algorithmic
   - `tuning.js`: contains standard guitar tuning
   - `misc.js`: other miscellaneous functions
 
-The most important utility functions are lated described in detail in the [Documentation](#Documentation) section.
+The most important utility functions are lated described in detail in the [Documentation](#documentation) section.
 
 
 ## Usage
