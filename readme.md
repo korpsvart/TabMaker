@@ -33,12 +33,12 @@ Chord voicings are not found in a database look-up fashion but in an algorithmic
   - `ToggleButton.vue`: simple component implementing a custom toggle button
   - `Tuning.vue`: displays the tuning customization pop-up menu
 - `components/utils/` folder contains JS modules with functions and variables needed by the components to perform specific tasks:
-  - [feasibility.js](#feasibility)
-  - [fretboardModel.js](#fretboardModel)
+  - [feasibility.js](#feasibility.js)
+  - [fretboardModel.js](#fretboardModel.js)
   - `midiInput.js`: functions for handling MIDI data and applying chord recognition
   - `note.js`: classes and functions for musical notes representation
   - `sound.js`: functions for sound reproduction
-  - [voicing.js](#voicing)
+  - [voicing.js](#voicing.js)
   - `tuning.js`: contains standard guitar tuning
   - `misc.js`: other miscellaneous functions
 
@@ -110,6 +110,8 @@ The application relies mainly on three dependencies:
 ## Documentation
 
 ### voicing.js
+
+---
 
 #### getVoicingSequence
 
@@ -186,6 +188,8 @@ This function is employed to sort the possible voicings found for a chord:
 
 ### feasibility.js
 
+---
+
 #### checkFeasible
 
 This function performs a more in-depth check to determine the feasibility of a voicing by analyzing the fingering:
@@ -205,6 +209,8 @@ This function checks if the barre technique can be applied to a chord voicing. I
 A simplifying assumption is made: the barre can be applied only on the leftmost fret, with the index finger.
 
 ### fretboardModel.js
+
+---
 
 #### createFretboard
 
