@@ -49,7 +49,7 @@ The "submit" button starts the generation algorithm with the currently selected 
 
 The lower part of the GUI is dedicated to the visualization and playing of the generated sequence, and the tuning customization.
 
-LOWER GUI IMAGE
+![](/img/lower.png)
 
 The "play" button starts the sequence playback: each chord is reproduced with a brief strum from the lowest string to the highest one. During the playback phase, it switches to a "stop" button which can be used to interrupt the sound.
 
