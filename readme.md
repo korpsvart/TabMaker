@@ -55,7 +55,7 @@ The "Play" button starts the sequence playback: each chord is reproduced with a 
 
 The "Fast forward" and "Rewind"  buttons can be used to navigate the sequence during playback.
 
-![GUI_tuning](/img/tuning.png | width=150 height=268)
+![GUI_tuning](/img/tuning.png | width=150px)
 
 The "Tuning" button opens a pop-up menu which allows the user to select the note for each open string: this option is useful to find voicings on customized tunings and enables expert musicians to experiment new sonorities.
 
