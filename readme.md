@@ -31,37 +31,37 @@ For each chord, the user can specify:
 - fundamental note;
 - type (e.g. Major (M), Minor (m), Major seventh (maj7), Minor seventh (m7), Dominant seventh (7), ...).
 
-Chords can also be added by clicking the "plus" button and removed using the small crosses in the top right corners.
+Chords can also be added by clicking the "Plus" button and removed using the small crosses in the top right corners.
 
-The "options" button opens a pop-up menu that contains some toggle buttons for controlling the generation mechanism. The customizable options are:
-- Chords difficulty: it controls the technical complexity of the generated voicing sequence. In "Easy mode", adjacent fingers must be on the same or adjacent frets and the total stretch can't cover more than 4 frets. "Hard mode" allows for one fret stretch between two consecutive fingers (except for middle and ring finger), bringing the maximum total stretch to 5 frets.
-- Allow inversions: it allows the use of chord inversions when generating voicings (except for the first one). Inversions are allowed by default and it's recommended to use them, although it could be desirable to switch them off when chord progressions only involve simple triads.
+![GUI_options](/img/options.png)
 
-The "share" button copies the customized URL which embeds the current chord sequence, so that it can be shared or saved for later use without the need to re-select the entire progression from scratch.
+The "Options" button opens a pop-up menu that contains some toggle buttons for controlling the generation mechanism. The customizable options are:
+- "Chords difficulty": it controls the technical complexity of the generated voicing sequence. In "Easy mode", adjacent fingers must be on the same or adjacent frets and the total stretch can't cover more than 4 frets. "Hard mode" allows for one fret stretch between two consecutive fingers (except for middle and ring finger), bringing the maximum total stretch to 5 frets.
+- "Allow inversions": it allows the use of chord inversions when generating voicings (except for the first one). Inversions are allowed by default and it's recommended to use them, although it could be desirable to switch them off when chord progressions only involve simple triads.
+
+The "Share" button copies the customized URL which embeds the current chord sequence, so that it can be shared or saved for later use without the need to re-select the entire progression from scratch.
 
 The "Enable/Disable MIDI" button toggles the MIDI input mode for the selection of the chord sequence. When this mode is enabled, the program will listen to incoming MIDI data, apply a chord recognition algorithm and append the recognized chords at the end of the progression.
 
-The "clear" button clears the input chord sequence, making it empty.
-
-The "submit" button starts the generation algorithm with the currently selected chord sequence.
+The "Submit" button starts the generation algorithm with the currently selected chord sequence.
 
 ### Sequence Playback and Visualization
 
 The lower part of the GUI is dedicated to the visualization and playing of the generated sequence, and the tuning customization.
 
+![GUI_lower](/img/lower.png)
 
+The "Play" button starts the sequence playback: each chord is reproduced with a brief strum from the lowest string to the highest one. During the playback phase, it switches to a "Pause" button which can be used to interrupt the sound.
 
-The "play" button starts the sequence playback: each chord is reproduced with a brief strum from the lowest string to the highest one. During the playback phase, it switches to a "stop" button which can be used to interrupt the sound.
+The "Fast forward" and "Rewind"  buttons can be used to navigate the sequence during playback.
 
-The "fast forward" and "rewind" buttons can be used to navigate the sequence during playback (ONLY DURING PLAYBACK?)
+![GUI_tuning](/img/tuning.png)
 
-The "tuning" button opens a pop-up menu which allows the user to select the note for each open string: this option is useful to find voicings on customized tunings and enables expert musicians to experiment new sonorities.
+The "Tuning" button opens a pop-up menu which allows the user to select the note for each open string: this option is useful to find voicings on customized tunings and enables expert musicians to experiment new sonorities.
 
 There are two available visualization modes:
 - Fretboard: chord positions and note names are shown on a guitar fretboard. As the progression is played back, voicings are displayed one after the other together with the sound.
 - TAB: the entire chord sequence is shown using tablature notation, which illustrates the fingering to be used on the fretboard. As the progression is played back, the current chord is highlighted in sync with the sound.
-
-![GUI_lower](/img/lower.png)
 
 ## Build and Run the App Locally
 
