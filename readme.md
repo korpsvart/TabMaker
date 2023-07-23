@@ -11,6 +11,7 @@ An hosted running version of the app can be found at: https://korpsvart.github.i
 - [Build and Run the App Locally](#build-and-run-the-app-locally)
 - [Dependencies](#dependencies)
 - [Documentation](#documentation)
+- [Credits](#credits)
 
 ## Overview
 
@@ -181,3 +182,10 @@ This function is employed to sort the possible voicings found for a chord:
 ### createFretboard
 
 This function builds the fretboard data as a matrix of "note" objects: each row represents a string and each column a different fret.
+
+## Credits
+
+Group members:
+- Riccardo Di Bella
+- Stefano Ravasi
+- Yan Zhuang
