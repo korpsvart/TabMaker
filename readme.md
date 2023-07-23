@@ -25,7 +25,7 @@ Chord voicings are not found in a database look-up fashion but in an algorithmic
 
 The upper part of the GUI is dedicated to the selection of the chord sequence.
 
-![](/img/upper.png)
+![GUI_upper](/img/upper.png)
 
 For each chord, the user can specify:
 - fundamental note;
@@ -49,7 +49,7 @@ The "submit" button starts the generation algorithm with the currently selected 
 
 The lower part of the GUI is dedicated to the visualization and playing of the generated sequence, and the tuning customization.
 
-![](/img/lower.png)
+![GUI_lower](/img/lower.png)
 
 The "play" button starts the sequence playback: each chord is reproduced with a brief strum from the lowest string to the highest one. During the playback phase, it switches to a "stop" button which can be used to interrupt the sound.
 
