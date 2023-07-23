@@ -124,6 +124,14 @@ At first, it performs some checks:
 
 Then it searches for new notes by calling "findNextPositions", which finds all possible frets to be played on the next string. Each valid position is added to the current voicing and "findNextPositions" is recursively called the on the updated voicing.
 
+### computeDistance
+
+This function computes the distance between the previous voicing and the current one:
+- for the first element of the sequence (no previous chords are present) simply returns the difference bewteen the number of strings and the length of the chord voicing.
+- for the other chords, it computes the total the distance (sum of the distances between each note of the actual and previous voicings) and a "penalty factor" (which is four times the number of unused strings). Then these two factors are summed and weighted by the number of strings used iin the voicing.
+
+The weighted result is needed to prioritize the choice of chords with a higher number of played notes.
+
 ### findNextPositions
 
 This function returns the next candidate note positions (on the next string), based on the following principles:
@@ -141,7 +149,11 @@ This function sorts the possible voicings found for a chord, according to the ou
 
 ### pickBoundedVoicingSequence
 
-?????????????????????????
+This function tries to find the best sequence of voicings, based on the following criteria:
+- the least distance (the output of the function "computeDistance"), to prioritize voicing sequences with the highest number of played notes whenever possible;
+- the highest number of tritone resolutions (a tritone resolution is present if there is a sequence of two intervals, between two consecutive voicings, played on the same strings where a diminished fifth is followed by a major third/perfect fourth, or an augmented fourth is followed by a perfect fith/minor sixth).
+
+To improve performance, the "recursiveDepth" variable is employed: it decides how long is the sequence of chords to consider when building the best voicing sequence. For example, if the recursiveDepth is four, there is a "sliding window" of four chords which is considered to create the sequence. Chords which come after this window are not kept into account (otherwise the algorithm would be extremely slow). However, the last chord before the window is always considered (except for the first one), in order to avoid "ugly" changes at the boundaries between two analysis windows.
 
 ### checkFeasible
 
@@ -149,7 +161,7 @@ This function performs a more in-depth check to determine the feasibility of a v
 - fingers can not cross;
 - the minimum fret is always played with the index finger (even in situations where spontaneous fingering may not follow this principle, an alternative one which respects such rule can typically be found);
 - if the "difficultMode" is disabled, no stretches between consecutive fingers are allowed (this assumption is quite restrictive since it makes many ninth chords impossible to play. However, it works well for major, minor, and seventh chords);
-- id the "difficultMode" is enabled, one fret stretch between two consecutive fingers (except for middle and ring finger) is allowed.
+- if the "difficultMode" is enabled, one fret stretch between two consecutive fingers (except for middle and ring finger) is allowed.
 
 It works recursively and it stops as soon as a feasible fingering is found.
 
@@ -166,3 +178,7 @@ A simplyfing assumption is made: barre can be applied only on the leftmost fret,
 This function is employed to sort the possible voicings found for a chord:
 - it prioritizes chords with more distinct pitch classes and, in case these are always equal, it puts first the chord with the highest overall number of notes;
 - it leaves the order as it is (returns 0) if the controls performed before give a negative feedback (e.g. there are the exact same pitches and number of notes in each voicing).
+
+### createFretboard
+
+This function builds the fretboard data as a matrix of "note" objects: each row represents a string and each column a different fret.
