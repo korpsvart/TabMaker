@@ -42,7 +42,7 @@ Chord voicings are not found in a database look-up fashion but in an algorithmic
   - `tuning.js`: contains standard guitar tuning
   - `misc.js`: other miscellaneous functions
 
-The most important utility functions are lated described in detail in the [Documentation](#documentation) section.
+The most important utility functions are described later in the [Documentation](#documentation) section.
 
 
 ## Usage
@@ -58,7 +58,7 @@ For each chord, the user can specify:
 - type (e.g. Major (M), Minor (m), Major seventh (maj7), Minor seventh (m7), Dominant seventh (7), ...).
 
 Chords can be added by clicking the "Plus" button and removed using the small crosses in the top right corners.
-Additionally, each chord "card" can be dragged and dropped in order to reorder the way they appear in the sequence.
+Additionally, each slot can be dragged and dropped to change the order of the sequence.
 
 The "Options" button opens a pop-up menu that contains some toggle buttons for controlling the generation mechanism. The customizable options are:
 - "Chords difficulty": it controls the technical complexity of the generated voicing sequence. In "Easy mode", adjacent fingers must be on the same or adjacent frets and the total stretch can't cover more than 4 frets. "Hard mode" allows for one fret stretch between two consecutive fingers (except for middle and ring finger), bringing the maximum total stretch to 5 frets;
@@ -66,17 +66,18 @@ The "Options" button opens a pop-up menu that contains some toggle buttons for c
 
 ![Options](/img/options.png)
 
-The "Share" button copies the customized URL which embeds the current chord sequence, so that it can be shared or saved for later use without the need to re-select the entire progression from scratch.
-
 The "Enable/Disable MIDI" button toggles the MIDI input mode for the selection of the chord sequence. When this mode is enabled, the program will listen to incoming MIDI data, apply a chord recognition algorithm and append the recognized chords at the end of the progression.
-
-The "Submit" button starts the generation algorithm with the currently selected chord sequence.
 
 The "Clear sequence" button empties the input chord sequence.
 
+The "Submit" button starts the generation algorithm with the currently selected chord sequence.
+
+The "Share" button copies the customized URL which embeds the current chord sequence, so that it can be shared or saved for later use without the need to re-select the entire progression from scratch.
+
 ### Sequence Playback and Visualization
 
-The lower part of the GUI is dedicated to the visualization and playing of the generated sequence, and the tuning customization (this section appears once the "Submit" button has been clicked).
+The lower part of the GUI is dedicated to visualization and playback of the generated sequence. It also allows to customize the strings tuning. 
+Notice that this section appears once the "Submit" button has been clicked.
 
 ![GUI_lower](/img/lower.png)
 
