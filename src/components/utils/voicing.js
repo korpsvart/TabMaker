@@ -219,7 +219,7 @@ export function recursivePositionSearch(previousPositions, lastNote, chordNotes,
                 if (canApplyBarre(previousPositions, frettedNotes)) {
                     validPositions.push(previousPositions);
                 } else {
-                    //Chord is not valid, discard (return, so to avoid also following paths)
+                    // Chord is not valid, discard (return, so to avoid also following paths)
                     return;
                 }
             } else {
