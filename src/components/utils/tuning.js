@@ -1,4 +1,4 @@
-import {Note} from "@/components/note";
+import {Note} from "@/components/utils/Note";
 
 export function getStandardTuning() {
  return [new Note('E', 4),

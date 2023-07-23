@@ -1,4 +1,22 @@
-import * as voicingUtils from "@/components/utils/voicing";
+import {countFrettedNotes, getMinFret as getMinFret1, getMinFret, posEqual} from "@/components/utils/fretboardModel";
+
+export function canApplyBarre(position, frettedNotes) {
+    //Check if barre can be applied
+    //For now we assume barre can only be done on the minimum fret position
+
+    let minFret = getMinFret(position);
+    if (!position || !Array.isArray(position) || !position.length) {
+        return false
+    }
+
+    if (Math.min(...position.map(x => x.fret)) === 0) return false; //Can never apply barre on open strings
+    //(Do not use minFret for checking this, since it can't contain the zero fret)
+
+    let minFretsAmount = position.filter(x => x.fret === minFret).length;
+
+    return frettedNotes - minFretsAmount + 1 < 5; //check if we now can play the chord with less than 5 fingers
+
+}
 
 export function checkFeasible(voicing, difficultModeEnabled) {
     //A more in-depth check to see if a voicing is actually feasible,
@@ -23,8 +41,8 @@ export function checkFeasible(voicing, difficultModeEnabled) {
     let availableFingers = [1, 2, 3];
     let usedFingers = [];
 
-    let frettedNotesCount = voicingUtils.countFrettedNotes(voicing);
-    let isBarre = voicingUtils.canApplyBarre(voicing, frettedNotesCount);
+    let frettedNotesCount = countFrettedNotes(voicing);
+    let isBarre = canApplyBarre(voicing, frettedNotesCount);
 
     //Remove all open strings, as they don't need to be checked
     voicingLocal = voicingLocal.filter(x => x.fret !== 0);
@@ -33,7 +51,7 @@ export function checkFeasible(voicing, difficultModeEnabled) {
     if (voicingLocal.length === 0) return true;
 
     //Use index finger to play minimum non-zero fret
-    let minFret = voicingUtils.getMinFret(voicingLocal);
+    let minFret = getMinFret1(voicingLocal);
     //Take one string (doesn't matter which) having min fret
     let indexPos = voicingLocal.find(pos => pos.fret === minFret);
 
@@ -47,7 +65,7 @@ export function checkFeasible(voicing, difficultModeEnabled) {
         voicingLocal = voicingLocal.filter(pos => pos.fret !== minFret);
     } else {
         //Not a barre chord, remove only one exact position
-        voicingLocal = voicingLocal.filter(pos => !voicingUtils.posEqual(pos, indexPos));
+        voicingLocal = voicingLocal.filter(pos => !posEqual(pos, indexPos));
     }
     //Again, before proceeding check if we run out of positions to cover. In that case return true
     if (voicingLocal.length === 0) return true;

@@ -42,10 +42,6 @@
                     </div>
                 </div>
             </div>
-            <div>
-              <!-- MIDI input component -->
-              <MidiInput :midiEnabled="data.midiEnabled" @chordFound="addChordFromMidi"/>
-            </div>
             <div class="btn-group action-group">
                 <button class="btn btn-primary"  @click="submit">Submit</button>
                 <button class="btn btn-primary" @click="data.showOptions=true">Options</button>
@@ -113,16 +109,17 @@
 </template>
 <script>
 import * as Tonal from 'tonal'
-import {Note, notes} from "./components/note"
-import {playChord, stopChord} from "./components/sound"
+import {notes} from "./components/utils/Note"
+import {playChord, stopChord} from "./components/utils/Sound"
 import FretboardEL from "./components/fretboard.vue"
 import Tab from "./components/tablature.vue"
 import Tuning from './components/tuning.vue'
 import Options from './components/options.vue'
-import MidiInput from "@/components/MidiInput.vue";
 import * as voicingUtils from './components/utils/voicing'
 import * as tuningUtils from './components/utils/tuning'
-import fretboard from "@/components/fretboard.vue";
+import * as midiInputUtils from './components/utils/MidiInput'
+import {setMIDIEnabled} from './components/utils/MidiInput'
+import {createFretboard, getNote} from "@/components/utils/fretboardModel";
 
 /* For debugging in webstorm: CTRL+SHIFT+CLICK on the localhost link after
 npm run dev
@@ -148,7 +145,7 @@ export default {
             numFrets:24,
             midiEnabled: false,
             tuning:tuningUtils.getStandardTuning(),
-            fretboardMatrix:voicingUtils.createFretboard(numStrings, numFrets, tuningUtils.getStandardTuning()),
+            fretboardMatrix:createFretboard(numStrings, numFrets, tuningUtils.getStandardTuning()),
             playing:false,
             notes,
             showTuning:false,
@@ -174,8 +171,7 @@ export default {
         FretboardEL,
         Tab,
         Tuning,
-        Options,
-        MidiInput
+        Options
     },
     mounted() {
         let me = this;
@@ -194,6 +190,7 @@ export default {
             }
         }
         me.genURL()
+        midiInputUtils.activateMIDI(recChord => this.addChordFromMidi(recChord));
         $('[data-toggle="popover"]').popover()
     },
     watch:{
@@ -250,6 +247,7 @@ export default {
         },
         toggleMidiEnabled() {
           this.data.midiEnabled = !this.data.midiEnabled;
+          setMIDIEnabled(this.data.midiEnabled);
         },
         deleteChord(index){
             let me = this;
@@ -275,7 +273,7 @@ export default {
           //Not so efficient, just for a quick implementation
           let me = this
           me.data.tuning = newTuning;
-          me.data.fretboardMatrix = voicingUtils.createFretboard(numStrings, numFrets, me.data.tuning);
+          me.data.fretboardMatrix = createFretboard(numStrings, numFrets, me.data.tuning);
           if (me.voicingSequence !== null)
           {
             //Regenerate voicing sequence
@@ -380,7 +378,7 @@ export default {
                 });
                 let foundNotes = [];
                 for (let i = 0; i < me.voicingSequence[k].length; i++) {
-                    foundNotes.push(voicingUtils.getNote(me.voicingSequence[k][i], this.data.fretboardMatrix));
+                    foundNotes.push(getNote(me.voicingSequence[k][i], this.data.fretboardMatrix));
                 }
                 await playChord(foundNotes, me.voicingSequence[k],id);
             }
