@@ -19,6 +19,28 @@ Chord voicings are not found in a database look-up fashion but in an algorithmic
 - it works with custom tunings;
 - it potentially works with more or less strings (not implemented yet).
 
+
+## Files Organization
+
+- ```App.vue``` is the main Vue component and entry point for the application.
+- ```components/``` folder contains the child Vue components:
+  - ```Fretboard.vue```: displays and animate the guitar fretboard for sequence
+visualization
+  - ```Options.vue```: displays the options pop-up menu
+  - ```Tablature.vue```: displays the TAB for sequence visualization
+  - ```ToggleButton.vue```: simple component implementing a custom toggle button
+  - ```Tuning.vue```: displays the tuning customization pop-up menu
+- ```components/utils/``` folder contains JS modules with functions and
+variables needed by the components to perform specific tasks:
+  - ```feasibility.js```: functions for checking voicings feasibility
+  - ```fretboardMode.js```: functions for creating and handling the
+guitar fretboard data model
+  - ```midiInput.js```: functions for handling MIDI data and applying chord recognition
+  - ```note.js```: classes and functions for musical notes representation
+  - ```sound.js```: functions for sound reproduction
+  - ```voicing.js```: functions for the generation of the voicing sequence
+  - ```tuning.js```: contains standard guitar tuning
+  - ```misc.js```: other miscellaneous functions
 ## Usage
 
 ### Chord Sequence Input
@@ -92,9 +114,9 @@ Here the main functions of the generation algorithm are listed and described.
 
 This function gets as input:
 - the chord sequence (fundamental notes and types).
-- the "recursiveDepth", that is the maximum number of valid sequences which can be found before stopping the recursive search (for now it is set equal to 4 by default).
+- the ```recursiveDepth```, that is the maximum number of successive chords which are considered when building the sequence.
 
-After, it calls "buildConstraints" and then "findVoicings".
+It calls ```buildConstraints``` and then returns the optimal sequence by calling the ```pickBoundedVoicingSequence``` function.
 
 ### buildConstraints
 
@@ -150,7 +172,7 @@ This function sorts the possible voicings found for a chord, according to the ou
 ### pickBoundedVoicingSequence
 
 This function tries to find the best sequence of voicings, based on the following criteria:
-- the least distance (the output of the function "computeDistance"), to prioritize voicing sequences with the highest number of played notes whenever possible;
+- the least distance (the output of the function "computeDistance"), to prioritize common tones and easier transitions between voicings;
 - the highest number of tritone resolutions (a tritone resolution is present if there is a sequence of two intervals, between two consecutive voicings, played on the same strings where a diminished fifth is followed by a major third/perfect fourth, or an augmented fourth is followed by a perfect fith/minor sixth).
 
 To improve performance, the "recursiveDepth" variable is employed: it decides how long is the sequence of chords to consider when building the best voicing sequence. For example, if the recursiveDepth is four, there is a "sliding window" of four chords which is considered to create the sequence. Chords which come after this window are not kept into account (otherwise the algorithm would be extremely slow). However, the last chord before the window is always considered (except for the first one), in order to avoid "ugly" changes at the boundaries between two analysis windows.
