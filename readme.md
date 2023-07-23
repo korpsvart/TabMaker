@@ -21,7 +21,9 @@ Chord voicings are not found in a database look-up fashion but in an algorithmic
 - it works with custom tunings;
 - it potentially works with more or less strings (not implemented yet).
 
-## Files Organization
+## Source Code Organization
+
+![CodeStructure](/img/app_structure.png)
 
 - `App.vue` is the main Vue component and entry point for the application.
 - `components/` folder contains the child Vue components:
@@ -31,12 +33,12 @@ Chord voicings are not found in a database look-up fashion but in an algorithmic
   - `ToggleButton.vue`: simple component implementing a custom toggle button
   - `Tuning.vue`: displays the tuning customization pop-up menu
 - `components/utils/` folder contains JS modules with functions and variables needed by the components to perform specific tasks:
-  - [feasibility.js](#feasibility.js): functions for checking voicings feasibility
-  - [fretboardModel.js](#fretboardModel.js): functions for creating and handling the guitar fretboard data model
+  - [feasibility.js](#feasibility): functions for checking voicings feasibility
+  - [fretboardModel.js](#fretboardModel): functions for creating and handling the guitar fretboard data model
   - `midiInput.js`: functions for handling MIDI data and applying chord recognition
   - `note.js`: classes and functions for musical notes representation
   - `sound.js`: functions for sound reproduction
-  - [voicing.js](#voicing.js): functions for the generation of the voicing sequence
+  - [voicing.js](#voicing): functions for the generation of the voicing sequence
   - `tuning.js`: contains standard guitar tuning
   - `misc.js`: other miscellaneous functions
 
@@ -107,7 +109,7 @@ The application relies mainly on three dependencies:
 
 ## Documentation
 
-### [voicing.js](#voicing.js)
+### [voicing.js](#voicing)
 
 #### [getVoicingSequence](#getvoicingsequence)
 
@@ -181,7 +183,7 @@ This function is employed to sort the possible voicings found for a chord:
 - it prioritizes chords with more distinct pitch classes and, in case these are always equal, it puts first the chord with the highest overall number of notes;
 - it leaves the order as it is (returns 0) if the controls performed before give a negative feedback (e.g. there are the exact same pitches and number of notes in each voicing).
 
-### [feasibility.js](#feasibility.js)
+### [feasibility.js](#feasibility)
 
 #### [checkFeasible](#checkfeasible)
 
@@ -201,7 +203,7 @@ This function checks if the barre technique can be applied to a chord voicing. I
 
 A simplifying assumption is made: the barre can be applied only on the leftmost fret, with the index finger.
 
-### [fretboardModel.js](#fretboardmodel.js)
+### [fretboardModel.js](#fretboardmodel)
 
 #### [createFretboard](#createfretboard)
 
