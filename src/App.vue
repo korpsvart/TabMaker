@@ -111,10 +111,10 @@
 import * as Tonal from 'tonal'
 import {notes} from "./components/utils/note"
 import {playChord, stopChord} from "./components/utils/sound"
-import FretboardEL from "./components/fretboard.vue"
-import Tab from "./components/tablature.vue"
-import Tuning from './components/tuning.vue'
-import Options from './components/options.vue'
+import FretboardEL from "./components/Fretboard.vue"
+import Tab from "./components/Tablature.vue"
+import Tuning from './components/Tuning.vue'
+import Options from './components/Options.vue'
 import * as voicingUtils from './components/utils/voicing'
 import * as tuningUtils from './components/utils/tuning'
 import * as midiInputUtils from './components/utils/midiInput'
